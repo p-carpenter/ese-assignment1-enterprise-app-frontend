@@ -1,42 +1,87 @@
 #root {
-  max-width: 1280px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);
+}
+
+.app-container {
+  padding: 24px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #1db954 0%, #1ed760 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .app-grid {
+    grid-template-columns: 2fr 1fr;
   }
 }
 
-.card {
-  padding: 2em;
+/* Global input styles for consistency */
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: var(--spotify-dark-elevated);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
 }
 
-.read-the-docs {
-  color: #888;
+.input-field:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background-color: #282828;
+}
+
+.input-field::placeholder {
+  color: var(--spotify-gray);
+}
+
+.primary-button {
+  width: 100%;
+  background-color: var(--spotify-green);
+  color: var(--spotify-black);
+  border: none;
+  padding: 16px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--spotify-green-bright);
+  transform: scale(1.04);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

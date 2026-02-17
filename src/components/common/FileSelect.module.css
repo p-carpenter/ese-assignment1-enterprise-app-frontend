@@ -1,0 +1,30 @@
+.wrapper {
+    display: inline-block;
+    width: 100%;
+}
+
+.label {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 24px;
+    background-color: transparent;
+    border: 2px solid var(--spotify-gray-dark);
+    border-radius: 500px;
+    color: var(--spotify-white);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.label:hover {
+    border-color: var(--spotify-white);
+    transform: scale(1.02);
+}
+
+.input {
+    display: none;
+}

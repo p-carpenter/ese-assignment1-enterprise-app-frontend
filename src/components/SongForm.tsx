@@ -1,54 +1,92 @@
-// src/components/SongUploadForm.tsx (Update)
 import { useState } from 'react';
 import { useCloudinaryUpload } from '../hooks/useCloudinaryUpload';
 import { api } from '../services/api';
 import { FileSelect } from './common/FileSelect';
+import styles from './SongForm.module.css';
 
-export const SongUploadForm = ({ onUploadSuccess }: { onUploadSuccess: () => void }) => {
+interface SongUploadFormProps {
+    onUploadSuccess: () => void;
+}
+
+export const SongUploadForm = ({ onUploadSuccess }: SongUploadFormProps): JSX.Element => {
     const { upload, isUploading, error: uploadError } = useCloudinaryUpload();
-    const [title, setTitle] = useState('');
-    const [artist, setArtist] = useState('');
+    const [title, setTitle] = useState<string>('');
+    const [artist, setArtist] = useState<string>('');
+    const [songUrl, setSongUrl] = useState<string>('');
+    const [songDuration, setSongDuration] = useState<number>(0);
+    const [coverArtUrl, setCoverArtUrl] = useState<string>('');
+    const [songFileName, setSongFileName] = useState<string>('');
 
-    const handleFile = async (file: File) => {
+    const handleFile = async (file: File): Promise<void> => {
         try {
-            // Upload to Cloudinary
             const cloudData = await upload(file);
             
-            // Save to Django Database
+            // Determine if this is audio or image based on file type
+            if (file.type.startsWith('audio')) {
+                setSongUrl(cloudData.secure_url);
+                setSongDuration(Math.round(cloudData.duration || 0));
+                setSongFileName(file.name);
+            } else if (file.type.startsWith('image')) {
+                setCoverArtUrl(cloudData.secure_url);
+            }
+        } catch (err) {
+            console.error("Upload failed:", err);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+        e.preventDefault();
+        
+        if (!songUrl) {
+            alert("Please select an MP3 file.");
+            return;
+        }
+
+        try {
             await api.createSong({
-                title: title || file.name,
+                title: title || songFileName,
                 artist: artist || "Unknown Artist",
-                file_url: cloudData.secure_url,
-                duration: Math.round(cloudData.duration || 0),
+                file_url: songUrl,
+                cover_art_url: coverArtUrl,
+                duration: songDuration,
             });
 
-            // Reset and Notify
+            // Reset form
             setTitle('');
             setArtist('');
+            setSongUrl('');
+            setSongDuration(0);
+            setCoverArtUrl('');
+            setSongFileName('');
+            
             alert('Song saved successfully!');
-            // Tells parent component to refresh the list
             onUploadSuccess();
 
         } catch (err) {
-            console.error("Failed:", err);
-            alert("Upload failed. Check console.");
+            console.error("Failed to save song:", err);
+            alert("Failed to save song. Check console.");
         }
     };
 
     return (
-        <div className="upload-box">
-            <h3>Add New Track</h3>
+        <form className={styles.container} onSubmit={handleSubmit}>
+            <h3 className={styles.title}>Add New Track</h3>
+            <FileSelect 
+                accept="image/*" 
+                label={isUploading ? "Uploading..." : "Select Cover Art"}
+                onFileSelect={handleFile} 
+            />
             <input 
                 placeholder="Title" 
                 value={title} 
                 onChange={e => setTitle(e.target.value)} 
-                className="input-field"
+                className={styles.inputField}
             />
              <input 
                 placeholder="Artist" 
                 value={artist} 
                 onChange={e => setArtist(e.target.value)} 
-                className="input-field"
+                className={styles.inputField}
             />
 
             <FileSelect 
@@ -56,6 +94,15 @@ export const SongUploadForm = ({ onUploadSuccess }: { onUploadSuccess: () => voi
                 label={isUploading ? "Uploading..." : "Select MP3"}
                 onFileSelect={handleFile} 
             />
-        </div>
+            {uploadError && <div className={styles.error}>{uploadError}</div>}
+            {songUrl && <p className={styles.success}>✓ Audio file ready</p>}
+            <button 
+                type="submit" 
+                disabled={isUploading || !songUrl}
+                className={styles.submitButton}
+            >
+                {isUploading ? 'Uploading...' : 'Save Song'}
+            </button>
+        </form>
     );
 };

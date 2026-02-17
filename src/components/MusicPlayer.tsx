@@ -4,82 +4,83 @@ import { api } from '../services/api';
 import { type Song } from '../types';
 import styles from './MusicPlayer.module.css';
 
-export const MusicPlayer = ({ keyTrigger }: { keyTrigger: number }) => {
+interface MusicPlayerProps {
+    keyTrigger: number;
+    onSongPlay?: () => void;
+}
+
+export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.Element => {
     const { play, pause, stop, isPlaying, load, getPosition, seek, duration } = useAudioPlayer();
     const [songs, setSongs] = useState<Song[]>([]);
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
     const [position, setPosition] = useState(0);
 
-    // Fetch Songs on Load (or after upload)
     useEffect(() => {
         api.getSongs()
             .then(data => setSongs(data))
             .catch(err => console.error("Failed to load library", err));
     }, [keyTrigger]);
 
-    const playSong = (song: Song) => {
+    const playSong = async (song: Song): Promise<void> => {
         if (currentSong?.id === song.id) {
-            if (isPlaying) {
-                pause();
-            } else {
-                play();
-            }
+            if (isPlaying) { pause(); } else { play(); }
             return;
         }
 
-        // New song selected
-        stop(); // Stop previous
+        stop(); 
         setCurrentSong(song);
         setPosition(0);
         
         load(song.file_url, {
             autoplay: true,
-            onend: () => console.log("Song finished!"),
             format: 'mp3',
-            html5: true
+            html5: true,
+            onend: () => console.log("Song finished!"),
         });
 
-        // Play history (Audit log)
-        api.logPlay(song.id);
+        try {
+            await api.logPlay(song.id);
+            
+            if (onSongPlay) {
+                onSongPlay(); 
+            }
+        } catch (err) {
+            console.error("Failed to log play:", err);
+        }
     };
 
-    const currentIndex = useMemo(() => {
+    const currentIndex = useMemo((): number => {
         if (!currentSong) return -1;
         return songs.findIndex(song => song.id === currentSong.id);
     }, [songs, currentSong]);
 
-    const handlePrev = () => {
+    const handlePrev = (): void => {
         if (songs.length === 0) return;
         const prevIndex = currentIndex > 0 ? currentIndex - 1 : songs.length - 1;
-        playSong(songs[prevIndex]);
+        void playSong(songs[prevIndex]);
     };
 
-    const handleNext = () => {
+    const handleNext = (): void => {
         if (songs.length === 0) return;
         const nextIndex = currentIndex >= 0 && currentIndex < songs.length - 1 ? currentIndex + 1 : 0;
-        playSong(songs[nextIndex]);
+        void playSong(songs[nextIndex]);
     };
 
     useEffect(() => {
         if (!currentSong) return;
-
-        const id = window.setInterval(() => {
-            setPosition(getPosition());
-        }, 500);
-
+        const id = window.setInterval(() => setPosition(getPosition()), 500);
         return () => window.clearInterval(id);
     }, [currentSong, getPosition]);
 
-    const maxDuration = Math.max(duration || 0, currentSong?.duration || 0);
-    const handleSeek = (value: number) => {
+    const maxDuration = Math.max(duration ?? 0, currentSong?.duration ?? 0);
+    const handleSeek = (value: number): void => {
         seek(value);
         setPosition(value);
     };
 
     return (
         <div className={styles.container}>
-            
-            {/* The "Now Playing" Widget */}
+             {/* Player Controls */}
             <div className={styles.playerControls}>
                 {currentSong ? (
                     <>
@@ -92,27 +93,9 @@ export const MusicPlayer = ({ keyTrigger }: { keyTrigger: number }) => {
                         <p className={styles.artist}>{currentSong.artist}</p>
                         
                         <div className={styles.buttons}>
-                            <button 
-                                onClick={handlePrev}
-                                className={styles.secondaryButton}
-                                disabled={songs.length === 0}
-                            >
-                                ⏮ PREV
-                            </button>
-                            <button 
-                                onClick={() => isPlaying ? pause() : play()}
-                                className={styles.primaryButton}
-                                disabled={!currentSong}
-                            >
-                                {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
-                            </button>
-                            <button 
-                                onClick={handleNext}
-                                className={styles.secondaryButton}
-                                disabled={songs.length === 0}
-                            >
-                                NEXT ⏭
-                            </button>
+                            <button onClick={handlePrev} className={styles.secondaryButton} disabled={songs.length === 0}>‹‹ PREV</button>
+                            <button onClick={() => isPlaying ? pause() : play()} className={styles.primaryButton}>{isPlaying ? '❚❚ PAUSE' : '▸ PLAY'}</button>
+                            <button onClick={handleNext} className={styles.secondaryButton} disabled={songs.length === 0}>NEXT ››</button>
                         </div>
 
                         <div className={styles.progressRow}>
@@ -134,7 +117,7 @@ export const MusicPlayer = ({ keyTrigger }: { keyTrigger: number }) => {
                 )}
             </div>
 
-            {/* The Library */}
+            {/* Library List */}
             <div className={styles.songList}>
                 <h3 className={styles.libraryTitle}>Library ({songs.length} tracks)</h3>
                 <ul className={styles.list}>
@@ -149,9 +132,7 @@ export const MusicPlayer = ({ keyTrigger }: { keyTrigger: number }) => {
                                 <br/>
                                 <span className={styles.songArtist}>{song.artist}</span>
                             </div>
-                            <span className={styles.duration}>
-                                {formatTime(song.duration)}
-                            </span>
+                            <span className={styles.duration}>{formatTime(song.duration)}</span>
                         </li>
                     ))}
                 </ul>
@@ -160,8 +141,7 @@ export const MusicPlayer = ({ keyTrigger }: { keyTrigger: number }) => {
     );
 };
 
-// Helper format seconds duration into minutes
-const formatTime = (seconds: number) => {
+const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.round(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
