@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { SongUploadForm } from '../components/SongForm';
 import { Header } from '../components/Header';
 

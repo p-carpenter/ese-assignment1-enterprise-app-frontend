@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { MusicPlayer } from '../components/MusicPlayer';
 import { PlayHistory } from '../components/PlayHistory';
 import { Header } from '../components/Header';

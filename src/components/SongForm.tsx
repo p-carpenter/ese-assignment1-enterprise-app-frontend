@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { useCloudinaryUpload } from '../hooks/useCloudinaryUpload';
 import { api } from '../services/api';
 import { FileSelect } from './common/FileSelect';

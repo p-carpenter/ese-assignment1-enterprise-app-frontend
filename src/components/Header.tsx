@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import styles from './Header.module.css';
+import type { JSX } from 'react';
 
 interface HeaderProps {
     onLogout: () => void;

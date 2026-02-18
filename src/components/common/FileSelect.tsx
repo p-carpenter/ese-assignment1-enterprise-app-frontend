@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import styles from './FileSelect.module.css';
 
 interface FileSelectProps {

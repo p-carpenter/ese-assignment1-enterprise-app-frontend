@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { type Song } from '../types';
 import { api } from '../services/api';
 import styles from './PlayHistory.module.css';

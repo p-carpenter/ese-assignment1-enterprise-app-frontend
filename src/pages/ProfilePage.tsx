@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { type UserProfile } from '../types';

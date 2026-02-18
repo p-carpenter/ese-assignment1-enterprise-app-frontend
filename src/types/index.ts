@@ -12,6 +12,7 @@ export interface SongUploadPayload {
     title: string;
     artist: string;
     file_url: string;
+    cover_art_url?: string;
     duration: number;
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type JSX } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
@@ -10,11 +10,11 @@ import { api } from './services/api';
 import { type UserProfile } from './types';
 import './App.css';
 
-interface AppState {
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    userProfile: UserProfile | null;
-}
+// interface AppState {
+//    isAuthenticated: boolean;
+//    isLoading: boolean;
+//    userProfile: UserProfile | null;
+// }
 
 const App = (): JSX.Element => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);

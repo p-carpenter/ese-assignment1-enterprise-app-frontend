@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import { useAudioPlayer } from 'react-use-audio-player';
 import { api } from '../services/api';
 import { type Song } from '../types';
