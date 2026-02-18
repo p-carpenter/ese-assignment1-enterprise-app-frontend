@@ -17,7 +17,7 @@ export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.E
     const [position, setPosition] = useState(0);
 
     useEffect(() => {
-        api.getSongs()
+        api.songs.list()
             .then(data => setSongs(data))
             .catch(err => console.error("Failed to load library", err));
     }, [keyTrigger]);
@@ -40,7 +40,7 @@ export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.E
         });
 
         try {
-            await api.logPlay(song.id);
+            await api.songs.logPlay(song.id);
             
             if (onSongPlay) {
                 onSongPlay(); 

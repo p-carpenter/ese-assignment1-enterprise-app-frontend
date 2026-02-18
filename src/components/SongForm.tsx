@@ -43,7 +43,7 @@ export const SongUploadForm = ({ onUploadSuccess }: SongUploadFormProps): JSX.El
         }
 
         try {
-            await api.createSong({
+            await api.songs.upload({
                 title: title || songFileName,
                 artist: artist || "Unknown Artist",
                 file_url: songUrl,

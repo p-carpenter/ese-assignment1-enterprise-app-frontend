@@ -25,6 +25,10 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 
     const response = await fetch(url, config);
 
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return undefined as T;
+    }
+
     // Handle 401 Unauthorised (Session expired)
     if (response.status === 401) {
         console.warn("Unauthorised request - user may need to log in again.");
@@ -39,25 +43,34 @@ const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 };
 
 export const api = {
-    // Fetch all songs
-    getSongs: async (): Promise<Song[]> => request<Song[]>('/songs/'),
+    songs: {
+            // Fetch all songs
+        list: async (): Promise<Song[]> => request<Song[]>('/songs/'),
 
-    // Save a new song 
-    createSong: async (payload: SongUploadPayload): Promise<Song> => request<Song>('/songs/', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-    }),
-
-    // Log a play event
-    logPlay: async (songId: number): Promise<void> => {
-        try {
-            await request<void>('/history/', {
-                method: 'POST',
-                body: JSON.stringify({ song: songId }),
-            });
-        } catch (err) {
-            console.error("Audit log failed:", err);
-        }
+        delete: async (songId: number): Promise<void> => {
+            await request(`/songs/${songId}/`, { method: 'DELETE' });
+        },
+        // Save a new song 
+        upload: async (payload: SongUploadPayload): Promise<Song> => request<Song>('/songs/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        }),
+        // Update an existing song
+        update: async (songId: number, payload: Partial<SongUploadPayload>): Promise<Song> => request<Song>(`/songs/${songId}/`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        }),
+        // Log a play event
+        logPlay: async (songId: number): Promise<void> => {
+            try {
+                await request<void>('/history/', {
+                    method: 'POST',
+                    body: JSON.stringify({ song: songId }),
+                });
+            } catch (err) {
+                console.error("Audit log failed:", err);
+            }
+        },
     },
 
     playHistory: async (): Promise<PlayHistoryEntry[]> => request<PlayHistoryEntry[]>('/history/'),
