@@ -1,7 +1,7 @@
 // src/services/api.ts
 import { type Song, type SongUploadPayload, type UserProfile } from '../types/index.ts';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 interface PlayHistoryEntry {
     song: Song;
