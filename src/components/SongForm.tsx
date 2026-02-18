@@ -1,7 +1,7 @@
 import { useState, type JSX } from 'react';
 import { useCloudinaryUpload } from '../hooks/useCloudinaryUpload';
 import { api } from '../services/api';
-import { FileSelect } from './common/FileSelect';
+import { SongDetailsForm } from './common/SongDetailsForm';
 import styles from './SongForm.module.css';
 
 interface SongUploadFormProps {
@@ -17,92 +17,67 @@ export const SongUploadForm = ({ onUploadSuccess }: SongUploadFormProps): JSX.El
     const [coverArtUrl, setCoverArtUrl] = useState<string>('');
     const [songFileName, setSongFileName] = useState<string>('');
 
-    const handleFile = async (file: File): Promise<void> => {
+    // Handlers for SongDetailsForm
+    const handleCoverArtUpload = async (file: File) => {
         try {
             const cloudData = await upload(file);
-            
-            // Determine if this is audio or image based on file type
-            if (file.type.startsWith('audio')) {
-                setSongUrl(cloudData.secure_url);
-                setSongDuration(Math.round(cloudData.duration || 0));
-                setSongFileName(file.name);
-            } else if (file.type.startsWith('image')) {
-                setCoverArtUrl(cloudData.secure_url);
-            }
+            setCoverArtUrl(cloudData.secure_url);
         } catch (err) {
-            console.error("Upload failed:", err);
+            console.error('Cover art upload failed:', err);
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-        e.preventDefault();
-        
+    const handleMp3Upload = async (file: File) => {
+        try {
+            const cloudData = await upload(file);
+            setSongUrl(cloudData.secure_url);
+            setSongDuration(Math.round(cloudData.duration || 0));
+            setSongFileName(file.name);
+        } catch (err) {
+            console.error('MP3 upload failed:', err);
+        }
+    };
+
+    const handleSubmit = async ({ title: t, artist: a, coverArtUrl: c }: { title: string; artist: string; coverArtUrl: string }) => {
         if (!songUrl) {
-            alert("Please select an MP3 file.");
+            alert('Please select an MP3 file.');
             return;
         }
-
         try {
             await api.songs.upload({
-                title: title || songFileName,
-                artist: artist || "Unknown Artist",
+                title: t || songFileName,
+                artist: a || 'Unknown Artist',
                 file_url: songUrl,
-                cover_art_url: coverArtUrl,
+                cover_art_url: coverArtUrl || c,
                 duration: songDuration,
             });
-
-            // Reset form
             setTitle('');
             setArtist('');
             setSongUrl('');
             setSongDuration(0);
             setCoverArtUrl('');
             setSongFileName('');
-            
             alert('Song saved successfully!');
             onUploadSuccess();
-
         } catch (err) {
-            console.error("Failed to save song:", err);
-            alert("Failed to save song. Check console.");
+            console.error('Failed to save song:', err);
+            alert('Failed to save song. Check console.');
         }
     };
 
     return (
-        <form className={styles.container} onSubmit={handleSubmit}>
-            <h3 className={styles.title}>Add New Track</h3>
-            <FileSelect 
-                accept="image/*" 
-                label={isUploading ? "Uploading..." : "Select Cover Art"}
-                onFileSelect={handleFile} 
-            />
-            <input 
-                placeholder="Title" 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
-                className={styles.inputField}
-            />
-             <input 
-                placeholder="Artist" 
-                value={artist} 
-                onChange={e => setArtist(e.target.value)} 
-                className={styles.inputField}
-            />
-
-            <FileSelect 
-                accept="audio/*" 
-                label={isUploading ? "Uploading..." : "Select MP3"}
-                onFileSelect={handleFile} 
-            />
-            {uploadError && <div className={styles.error}>{uploadError}</div>}
-            {songUrl && <p className={styles.success}>✓ Audio file ready</p>}
-            <button 
-                type="submit" 
-                disabled={isUploading || !songUrl}
-                className={styles.submitButton}
-            >
-                {isUploading ? 'Uploading...' : 'Save Song'}
-            </button>
-        </form>
+        <SongDetailsForm
+            initialValues={{ title, artist, cover_art_url: coverArtUrl }}
+            onSubmit={handleSubmit}
+            isSubmitting={isUploading}
+            error={uploadError as string}
+            showMp3Upload={true}
+            onMp3Upload={handleMp3Upload}
+            mp3Uploaded={!!songUrl}
+            mp3Uploading={isUploading}
+            mp3Label={isUploading ? 'Uploading...' : 'Select MP3'}
+            coverArtUploading={isUploading}
+            onCoverArtUpload={handleCoverArtUpload}
+        />
     );
 };

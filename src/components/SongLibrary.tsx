@@ -1,24 +1,40 @@
-import { type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { type Song } from '../types';
 import styles from './MusicPlayer.module.css';
 import ManagementDropdown, { type DropdownItem } from './ManagementDropdown';
 import { api } from '../services/api';
+import { EditSongModal } from './EditSongModal';
+
 interface SongLibraryProps {
     songs: Song[];
     currentSongId?: number;
     onSongClick: (song: Song) => void;
+    onSongsChanged?: () => void;
 }
 
-export const SongLibrary = ({ songs, currentSongId, onSongClick }: SongLibraryProps): JSX.Element => {
+export const SongLibrary = ({ songs, currentSongId, onSongClick, onSongsChanged }: SongLibraryProps): JSX.Element => {
+    const [editSong, setEditSong] = useState<Song | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const handleEdit = (song: Song) => {
+        setEditSong(song);
+        setModalOpen(true);
+    };
+    const handleModalClose = () => {
+        setModalOpen(false);
+        setEditSong(null);
+    };
+    const handleSongUpdated = () => {
+        if (onSongsChanged) onSongsChanged();
+    };
+
     const buildDropdownItems = (song: Song): DropdownItem[] => [
         {
             label: 'Delete',
             onSelect: () => {
-                console.log('Delete song:', song.id);
                 api.songs.delete(song.id)
                     .then(() => {
-                        console.log('Song deleted successfully');
-                        // Optionally, trigger a refresh of the song list here
+                        if (onSongsChanged) onSongsChanged();
                     })
                     .catch((error) => {
                         console.error('Error deleting song:', error);
@@ -28,10 +44,7 @@ export const SongLibrary = ({ songs, currentSongId, onSongClick }: SongLibraryPr
         },
         {
             label: 'Edit',
-            onSelect: () => {
-                // TODO: call edit/update API for this song
-                console.log('Edit song:', song.id);
-            },
+            onSelect: () => handleEdit(song),
         },
     ];
 
@@ -55,6 +68,12 @@ export const SongLibrary = ({ songs, currentSongId, onSongClick }: SongLibraryPr
                     </li>
                 ))}
             </ul>
+            <EditSongModal 
+                song={editSong} 
+                isOpen={modalOpen} 
+                onClose={handleModalClose} 
+                onSongUpdated={handleSongUpdated}
+            />
         </div>
     );
 };

@@ -16,10 +16,14 @@ export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.E
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
     const [position, setPosition] = useState(0);
 
-    useEffect(() => {
+    const refreshSongs = () => {
         api.songs.list()
             .then(data => setSongs(data))
             .catch(err => console.error("Failed to load library", err));
+    };
+
+    useEffect(() => {
+        refreshSongs();
     }, [keyTrigger]);
 
     const playSong = async (song: Song): Promise<void> => {
@@ -123,6 +127,7 @@ export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.E
                 songs={songs}
                 currentSongId={currentSong?.id}
                 onSongClick={playSong}
+                onSongsChanged={refreshSongs}
             />
         </div>
     );
