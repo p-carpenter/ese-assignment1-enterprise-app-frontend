@@ -1,38 +1,21 @@
-import { useEffect, useState, type JSX } from 'react';
+import { type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
 import { type UserProfile } from '../types';
 import styles from './ProfilePage.module.css';
+import defaultAvatar from '../assets/default_avatar.png';
 
-export const ProfilePage = (): JSX.Element => {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>('');
+interface ProfilePageProps {
+    profile: UserProfile | null;
+}
+
+export const ProfilePage = ({ profile }: ProfilePageProps): JSX.Element => {
     const navigate = useNavigate();
 
-    useEffect(() => {
-        api.getProfile()
-            .then(data => setProfile(data))
-            .catch(err => {
-                console.error('Failed to load profile:', err);
-                setError('Failed to load profile');
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
-    if (loading) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.loading}>Loading profile...</div>
-            </div>
-        );
-    }
-
-    if (error || !profile) {
+    if (!profile) {
         return (
             <div className={styles.container}>
                 <div className={styles.card}>
-                    <div className={styles.error}>{error || 'Profile not found'}</div>
+                    <div className={styles.error}>Profile not found</div>
                     <button className={styles.backButton} onClick={() => navigate('/')}>
                         Back to Home
                     </button>
@@ -41,9 +24,8 @@ export const ProfilePage = (): JSX.Element => {
         );
     }
 
-    const displayName = profile.profile?.display_name || profile.username;
-    const avatarUrl = profile.profile?.avatar_url;
-    const userInitial = displayName
+    const username = profile.username;
+    const avatarUrl = profile.avatar_url;
 
     return (
         <div className={styles.container}>
@@ -53,11 +35,10 @@ export const ProfilePage = (): JSX.Element => {
                         {avatarUrl ? (
                             <img src={avatarUrl} alt="Profile" />
                         ) : (
-                            userInitial
+                            <img src={defaultAvatar} alt="Default Profile" />
                         )}
                     </div>
-                    <h1 className={styles.displayName}>{displayName}</h1>
-                    <p className={styles.username}>@{profile.username}</p>
+                    <h1 className={styles.displayName}>@{username}</h1>
                 </div>
 
                 <div className={styles.divider}></div>

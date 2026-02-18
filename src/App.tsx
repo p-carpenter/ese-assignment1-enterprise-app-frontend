@@ -24,12 +24,8 @@ const App = (): JSX.Element => {
     // Check authentication status on mount
     useEffect(() => {
         api.me()
-            .then(() => {
-                setIsAuthenticated(true);
-                // Fetch user profile
-                return api.getProfile();
-            })
             .then(profile => {
+                setIsAuthenticated(true);
                 setUserProfile(profile);
             })
             .catch(() => {
@@ -42,7 +38,7 @@ const App = (): JSX.Element => {
     const handleAuthSuccess = (): void => {
         setIsAuthenticated(true);
         // Fetch profile after successful auth
-        api.getProfile()
+        api.me()
             .then((profile: UserProfile) => setUserProfile(profile))
             .catch((err: unknown) => console.error('Failed to fetch profile:', err));
     };
@@ -54,12 +50,12 @@ const App = (): JSX.Element => {
 
     const getUserInitial = (): string => {
         if (!userProfile) return 'U';
-        const displayName = userProfile.profile?.display_name || userProfile.username;
+        const displayName = userProfile.username;
         return displayName
     };
 
     const getAvatarUrl = (): string | undefined => {
-        return userProfile?.profile?.avatar_url;
+        return userProfile?.avatar_url;
     };
 
     if (isLoading) {
@@ -102,7 +98,7 @@ const App = (): JSX.Element => {
                                     <div className="app-header">
                                         <h1 className="app-title">Music Player</h1>
                                     </div>
-                                    <RegistrationForm onSuccess={handleAuthSuccess} />
+                                    <RegistrationForm />
                                 </>
                             )
                         } 
@@ -115,7 +111,6 @@ const App = (): JSX.Element => {
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
                                 <HomePage 
                                     onLogout={handleLogout}
-                                    userInitial={getUserInitial()}
                                     avatarUrl={getAvatarUrl()}
                                 />
                             </ProtectedRoute>
@@ -137,7 +132,7 @@ const App = (): JSX.Element => {
                         path="/profile"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <ProfilePage />
+                                <ProfilePage profile={userProfile} />
                             </ProtectedRoute>
                         }
                     />

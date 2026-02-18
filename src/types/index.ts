@@ -29,8 +29,5 @@ export interface UserProfile {
     id: number;
     username: string;
     email: string;
-    profile?: {
-        display_name?: string;
-        avatar_url?: string;
-    };
+    avatar_url?: string;
 }

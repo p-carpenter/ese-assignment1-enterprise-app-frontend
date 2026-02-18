@@ -14,6 +14,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
   const [password2, setPassword2] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
 
     try {
       await api.register(username, email, password, password2);
+      setSuccess(true);
       onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -35,6 +37,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
       <h2 className={styles.title}>Sign up for Spotify</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
+        {success && <div className={styles.success}>Registration successful! Please check your email for a verification link.</div>}
         <input 
           placeholder="Username" 
           className={styles.inputField}

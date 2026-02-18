@@ -63,10 +63,10 @@ export const api = {
     playHistory: async (): Promise<PlayHistoryEntry[]> => request<PlayHistoryEntry[]>('/history/'),
 
     // Auth: Register
-    register: async (username: string, email: string, password: string, password2: string): Promise<void> => {
+    register: async (username: string, email: string, password1: string, password2: string): Promise<void> => {
         await request('/auth/registration/', { 
             method: 'POST',
-            body: JSON.stringify({ username, email, password, password2 }),
+            body: JSON.stringify({ username, email, password1, password2 }),
         });
     },
 
@@ -83,11 +83,11 @@ export const api = {
         await request('/auth/logout/', { method: 'POST' });
     },
     
-    // Auth: Check status
-    me: async (): Promise<void> => {
-        await request('/auth/user/', { method: 'GET' });
+    // Auth: Check status and get user profile
+    me: async (): Promise<UserProfile> => {
+        console.log('Calling GET /auth/user/');
+        const response = await request<UserProfile>('/auth/user/', { method: 'GET' });
+        console.log('User profile received:', response);
+        return response;
     },
-    
-    // Profile: Get user profile
-    getProfile: async (): Promise<UserProfile> => request<UserProfile>('/profile/', { method: 'GET' })
 };

@@ -5,11 +5,10 @@ import { Header } from '../components/Header';
 
 interface HomePageProps {
     onLogout: () => void;
-    userInitial?: string;
     avatarUrl?: string;
 }
 
-export const HomePage = ({ onLogout, userInitial, avatarUrl }: HomePageProps): JSX.Element => {
+export const HomePage = ({ onLogout, avatarUrl }: HomePageProps): JSX.Element => {
     const [historyTrigger, setHistoryTrigger] = useState(0);
 
     const refreshHistory = () => {
@@ -18,7 +17,7 @@ export const HomePage = ({ onLogout, userInitial, avatarUrl }: HomePageProps): J
 
     return (
         <>
-            <Header onLogout={onLogout} userInitial={userInitial} avatarUrl={avatarUrl} />
+            <Header onLogout={onLogout} avatarUrl={avatarUrl} />
             <div className="app-grid">
                 {/* LEFT COLUMN: Player */}
                 <div>
