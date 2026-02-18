@@ -3,6 +3,7 @@ import { useAudioPlayer } from 'react-use-audio-player';
 import { api } from '../services/api';
 import { type Song } from '../types';
 import styles from './MusicPlayer.module.css';
+import { SongLibrary } from './SongLibrary';
 
 interface MusicPlayerProps {
     keyTrigger: number;
@@ -118,25 +119,11 @@ export const MusicPlayer = ({ keyTrigger, onSongPlay }: MusicPlayerProps): JSX.E
             </div>
 
             {/* Library List */}
-            <div className={styles.songList}>
-                <h3 className={styles.libraryTitle}>Library ({songs.length} tracks)</h3>
-                <ul className={styles.list}>
-                    {songs.map((song) => (
-                        <li 
-                            key={song.id} 
-                            onClick={() => playSong(song)}
-                            className={currentSong?.id === song.id ? styles.songItemActive : styles.songItem}
-                        >
-                            <div className={styles.songMeta}>
-                                <strong className={styles.songTitle}>{song.title}</strong>
-                                <br/>
-                                <span className={styles.songArtist}>{song.artist}</span>
-                            </div>
-                            <span className={styles.duration}>{formatTime(song.duration)}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <SongLibrary 
+                songs={songs}
+                currentSongId={currentSong?.id}
+                onSongClick={playSong}
+            />
         </div>
     );
 };
