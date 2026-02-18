@@ -64,7 +64,7 @@ export const api = {
 
     // Auth: Register
     register: async (username: string, email: string, password: string, password2: string): Promise<void> => {
-        await request('/auth/register/', { 
+        await request('/auth/registration/', { 
             method: 'POST',
             body: JSON.stringify({ username, email, password, password2 }),
         });
