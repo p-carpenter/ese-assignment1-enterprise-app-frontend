@@ -8,5 +8,9 @@ export default defineConfig({
     globals: true, // This allows you to use 'describe', 'it', 'expect' without importing them
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    coverage: {
+      reporter: ['text', 'json-summary', 'json'],
+      reportOnFailure: true,
+    },
   },
 })
