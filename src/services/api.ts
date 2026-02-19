@@ -94,39 +94,67 @@ export const api = {
   playHistory: async (): Promise<PlayHistoryEntry[]> =>
     request<PlayHistoryEntry[]>("/history/"),
 
-  // Auth: Register
-  register: async (
-    username: string,
-    email: string,
-    password1: string,
-    password2: string,
-  ): Promise<void> => {
-    await request("/auth/registration/", {
-      method: "POST",
-      body: JSON.stringify({ username, email, password1, password2 }),
-    });
-  },
+  auth: {
+    // Auth: Register
+    register: async (
+      username: string,
+      email: string,
+      password1: string,
+      password2: string,
+    ): Promise<void> => {
+      await request("/auth/registration/", {
+        method: "POST",
+        body: JSON.stringify({ username, email, password1, password2 }),
+      });
+    },
 
-  // Auth: Login
-  login: async (email: string, password: string): Promise<void> => {
-    await request("/auth/login/", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-  },
+    // Auth: Login
+    login: async (email: string, password: string): Promise<void> => {
+      await request("/auth/login/", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+    },
 
-  // Auth: Logout
-  logout: async (): Promise<void> => {
-    await request("/auth/logout/", { method: "POST" });
-  },
+    // Auth: Logout
+    logout: async (): Promise<void> => {
+      await request("/auth/logout/", { method: "POST" });
+    },
 
-  // Auth: Check status and get user profile
-  me: async (): Promise<UserProfile> => {
-    console.log("Calling GET /auth/user/");
-    const response = await request<UserProfile>("/auth/user/", {
-      method: "GET",
-    });
-    console.log("User profile received:", response);
-    return response;
+    // Auth: Check status and get user profile
+    me: async (): Promise<UserProfile> => {
+      console.log("Calling GET /auth/user/");
+      const response = await request<UserProfile>("/auth/user/", {
+        method: "GET",
+      });
+      console.log("User profile received:", response);
+      return response;
+    },
+
+    // Auth: Request password reset
+    requestPasswordReset: async (email: string): Promise<void> => {
+      await request("/auth/password/reset/", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+
+    // Auth: Confirm password reset
+    confirmPasswordReset: async (
+      uid: string | undefined,
+      token: string | undefined,
+      new_password1: string,
+      new_password2: string,
+    ): Promise<void> => {
+      await request("/auth/password/reset/confirm/", {
+        method: "POST",
+        body: JSON.stringify({
+          uid,
+          token,
+          new_password1,
+          new_password2,
+        }),
+      });
+    },
   },
 };

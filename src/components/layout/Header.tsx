@@ -19,7 +19,7 @@ const Header = ({
 
   const handleLogout = async (): Promise<void> => {
     try {
-      await api.logout();
+      await api.auth.logout();
       onLogout();
       navigate("/login");
     } catch (err) {
