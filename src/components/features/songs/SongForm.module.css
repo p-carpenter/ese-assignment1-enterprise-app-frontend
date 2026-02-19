@@ -1,0 +1,98 @@
+.container {
+  background-color: var(--spotify-dark-elevated);
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: var(--spotify-white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.04em;
+}
+
+.inputField {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: var(--spotify-dark-highlight);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.inputField:hover {
+  border-color: var(--spotify-gray-dark);
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background-color: #282828;
+}
+
+.inputField::placeholder {
+  color: var(--spotify-gray);
+}
+
+.uploadButton {
+  width: 100%;
+  background-color: var(--spotify-green);
+  color: var(--spotify-black);
+  border: none;
+  padding: 14px 24px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 8px;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background-color: var(--spotify-green-bright);
+  transform: scale(1.04);
+}
+
+.uploadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.success {
+  color: green;
+  font-size: 0.9rem;
+  margin: 10px 0;
+}
+
+.submitButton {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  background-color: rgba(230, 0, 0, 0.2);
+  border: 1px solid #e60000;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 16px;
+}
