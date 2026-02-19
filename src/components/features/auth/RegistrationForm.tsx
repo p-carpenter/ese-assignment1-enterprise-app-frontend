@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { api } from "../../../services/api";
-import styles from "./AuthPages.module.css"; 
+import styles from "./AuthPages.module.css";
 
 interface RegistrationFormProps {
   onSuccess?: () => void;
@@ -81,7 +81,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
           {isLoading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
-      </>
+    </>
   );
 };
 

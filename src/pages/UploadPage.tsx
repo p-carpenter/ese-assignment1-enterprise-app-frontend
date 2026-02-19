@@ -2,7 +2,7 @@ import { useState, type JSX } from "react";
 import { SongUploadForm } from "../components/features/songs/SongForm";
 import Header from "../components/layout/Header";
 import Button from "../components/layout/Button";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 interface UploadPageProps {
   onLogout: () => void;

@@ -1,5 +1,5 @@
-import { type FC } from 'react';
-import { Link } from 'react-router-dom';
+import { type FC } from "react";
+import { Link } from "react-router-dom";
 import styles from "./AuthPages.module.css";
 
 interface AuthFormFooterProps {
@@ -8,7 +8,11 @@ interface AuthFormFooterProps {
   linkTo: string;
 }
 
-const AuthFormFooter: FC<AuthFormFooterProps> = ({ footerText, linkText, linkTo }) => {
+const AuthFormFooter: FC<AuthFormFooterProps> = ({
+  footerText,
+  linkText,
+  linkTo,
+}) => {
   return (
     <div className={styles.footer}>
       <span className={styles.footerText}>{footerText}</span>

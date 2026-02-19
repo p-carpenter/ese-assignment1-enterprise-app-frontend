@@ -31,9 +31,13 @@ const Header = ({
     <div className={styles.header}>
       <h1 className={styles.title}>Music Player</h1>
       <div className={styles.actions}>
-        <Button variant="primary" size="small" onClick={() => navigate("/upload")}>
-        Upload
-      </Button>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={() => navigate("/upload")}
+        >
+          Upload
+        </Button>
         <button
           className={styles.avatarButton}
           onClick={() => navigate("/profile")}

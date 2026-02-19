@@ -14,12 +14,12 @@ const RegisterPage = ({ onSuccess }: RegisterPageProps) => {
       </div>
       <div className={styles.container}>
         <RegistrationForm onSuccess={onSuccess} />
-        
+
         <div className={styles.divider}>
           <span>or</span>
         </div>
 
-        <AuthFormFooter 
+        <AuthFormFooter
           footerText="Already have an account?"
           linkText="Log in to Spotify"
           linkTo="/login"

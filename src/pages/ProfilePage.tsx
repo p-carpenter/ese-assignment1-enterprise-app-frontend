@@ -52,7 +52,7 @@ export const ProfilePage = ({ profile }: ProfilePageProps): JSX.Element => {
           <div className={styles.infoValue}>#{profile.id}</div>
         </div>
 
-         <Button variant="outlined" size="large" onClick={() => navigate("/")}>
+        <Button variant="outlined" size="large" onClick={() => navigate("/")}>
           Back to Home
         </Button>
       </div>
