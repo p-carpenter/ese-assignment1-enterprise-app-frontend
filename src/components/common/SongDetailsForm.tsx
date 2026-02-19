@@ -35,9 +35,9 @@ export const SongDetailsForm = ({
 }: SongDetailsFormProps): JSX.Element => {
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
-  const [coverArtUrl, setCoverArtUrl] = useState(
+  const [coverArtUrl, setCoverArtUrl] = useState( // eslint-disable-line @typescript-eslint/no-unused-vars
     initialValues.cover_art_url || "",
-  ); // eslint-disable-line @typescript-eslint/no-unused-vars
+  ); 
   // For cover art upload
   const handleCoverArt = async (file: File) => {
     if (onCoverArtUpload) {
@@ -52,7 +52,7 @@ export const SongDetailsForm = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit({
       title,

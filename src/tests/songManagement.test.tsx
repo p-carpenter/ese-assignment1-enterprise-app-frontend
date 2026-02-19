@@ -56,12 +56,10 @@ describe("Song management", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUseCloudinary.mockReturnValue({
-      upload: vi
-        .fn()
-        .mockResolvedValue({
-          secure_url: "http://audio.url/song.mp3",
-          duration: 123,
-        }),
+      upload: vi.fn().mockResolvedValue({
+        secure_url: "http://audio.url/song.mp3",
+        duration: 123,
+      }),
       isUploading: false,
       error: null,
     });
