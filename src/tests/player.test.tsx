@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MusicPlayer } from "../components/features/player/MusicPlayer";
+import MusicPlayer from "../components/features/player/MusicPlayer";
 import { api } from "../services/api";
 import type { Song } from "../types";
 
@@ -69,7 +69,7 @@ describe("MusicPlayer", () => {
   });
 
   it("loads and renders the song library", async () => {
-    render(<MusicPlayer keyTrigger={1} />);
+    render(<MusicPlayer />);
 
     expect(await screen.findByText("Song A")).toBeInTheDocument();
     expect(screen.getByText("Song B")).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe("MusicPlayer", () => {
   });
 
   it("plays a song when selected and logs play", async () => {
-    render(<MusicPlayer keyTrigger={1} />);
+    render(<MusicPlayer />);
 
     const songTitle = await screen.findByText("Song A");
     fireEvent.click(songTitle);
@@ -93,43 +93,51 @@ describe("MusicPlayer", () => {
   });
 
   it("calls play when clicking the play button", async () => {
-    render(<MusicPlayer keyTrigger={1} />);
+    render(<MusicPlayer />);
 
     fireEvent.click(await screen.findByText("Song A"));
 
-    const playButton = await screen.findByRole("button", { name: /play/i });
+    const playButton = await screen.findByRole("button", { name: "Play" });
     fireEvent.click(playButton);
 
-    expect(audioPlayerMocks.play).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(audioPlayerMocks.play).toHaveBeenCalled();
+    });
   });
 
   it("calls next when clicking the next button", async () => {
-    render(<MusicPlayer keyTrigger={1} />);
+    render(<MusicPlayer />);
 
     fireEvent.click(await screen.findByText("Song A"));
 
-    const nextButton = await screen.findByRole("button", { name: /next/i });
+    const nextButton = await screen.findByRole("button", { name: "Next" });
     fireEvent.click(nextButton);
 
-    expect(audioPlayerMocks.stop).toHaveBeenCalled();
-    expect(audioPlayerMocks.load).toHaveBeenCalledWith(
-      "http://example.com/song2.mp3",
-      expect.objectContaining({ autoplay: true }),
-    );
+    await waitFor(() => {
+      expect(audioPlayerMocks.stop).toHaveBeenCalled();
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song2.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
   });
 
   it("calls previous when clicking the previous button", async () => {
-    render(<MusicPlayer keyTrigger={1} />);
+    render(<MusicPlayer />);
 
     fireEvent.click(await screen.findByText("Song B"));
 
-    const previousButton = await screen.findByRole("button", { name: /prev/i });
+    const previousButton = await screen.findByRole("button", {
+      name: "Previous",
+    });
     fireEvent.click(previousButton);
 
-    expect(audioPlayerMocks.stop).toHaveBeenCalled();
-    expect(audioPlayerMocks.load).toHaveBeenCalledWith(
-      "http://example.com/song1.mp3",
-      expect.objectContaining({ autoplay: true }),
-    );
+    await waitFor(() => {
+      expect(audioPlayerMocks.stop).toHaveBeenCalled();
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song1.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
   });
 });

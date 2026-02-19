@@ -9,7 +9,7 @@ interface HeaderProps {
   avatarUrl?: string;
 }
 
-export const Header = ({
+const Header = ({
   onLogout,
   userInitial = "U",
   avatarUrl,
@@ -54,3 +54,5 @@ export const Header = ({
     </div>
   );
 };
+
+export default Header;

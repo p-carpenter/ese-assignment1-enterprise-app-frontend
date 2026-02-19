@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { EditSongModal } from "../components/features/songs/EditSongModal";
+import EditSongModal from "../components/features/songs/EditSongModal";
 import { api } from "../services/api";
 import { useCloudinaryUpload } from "../hooks/useCloudinaryUpload";
 import type { Song } from "../types";
 import { SongUploadForm } from "../components/features/songs/SongForm";
-import { SongLibrary } from "../components/features/songs/SongLibrary";
+import SongLibrary from "../components/features/songs/SongLibrary";
 
 vi.mock("../services/api", () => ({
   api: {

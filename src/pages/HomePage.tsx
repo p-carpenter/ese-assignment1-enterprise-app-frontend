@@ -1,7 +1,7 @@
 import { useState, type JSX } from "react";
-import { MusicPlayer } from "../components/features/player/MusicPlayer";
-import { PlayHistory } from "../components/features/player/PlayHistory";
-import { Header } from "../components/layout/Header";
+import MusicPlayer from "../components/features/player/MusicPlayer";
+import PlayHistory from "../components/features/player/PlayHistory";
+import Header from "../components/layout/Header";
 
 interface HomePageProps {
   onLogout: () => void;
@@ -24,10 +24,7 @@ export const HomePage = ({
       <div className="app-grid">
         {/* LEFT COLUMN: Player */}
         <div>
-          <MusicPlayer
-            keyTrigger={historyTrigger}
-            onSongPlay={refreshHistory}
-          />
+          <MusicPlayer onSongPlay={refreshHistory} />
         </div>
 
         {/* RIGHT COLUMN: History */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, type JSX } from "react";
+import { useState, type JSX } from "react";
 import { Modal } from "../../common/Modal";
 import { SongDetailsForm } from "../../common/SongDetailsForm";
 import { useCloudinaryUpload } from "../../../hooks/useCloudinaryUpload";
@@ -12,21 +12,17 @@ interface EditSongModalProps {
   onSongUpdated: () => void;
 }
 
-export const EditSongModal = ({
+const EditSongModal = ({
   song,
   isOpen,
   onClose,
   onSongUpdated,
 }: EditSongModalProps): JSX.Element | null => {
   const { upload, isUploading, error } = useCloudinaryUpload();
+
   const [coverArtUrl, setCoverArtUrl] = useState<string>(
     song?.cover_art_url || "",
   );
-
-  // Reset coverArtUrl if song changes
-  useEffect(() => {
-    setCoverArtUrl(song?.cover_art_url || "");
-  }, [song]);
 
   if (!song) return null;
 
@@ -81,3 +77,5 @@ export const EditSongModal = ({
     </Modal>
   );
 };
+
+export default EditSongModal;

@@ -1,9 +1,9 @@
 import { useState, type JSX } from "react";
 import { type Song } from "../../../types";
 import styles from "../player/MusicPlayer.module.css";
-import ManagementDropdown, { type DropdownItem } from "./ManagementDropdown";
+import ManagementDropdown from "./ManagementDropdown";
 import { api } from "../../../services/api";
-import { EditSongModal } from "./EditSongModal";
+import EditSongModal from "./EditSongModal";
 
 interface SongLibraryProps {
   songs: Song[];
@@ -12,7 +12,7 @@ interface SongLibraryProps {
   onSongsChanged?: () => void;
 }
 
-export const SongLibrary = ({
+const SongLibrary = ({
   songs,
   currentSongId,
   onSongClick,
@@ -25,34 +25,26 @@ export const SongLibrary = ({
     setEditSong(song);
     setModalOpen(true);
   };
+
   const handleModalClose = () => {
     setModalOpen(false);
-    setEditSong(null);
   };
+
   const handleSongUpdated = () => {
     if (onSongsChanged) onSongsChanged();
   };
 
-  const buildDropdownItems = (song: Song): DropdownItem[] => [
-    {
-      label: "Delete",
-      onSelect: () => {
-        api.songs
-          .delete(song.id)
-          .then(() => {
-            if (onSongsChanged) onSongsChanged();
-          })
-          .catch((error) => {
-            console.error("Error deleting song:", error);
-            alert("Failed to delete song. Please try again.");
-          });
-      },
-    },
-    {
-      label: "Edit",
-      onSelect: () => handleEdit(song),
-    },
-  ];
+  const handleDelete = (songId: number) => {
+    api.songs
+      .delete(songId)
+      .then(() => {
+        if (onSongsChanged) onSongsChanged();
+      })
+      .catch((error) => {
+        console.error("Error deleting song:", error);
+        alert("Failed to delete song. Please try again.");
+      });
+  };
 
   return (
     <div className={styles.songList}>
@@ -74,11 +66,17 @@ export const SongLibrary = ({
               <span className={styles.songArtist}>{song.artist}</span>
             </div>
             <span className={styles.duration}>{formatTime(song.duration)}</span>
-            <ManagementDropdown dropdownItems={buildDropdownItems(song)} />
+            <ManagementDropdown
+              dropdownItems={[
+                { label: "Edit", onSelect: () => handleEdit(song) },
+                { label: "Delete", onSelect: () => handleDelete(song.id) },
+              ]}
+            />
           </li>
         ))}
       </ul>
       <EditSongModal
+        key={editSong?.id || "empty-modal"}
         song={editSong}
         isOpen={modalOpen}
         onClose={handleModalClose}
@@ -93,3 +91,5 @@ const formatTime = (seconds: number): string => {
   const secs = Math.round(seconds % 60);
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
+
+export default SongLibrary;
