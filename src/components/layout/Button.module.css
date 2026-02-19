@@ -1,0 +1,50 @@
+/* button.module.css */
+
+/* the base styles every button shares */
+.button {
+  border-radius: 500px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  transform: scale(1.04);
+}
+
+/* visual variants */
+.outlined {
+  background: transparent;
+  color: var(--spotify-white);
+  border: 1px solid var(--spotify-gray-dark);
+}
+
+.outlined:hover {
+  border-color: var(--spotify-white);
+}
+
+.primary {
+  background: var(--spotify-green);
+  color: var(--spotify-black);
+  border: none;
+}
+
+.primary:hover {
+  background: var(--spotify-green-bright);
+}
+
+/* size modifiers */
+.small {
+  padding: 8px 20px;
+  font-size: 12px;
+}
+
+.large {
+  padding: 12px 32px;
+  font-size: 14px;
+}

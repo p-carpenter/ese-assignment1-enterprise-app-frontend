@@ -91,23 +91,3 @@
   border-radius: 4px;
   text-align: center;
 }
-
-.backButton {
-  background: transparent;
-  color: var(--spotify-white);
-  border: 1px solid var(--spotify-gray-dark);
-  padding: 12px 32px;
-  border-radius: 500px;
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 32px;
-}
-
-.backButton:hover {
-  border-color: var(--spotify-white);
-  transform: scale(1.04);
-}
