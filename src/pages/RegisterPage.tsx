@@ -1,4 +1,4 @@
-import RegistrationForm from '../components/auth/RegistrationForm';
+import RegistrationForm from "../components/features/auth/RegistrationForm";
 
 interface RegisterPageProps {
   onSuccess?: () => void;

@@ -1,9 +1,9 @@
-import { useState, useEffect, type JSX } from 'react';
-import { Modal } from './common/Modal';
-import { SongDetailsForm } from './common/SongDetailsForm';
-import { useCloudinaryUpload } from '../hooks/useCloudinaryUpload';
-import { api } from '../services/api';
-import { type Song } from '../types';
+import { useState, useEffect, type JSX } from "react";
+import { Modal } from "../../common/Modal";
+import { SongDetailsForm } from "../../common/SongDetailsForm";
+import { useCloudinaryUpload } from "../../../hooks/useCloudinaryUpload";
+import { api } from "../../../services/api";
+import { type Song } from "../../../types";
 
 interface EditSongModalProps {
   song: Song | null;
@@ -12,15 +12,21 @@ interface EditSongModalProps {
   onSongUpdated: () => void;
 }
 
-export const EditSongModal = ({ song, isOpen, onClose, onSongUpdated }: EditSongModalProps): JSX.Element | null => {
+export const EditSongModal = ({
+  song,
+  isOpen,
+  onClose,
+  onSongUpdated,
+}: EditSongModalProps): JSX.Element | null => {
   const { upload, isUploading, error } = useCloudinaryUpload();
-  const [coverArtUrl, setCoverArtUrl] = useState<string>(song?.cover_art_url || '');
+  const [coverArtUrl, setCoverArtUrl] = useState<string>(
+    song?.cover_art_url || "",
+  );
 
   // Reset coverArtUrl if song changes
   useEffect(() => {
-    setCoverArtUrl(song?.cover_art_url || '');
+    setCoverArtUrl(song?.cover_art_url || "");
   }, [song]);
-
 
   if (!song) return null;
 
@@ -29,11 +35,18 @@ export const EditSongModal = ({ song, isOpen, onClose, onSongUpdated }: EditSong
       const cloudData = await upload(file);
       setCoverArtUrl(cloudData.secure_url);
     } catch (err) {
-      console.error('Cover art upload failed:', err);
+      console.error("Cover art upload failed:", err);
     }
   };
 
-  const handleSubmit = async ({ title, artist }: { title: string; artist: string; coverArtUrl: string }) => {
+  const handleSubmit = async ({
+    title,
+    artist,
+  }: {
+    title: string;
+    artist: string;
+    coverArtUrl: string;
+  }) => {
     try {
       await api.songs.update(song.id, {
         title,
@@ -45,8 +58,8 @@ export const EditSongModal = ({ song, isOpen, onClose, onSongUpdated }: EditSong
       onSongUpdated();
       onClose();
     } catch (err) {
-      console.error('Failed to update song:', err);
-      alert('Failed to update song. Check console.');
+      console.error("Failed to update song:", err);
+      alert("Failed to update song. Check console.");
     }
   };
 

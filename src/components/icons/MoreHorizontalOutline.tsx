@@ -17,6 +17,5 @@ export function MoreHorizontalOutline(props: SVGProps<SVGSVGElement>) {
         ></path>
       </g>
     </svg>
-  )
+  );
 }
-

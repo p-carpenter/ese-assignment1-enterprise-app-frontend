@@ -1,0 +1,47 @@
+name: Code quality and tests
+
+on: [pull_request, push]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 'Install dependencies'
+        run: npm i
+
+      - name: 'Run Type Check (tsc)'
+        run: npm run check-types
+
+      - name: 'Run Prettier Check'
+        run: npm run check-format
+
+      - name: 'Run ESLint'
+        run: npm run lint
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 'Install dependencies'
+        run: npm i
+
+      - name: 'Run Tests'
+        run: npm run test
+      - name: 'Vitest Coverage Report'
+        # Set if: always() to also generate the report if tests are failing
+        # Only works if you set `reportOnFailure: true` in your vite config as specified above
+        if: always() 
+        uses: davelosert/vitest-coverage-report-action@v2.9.2
+
+  build:
+    needs: [code-quality, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Deploy to production'
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.MY_RENDER_API_KEY }}
