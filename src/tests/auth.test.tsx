@@ -9,14 +9,18 @@ import "@testing-library/jest-dom/vitest";
 
 vi.mock("../services/api", () => ({
   api: {
-    login: vi.fn(),
-    register: vi.fn(),
+    auth: {
+      login: vi.fn(),
+      register: vi.fn(),
+    },
   },
 }));
 
 const mockedApi = api as unknown as {
-  login: ReturnType<typeof vi.fn>;
-  register: ReturnType<typeof vi.fn>;
+  auth: {
+    login: ReturnType<typeof vi.fn>;
+    register: ReturnType<typeof vi.fn>;
+  };
 };
 
 describe("Auth features", () => {
@@ -26,7 +30,7 @@ describe("Auth features", () => {
 
   it("submits login form and calls onSuccess", async () => {
     const onSuccess = vi.fn();
-    mockedApi.login.mockResolvedValueOnce(undefined);
+    mockedApi.auth.login.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
@@ -44,7 +48,7 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(mockedApi.login).toHaveBeenCalledWith(
+      expect(mockedApi.auth.login).toHaveBeenCalledWith(
         "user@example.com",
         "secret",
       );
@@ -53,7 +57,9 @@ describe("Auth features", () => {
   });
 
   it("shows login error when api rejects", async () => {
-    mockedApi.login.mockRejectedValueOnce(new Error("Invalid credentials"));
+    mockedApi.auth.login.mockRejectedValueOnce(
+      new Error("Invalid credentials"),
+    );
 
     render(
       <MemoryRouter>
@@ -75,7 +81,7 @@ describe("Auth features", () => {
 
   it("submits registration form and shows success message", async () => {
     const onSuccess = vi.fn();
-    mockedApi.register.mockResolvedValueOnce(undefined);
+    mockedApi.auth.register.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
@@ -99,7 +105,7 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
-      expect(mockedApi.register).toHaveBeenCalledWith(
+      expect(mockedApi.auth.register).toHaveBeenCalledWith(
         "newuser",
         "new@example.com",
         "pass1234",

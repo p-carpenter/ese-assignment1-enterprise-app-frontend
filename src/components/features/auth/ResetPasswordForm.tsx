@@ -50,7 +50,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
         {success && (
           <div className={styles.success}>
             Password reset successfully! You can now log in with your new
-            password. link.
+            password.
           </div>
         )}
         <input
