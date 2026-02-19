@@ -4,8 +4,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
 import { UploadPage } from './pages/UploadPage';
 import { ProfilePage } from './pages/ProfilePage';
-import LoginForm from './components/auth/LoginForm';
-import RegistrationForm from './components/auth/RegistrationForm';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import { api } from './services/api';
 import { type UserProfile } from './types';
 import './App.css';
@@ -79,12 +79,7 @@ const App = (): JSX.Element => {
                             isAuthenticated ? (
                                 <Navigate to="/" replace />
                             ) : (
-                                <>
-                                    <div className="app-header">
-                                        <h1 className="app-title">Music Player</h1>
-                                    </div>
-                                    <LoginForm onSuccess={handleAuthSuccess} />
-                                </>
+                                <LoginPage onSuccess={handleAuthSuccess} />
                             )
                         } 
                     />
@@ -94,12 +89,7 @@ const App = (): JSX.Element => {
                             isAuthenticated ? (
                                 <Navigate to="/" replace />
                             ) : (
-                                <>
-                                    <div className="app-header">
-                                        <h1 className="app-title">Music Player</h1>
-                                    </div>
-                                    <RegistrationForm />
-                                </>
+                                <RegisterPage />
                             )
                         } 
                     />
