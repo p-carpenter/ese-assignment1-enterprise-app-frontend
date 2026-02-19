@@ -1,6 +1,8 @@
 import { useState, type JSX } from "react";
 import { SongUploadForm } from "../components/features/songs/SongForm";
 import Header from "../components/layout/Header";
+import Button from "../components/layout/Button";
+import { useNavigate } from "react-router-dom";
 
 interface UploadPageProps {
   onLogout: () => void;
@@ -13,6 +15,8 @@ export const UploadPage = ({
   userInitial,
   avatarUrl,
 }: UploadPageProps): JSX.Element => {
+  const navigate = useNavigate();
+
   const [, setRefreshKey] = useState(0);
 
   return (
@@ -26,6 +30,9 @@ export const UploadPage = ({
         <SongUploadForm
           onUploadSuccess={() => setRefreshKey((prev) => prev + 1)}
         />
+        <Button variant="outlined" size="large" onClick={() => navigate("/")}>
+          Back to Home
+        </Button>
       </div>
     </>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { type UserProfile } from "../types";
 import styles from "./ProfilePage.module.css";
 import defaultAvatar from "../assets/default_avatar.png";
+import Button from "../components/layout/Button";
 
 interface ProfilePageProps {
   profile: UserProfile | null;
@@ -16,9 +17,9 @@ export const ProfilePage = ({ profile }: ProfilePageProps): JSX.Element => {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.error}>Profile not found</div>
-          <button className={styles.backButton} onClick={() => navigate("/")}>
+          <Button variant="outlined" size="large" onClick={() => navigate("/")}>
             Back to Home
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -51,9 +52,9 @@ export const ProfilePage = ({ profile }: ProfilePageProps): JSX.Element => {
           <div className={styles.infoValue}>#{profile.id}</div>
         </div>
 
-        <button className={styles.backButton} onClick={() => navigate("/")}>
+        <Button variant="outlined" size="large" onClick={() => navigate("/")}>
           Back to Home
-        </button>
+        </Button>
       </div>
     </div>
   );

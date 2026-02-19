@@ -151,3 +151,18 @@
 .footerLink:hover {
   color: var(--spotify-green);
 }
+
+.forgotPasswordLink {
+  display: block;
+  text-align: center;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-top: 16px;
+  transition: color 0.2s ease;
+}
+
+.forgotPasswordLink:hover {
+  color: var(--spotify-green);
+}

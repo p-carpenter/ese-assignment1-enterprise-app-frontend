@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
+import Button from "./Button";
 
 interface HeaderProps {
   onLogout: () => void;
@@ -30,12 +31,13 @@ const Header = ({
     <div className={styles.header}>
       <h1 className={styles.title}>Music Player</h1>
       <div className={styles.actions}>
-        <button
-          className={styles.uploadButton}
+        <Button
+          variant="primary"
+          size="small"
           onClick={() => navigate("/upload")}
         >
           Upload
-        </button>
+        </Button>
         <button
           className={styles.avatarButton}
           onClick={() => navigate("/profile")}
@@ -47,9 +49,9 @@ const Header = ({
             userInitial.toUpperCase()
           )}
         </button>
-        <button className={styles.logoutButton} onClick={handleLogout}>
+        <Button variant="outlined" size="small" onClick={handleLogout}>
           Log Out
-        </button>
+        </Button>
       </div>
     </div>
   );

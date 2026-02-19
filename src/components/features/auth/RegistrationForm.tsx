@@ -1,7 +1,6 @@
 import { memo, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "../../../services/api";
-import styles from "./LoginForm.module.css"; // Reuse the same styles
+import styles from "./AuthPages.module.css";
 
 interface RegistrationFormProps {
   onSuccess?: () => void;
@@ -16,7 +15,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -33,7 +32,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
   };
 
   return (
-    <div className={styles.container}>
+    <>
       <h2 className={styles.title}>Sign up for Spotify</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
@@ -82,16 +81,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
           {isLoading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
-      <div className={styles.divider}>
-        <span>or</span>
-      </div>
-      <div className={styles.footer}>
-        <span className={styles.footerText}>Already have an account?</span>
-        <Link to="/login" className={styles.footerLink}>
-          Log in to Spotify
-        </Link>
-      </div>
-    </div>
+    </>
   );
 };
 
