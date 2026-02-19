@@ -1,0 +1,47 @@
+.container {
+    background-color: var(--spotify-dark-elevated);
+    padding: 24px;
+    border-radius: 8px;
+    height: fit-content;
+}
+
+.title {
+    color: var(--spotify-white);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.04em;
+}
+
+.grid {
+    display: grid;
+    gap: 8px;
+}
+
+.historyCard {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.historyCard:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--spotify-green);
+}
+
+.songTitle {
+    font-weight: 600;
+    color: var(--spotify-white);
+    font-size: 14px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.songMeta {
+    font-size: 0.75rem;
+    color: var(--spotify-gray);
+    display: block;
+    margin-top: 8px;
+}
