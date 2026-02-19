@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { PlayHistory } from "../components/features/player/PlayHistory";
+import PlayHistory from "../components/features/player/PlayHistory";
 import { api } from "../services/api";
 import type { Song } from "../types";
 

@@ -13,6 +13,11 @@
   letter-spacing: -0.04em;
 }
 
+.text {
+  color: var(--spotify-gray); 
+  font-size: 14px;
+}
+
 .grid {
   display: grid;
   gap: 8px;
@@ -37,6 +42,12 @@
   font-size: 14px;
   display: block;
   margin-bottom: 4px;
+}
+
+.songArtist {
+  color: var(--spotify-gray);
+  font-size: 13px;
+  margin-bottom: 8px;
 }
 
 .songMeta {

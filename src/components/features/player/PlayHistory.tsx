@@ -12,7 +12,7 @@ interface PlayHistoryEntry {
   played_at: string;
 }
 
-export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
+const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
   const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
 
   useEffect(() => {
@@ -27,22 +27,14 @@ export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
       <h3 className={styles.title}>Recently Played</h3>
       <div className={styles.grid}>
         {playHistory.length === 0 ? (
-          <p style={{ color: "var(--spotify-gray)", fontSize: "14px" }}>
-            No play history yet
-          </p>
+          <p className={styles.text}>No play history yet</p>
         ) : (
           playHistory.map((entry, index) => (
             <div key={index} className={styles.historyCard}>
               <div className={styles.songTitle}>
                 {entry.song?.title || "Unknown Track"}
               </div>
-              <div
-                style={{
-                  color: "var(--spotify-gray)",
-                  fontSize: "13px",
-                  marginBottom: "8px",
-                }}
-              >
+              <div className={styles.songArtist}>
                 {entry.song?.artist || "Unknown Artist"}
               </div>
               <div className={styles.songMeta}>
@@ -55,3 +47,5 @@ export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
     </div>
   );
 };
+
+export default PlayHistory;

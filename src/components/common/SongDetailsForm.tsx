@@ -35,9 +35,9 @@ export const SongDetailsForm = ({
 }: SongDetailsFormProps): JSX.Element => {
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
-  const [coverArtUrl, setCoverArtUrl] = useState( // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [coverArtUrl,] = useState(
     initialValues.cover_art_url || "",
-  ); 
+  );
   // For cover art upload
   const handleCoverArt = async (file: File) => {
     if (onCoverArtUpload) {

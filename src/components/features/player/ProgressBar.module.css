@@ -1,0 +1,68 @@
+.progressRow {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.progressBar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--spotify-gray-dark);
+  border-radius: 2px;
+}
+
+.progressBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--spotify-white);
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -4px;
+  opacity: 1;
+  transition: transform 0.2s ease;
+}
+
+.progressBar:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.progressBar:hover::-webkit-slider-runnable-track {
+  background: var(--spotify-green);
+}
+
+.progressBar::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: var(--spotify-gray-dark);
+  border-radius: 2px;
+}
+
+.progressBar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--spotify-white);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: var(--spotify-gray);
+  min-width: 40px;
+  text-align: center;
+  font-weight: 500;
+}

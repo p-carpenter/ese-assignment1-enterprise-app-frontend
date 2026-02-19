@@ -1,6 +1,6 @@
 import { useState, type JSX } from "react";
 import { SongUploadForm } from "../components/features/songs/SongForm";
-import { Header } from "../components/layout/Header";
+import Header from "../components/layout/Header";
 
 interface UploadPageProps {
   onLogout: () => void;
