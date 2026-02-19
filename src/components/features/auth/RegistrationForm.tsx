@@ -21,7 +21,7 @@ const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
     setIsLoading(true);
 
     try {
-      await api.register(username, email, password, password2);
+      await api.auth.register(username, email, password, password2);
       setSuccess(true);
       onSuccess?.();
     } catch (err) {

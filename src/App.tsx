@@ -11,6 +11,8 @@ import { UploadPage } from "./pages/UploadPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ResetPasswordPage from "./pages/ResetPassword";
+import RequestResetPasswordPage from "./pages/RequestResetPassword";
 import { api } from "./services/api";
 import { type UserProfile } from "./types";
 import "./App.css";
@@ -28,7 +30,7 @@ const App = (): JSX.Element => {
 
   // Check authentication status on mount
   useEffect(() => {
-    api
+    api.auth
       .me()
       .then((profile) => {
         setIsAuthenticated(true);
@@ -44,7 +46,7 @@ const App = (): JSX.Element => {
   const handleAuthSuccess = (): void => {
     setIsAuthenticated(true);
     // Fetch profile after successful auth
-    api
+    api.auth
       .me()
       .then((profile: UserProfile) => setUserProfile(profile))
       .catch((err: unknown) => console.error("Failed to fetch profile:", err));
@@ -102,7 +104,20 @@ const App = (): JSX.Element => {
               isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
             }
           />
-
+          <Route
+            path="/reset-password"
+            element={
+              <RequestResetPasswordPage
+                onSuccess={() => setIsAuthenticated(false)}
+              />
+            }
+          />
+          <Route
+            path="reset-password/confirm/:uid/:token"
+            element={
+              <ResetPasswordPage onSuccess={() => setIsAuthenticated(false)} />
+            }
+          />
           {/* Protected Routes */}
           <Route
             path="/"

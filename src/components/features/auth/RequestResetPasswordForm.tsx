@@ -1,15 +1,17 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { api } from "../../../services/api";
 import styles from "./AuthPages.module.css";
 
-interface LoginFormProps {
+interface RequestResetPasswordFormProps {
   onSuccess?: () => void;
 }
 
-const LoginForm = ({ onSuccess }: LoginFormProps) => {
+const RequestResetPasswordForm = ({
+  onSuccess,
+}: RequestResetPasswordFormProps) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
@@ -18,10 +20,13 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
     setIsLoading(true);
 
     try {
-      await api.auth.login(email, password);
+      await api.auth.requestPasswordReset(email);
+      setSuccess(true);
       onSuccess?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(
+        err instanceof Error ? err.message : "Failed to request password reset",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -29,9 +34,15 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
   return (
     <>
-      <h2 className={styles.title}>Log in to Spotify</h2>
+      <h2 className={styles.title}>Reset your password</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
+        {success && (
+          <div className={styles.success}>
+            Password reset requested! Please check your email for a confirmation
+            link.
+          </div>
+        )}
         <input
           placeholder="Email address"
           className={styles.inputField}
@@ -40,24 +51,18 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          placeholder="Password"
-          type="password"
-          className={styles.inputField}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
         <button
           className={styles.submitButton}
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? "Logging in..." : "Log In"}
+          {isLoading
+            ? "Requesting password reset..."
+            : "Request Password Reset"}
         </button>
       </form>
     </>
   );
 };
 
-export default memo(LoginForm);
+export default RequestResetPasswordForm;

@@ -16,7 +16,7 @@ const LoginPage = ({ onSuccess }: LoginPageProps) => {
       <div className={styles.container}>
         <LoginForm onSuccess={onSuccess} />
 
-        <Link to="/forgot-password" className={styles.forgotPasswordLink}>
+        <Link to="/reset-password" className={styles.forgotPasswordLink}>
           Forgot your password?
         </Link>
 
