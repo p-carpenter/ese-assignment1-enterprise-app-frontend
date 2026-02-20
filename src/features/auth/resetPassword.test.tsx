@@ -327,7 +327,7 @@ describe("Reset Password Features", () => {
       expect(screen.getByText(/Reset your password/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Email address")).toBeInTheDocument();
       expect(
-        screen.getByText(/Sorted out your password?/i),
+        screen.getByText(/Remembered your password?/i),
       ).toBeInTheDocument();
       expect(screen.getByText("Go back to login")).toBeInTheDocument();
     });

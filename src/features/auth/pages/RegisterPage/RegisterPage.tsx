@@ -1,6 +1,7 @@
 import { RegistrationForm } from "../../components/RegistrationForm/RegistrationForm";
 import { AuthFormFooter } from "../../components/AuthFormFooter/AuthFormFooter";
-import styles from "../LoginPage/AuthPages.module.css";
+import { AuthLayout } from "../../components/AuthLayout/AuthLayout";
+import authStyles from "../AuthPages.module.css";
 
 interface RegisterPageProps {
   onSuccess?: () => void;
@@ -9,13 +10,10 @@ interface RegisterPageProps {
 export const RegisterPage = ({ onSuccess }: RegisterPageProps) => {
   return (
     <>
-      <div className="app-header">
-        <h1 className="app-title">Music Player</h1>
-      </div>
-      <div className={styles.container}>
+      <AuthLayout>
         <RegistrationForm onSuccess={onSuccess} />
 
-        <div className={styles.divider}>
+        <div className={authStyles.divider}>
           <span>or</span>
         </div>
 
@@ -24,7 +22,7 @@ export const RegisterPage = ({ onSuccess }: RegisterPageProps) => {
           linkText="Log in to Spotify"
           linkTo="/login"
         />
-      </div>
+      </AuthLayout>
     </>
   );
 };

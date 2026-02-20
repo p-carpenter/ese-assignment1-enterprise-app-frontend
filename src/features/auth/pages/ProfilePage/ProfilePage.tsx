@@ -1,9 +1,9 @@
 import { type JSX } from "react";
 import { useNavigate } from "react-router-dom";
 import { type UserProfile } from "../../types";
-import styles from "./ProfilePage.module.css";
 import defaultAvatar from "@/shared/assets/default_avatar.png";
 import { Button } from "@/shared/components";
+import styles from "./ProfilePage.module.css";
 
 interface ProfilePageProps {
   profile: UserProfile | null;
