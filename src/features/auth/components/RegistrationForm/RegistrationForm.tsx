@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { api } from "@/shared/api/client";
+import { register } from "../../api";
 import styles from "../AuthForm.module.css";
 
 interface RegistrationFormProps {
@@ -21,7 +21,7 @@ export const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
     setIsLoading(true);
 
     try {
-      await api.auth.register(username, email, password, password2);
+      await register(username, email, password, password2);
       setSuccess(true);
       onSuccess?.();
     } catch (err) {

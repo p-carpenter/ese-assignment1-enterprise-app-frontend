@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { api } from "@/shared/api/client";
 import styles from "../AuthForm.module.css";
+import { requestPasswordReset } from "../../api";
 
 interface RequestResetPasswordFormProps {
   onSuccess?: () => void;
@@ -20,7 +20,7 @@ export const RequestResetPasswordForm = ({
     setIsLoading(true);
 
     try {
-      await api.auth.requestPasswordReset(email);
+      await requestPasswordReset(email);
       setSuccess(true);
       onSuccess?.();
     } catch (err) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "@/shared/api/client";
+import { login } from "../../api/"
 import styles from "../AuthForm.module.css";
 
 interface LoginFormProps {
@@ -18,7 +18,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     setIsLoading(true);
 
     try {
-      await api.auth.login(email, password);
+      await login(email, password);
       onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");

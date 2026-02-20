@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "@/shared/api/client";
+import { confirmPasswordReset } from "../../api";
 import styles from "../AuthForm.module.css";
 import { useParams } from "react-router-dom";
 
@@ -27,12 +27,7 @@ export const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
     setIsLoading(true);
 
     try {
-      await api.auth.confirmPasswordReset(
-        uid,
-        token,
-        password,
-        confirmPassword,
-      );
+      await confirmPasswordReset(uid, token, password, confirmPassword);
       setSuccess(true);
       onSuccess?.();
     } catch (err) {
