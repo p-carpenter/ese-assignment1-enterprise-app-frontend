@@ -2,8 +2,8 @@ import { useState, type JSX } from "react";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
-import { api } from "@/shared/api/client";
 import { type Song } from "../../types";
+import { updateSong } from "../../api";
 
 interface EditSongModalProps {
   song: Song | null;
@@ -44,7 +44,7 @@ export const EditSongModal = ({
     coverArtUrl: string;
   }) => {
     try {
-      await api.songs.update(song.id, {
+      await updateSong(song.id, {
         title,
         artist,
         file_url: song.file_url, // Keep existing file URL

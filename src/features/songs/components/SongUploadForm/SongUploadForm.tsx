@@ -1,7 +1,7 @@
 import { useState, type JSX } from "react";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
-import { api } from "@/shared/api/client";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
+import { uploadSong } from "../../api";
 
 interface SongUploadFormProps {
   onUploadSuccess: () => void;
@@ -53,7 +53,7 @@ export const SongUploadForm = ({
       return;
     }
     try {
-      await api.songs.upload({
+      await uploadSong({
         title: t || songFileName,
         artist: a || "Unknown Artist",
         file_url: songUrl,

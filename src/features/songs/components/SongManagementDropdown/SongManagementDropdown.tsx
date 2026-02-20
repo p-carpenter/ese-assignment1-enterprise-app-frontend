@@ -1,4 +1,4 @@
-import { memo, type FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { MoreHorizontalOutline } from "@/shared/icons";
 import styles from "./SongManagementDropdown.module.css";
 

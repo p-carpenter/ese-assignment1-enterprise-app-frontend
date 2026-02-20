@@ -2,7 +2,7 @@ import { useState, type JSX } from "react";
 import { type Song } from "../../types";
 import styles from "./SongLibrary.module.css";
 import { SongManagementDropdown } from "../SongManagementDropdown/SongManagementDropdown";
-import { api } from "@/shared/api/client";
+import { deleteSong } from "../../api";
 import { EditSongModal } from "../EditSongModal/EditSongModal";
 
 interface SongLibraryProps {
@@ -34,17 +34,15 @@ export const SongLibrary = ({
     if (onSongsChanged) onSongsChanged();
   };
 
-  const handleDelete = (songId: number) => {
-    api.songs
-      .delete(songId)
-      .then(() => {
-        if (onSongsChanged) onSongsChanged();
-      })
-      .catch((error) => {
-        console.error("Error deleting song:", error);
-        alert("Failed to delete song. Please try again.");
-      });
-  };
+  const handleDelete = async (songId: number) => {
+    try {
+      await deleteSong(songId);
+      onSongsChanged?.();
+    } catch (error) {
+      console.error("Error deleting song:", error);
+      alert("Failed to delete song. Please try again.");
+    }
+};
 
   return (
     <div className={styles.songList}>
