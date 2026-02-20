@@ -1,33 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import EditSongModal from "../components/features/songs/EditSongModal";
-import { api } from "../services/api";
-import { useCloudinaryUpload } from "../hooks/useCloudinaryUpload";
-import type { Song } from "../types";
-import { SongUploadForm } from "../components/features/songs/SongForm";
-import SongLibrary from "../components/features/songs/SongLibrary";
+import { EditSongModal } from "./components/EditSongModal/EditSongModal";
+import { useCloudinaryUpload } from "@/shared/hooks";
+import type { Song } from "@/features/songs/types";
+import { SongUploadForm } from "@/features/songs";
+import { SongLibrary } from "@/features/songs";
+import { uploadSong, deleteSong, updateSong } from "./api";
 
-vi.mock("../services/api", () => ({
-  api: {
-    songs: {
-      upload: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    },
-  },
+vi.mock("./api", () => ({
+  uploadSong: vi.fn(),
+  updateSong: vi.fn(),
+  deleteSong: vi.fn(),
 }));
 
-vi.mock("../hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
   useCloudinaryUpload: vi.fn(),
 }));
 
-const mockedApi = api as unknown as {
-  songs: {
-    upload: ReturnType<typeof vi.fn>;
-    update: ReturnType<typeof vi.fn>;
-    delete: ReturnType<typeof vi.fn>;
-  };
-};
+const mockUploadSong = vi.mocked(uploadSong) as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockUpdateSong = vi.mocked(updateSong) as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockDeleteSong = vi.mocked(deleteSong) as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 const mockedUseCloudinary = useCloudinaryUpload as unknown as ReturnType<
   typeof vi.fn
@@ -79,7 +77,7 @@ describe("Song management", () => {
   describe("create", () => {
     it("uploads a song and calls onUploadSuccess", async () => {
       const onUploadSuccess = vi.fn();
-      mockedApi.songs.upload.mockResolvedValueOnce(mockSongs[0]);
+      mockUploadSong.mockResolvedValueOnce(mockSongs[0]);
 
       render(<SongUploadForm onUploadSuccess={onUploadSuccess} />);
 
@@ -101,7 +99,7 @@ describe("Song management", () => {
       fireEvent.click(screen.getByRole("button", { name: /save song/i }));
 
       await waitFor(() => {
-        expect(mockedApi.songs.upload).toHaveBeenCalledWith({
+        expect(mockUploadSong).toHaveBeenCalledWith({
           title: "Test Song",
           artist: "Test Artist",
           cover_art_url: "",
@@ -117,7 +115,7 @@ describe("Song management", () => {
     it("updates a song and triggers callbacks", async () => {
       const onSongUpdated = vi.fn();
       const onClose = vi.fn();
-      mockedApi.songs.update.mockResolvedValueOnce({
+      mockUpdateSong.mockResolvedValueOnce({
         ...mockSongs[0],
         title: "New Title",
         artist: "New Artist",
@@ -142,7 +140,7 @@ describe("Song management", () => {
       fireEvent.click(screen.getByRole("button", { name: /save song/i }));
 
       await waitFor(() => {
-        expect(mockedApi.songs.update).toHaveBeenCalledWith(mockSongs[0].id, {
+        expect(mockUpdateSong).toHaveBeenCalledWith(mockSongs[0].id, {
           title: "New Title",
           artist: "New Artist",
           file_url: mockSongs[0].file_url,
@@ -156,8 +154,8 @@ describe("Song management", () => {
   });
 
   describe("delete", () => {
-    it("calls api.songs.delete when Delete is clicked and re-renders the song list", async () => {
-      (mockedApi.songs.delete as any).mockResolvedValueOnce({});
+    it("calls api.deleteSong when Delete is clicked and re-renders the song list", async () => {
+      mockDeleteSong.mockResolvedValueOnce({});
       const onSongClick = vi.fn();
       const onSongsChanged = vi.fn();
 
@@ -176,7 +174,7 @@ describe("Song management", () => {
       fireEvent.click(deleteOption);
 
       await waitFor(() => {
-        expect(mockedApi.songs.delete).toHaveBeenCalledWith(mockSongs[0].id);
+        expect(mockDeleteSong).toHaveBeenCalledWith(mockSongs[0].id);
         expect(onSongsChanged).toHaveBeenCalled();
       });
 

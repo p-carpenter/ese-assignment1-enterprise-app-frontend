@@ -1,29 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import RequestResetPasswordForm from "../components/features/auth/RequestResetPasswordForm";
-import ResetPasswordForm from "../components/features/auth/ResetPasswordForm";
-import RequestResetPasswordPage from "../pages/RequestResetPassword";
-import ResetPasswordPage from "../pages/ResetPassword";
-import { api } from "../services/api";
+import { RequestResetPasswordForm } from "./components/RequestResetPasswordForm/RequestResetPasswordForm";
+import { ResetPasswordForm } from "./components/ResetPasswordForm/ResetPasswordForm";
+import { RequestResetPasswordPage } from "./pages/RequestResetPasswordPage/RequestResetPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage/ResetPasswordPage";
+import { requestPasswordReset, confirmPasswordReset } from "./api";
 import "@testing-library/jest-dom/vitest";
 
 // Mock the api module
-vi.mock("../services/api", () => ({
-  api: {
-    auth: {
-      requestPasswordReset: vi.fn(),
-      confirmPasswordReset: vi.fn(),
-    },
-  },
+vi.mock("./api", () => ({
+  requestPasswordReset: vi.fn(),
+  confirmPasswordReset: vi.fn(),
 }));
 
-const mockedApi = api as unknown as {
-  auth: {
-    requestPasswordReset: ReturnType<typeof vi.fn>;
-    confirmPasswordReset: ReturnType<typeof vi.fn>;
-  };
-};
+const mockRequestPasswordReset = vi.mocked(
+  requestPasswordReset,
+) as unknown as ReturnType<typeof vi.fn>;
+const mockConfirmPasswordReset = vi.mocked(
+  confirmPasswordReset,
+) as unknown as ReturnType<typeof vi.fn>;
 
 describe("Reset Password Features", () => {
   beforeEach(() => {
@@ -32,7 +28,7 @@ describe("Reset Password Features", () => {
 
   describe("RequestResetPasswordForm", () => {
     it("submits email and calls requestPasswordReset API", async () => {
-      mockedApi.auth.requestPasswordReset.mockResolvedValueOnce(undefined);
+      mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
@@ -49,14 +45,14 @@ describe("Reset Password Features", () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockedApi.auth.requestPasswordReset).toHaveBeenCalledWith(
+        expect(mockRequestPasswordReset).toHaveBeenCalledWith(
           "user@example.com",
         );
       });
     });
 
     it("shows success message after successful request", async () => {
-      mockedApi.auth.requestPasswordReset.mockResolvedValueOnce(undefined);
+      mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
@@ -81,9 +77,7 @@ describe("Reset Password Features", () => {
 
     it("shows error message when API rejects", async () => {
       const errorMessage = "Email not found";
-      mockedApi.auth.requestPasswordReset.mockRejectedValueOnce(
-        new Error(errorMessage),
-      );
+      mockRequestPasswordReset.mockRejectedValueOnce(new Error(errorMessage));
 
       render(
         <MemoryRouter>
@@ -103,7 +97,7 @@ describe("Reset Password Features", () => {
     });
 
     it("disables button while loading", async () => {
-      mockedApi.auth.requestPasswordReset.mockImplementationOnce(
+      mockRequestPasswordReset.mockImplementationOnce(
         () => new Promise(() => {}), // Never resolves
       );
 
@@ -129,7 +123,7 @@ describe("Reset Password Features", () => {
 
     it("calls onSuccess callback after successful request", async () => {
       const onSuccess = vi.fn();
-      mockedApi.auth.requestPasswordReset.mockResolvedValueOnce(undefined);
+      mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
@@ -153,7 +147,7 @@ describe("Reset Password Features", () => {
 
   describe("ResetPasswordForm", () => {
     it("submits password reset with matching passwords", async () => {
-      mockedApi.auth.confirmPasswordReset.mockResolvedValueOnce(undefined);
+      mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
@@ -174,7 +168,7 @@ describe("Reset Password Features", () => {
       fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
 
       await waitFor(() => {
-        expect(mockedApi.auth.confirmPasswordReset).toHaveBeenCalledWith(
+        expect(mockConfirmPasswordReset).toHaveBeenCalledWith(
           "abc123",
           "token123",
           "newpass123",
@@ -184,7 +178,7 @@ describe("Reset Password Features", () => {
     });
 
     it("shows success message after password reset", async () => {
-      mockedApi.auth.confirmPasswordReset.mockResolvedValueOnce(undefined);
+      mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
@@ -211,9 +205,7 @@ describe("Reset Password Features", () => {
 
     it("shows error when API call fails", async () => {
       const errorMessage = "Invalid reset token";
-      mockedApi.auth.confirmPasswordReset.mockRejectedValueOnce(
-        new Error(errorMessage),
-      );
+      mockConfirmPasswordReset.mockRejectedValueOnce(new Error(errorMessage));
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
@@ -261,7 +253,7 @@ describe("Reset Password Features", () => {
     });
 
     it("disables button while loading", async () => {
-      mockedApi.auth.confirmPasswordReset.mockImplementationOnce(
+      mockConfirmPasswordReset.mockImplementationOnce(
         () => new Promise(() => {}), // Never resolves
       );
 
@@ -293,7 +285,7 @@ describe("Reset Password Features", () => {
 
     it("calls onSuccess callback after successful password reset", async () => {
       const onSuccess = vi.fn();
-      mockedApi.auth.confirmPasswordReset.mockResolvedValueOnce(undefined);
+      mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
@@ -342,7 +334,7 @@ describe("Reset Password Features", () => {
 
     it("passes onSuccess to the form", async () => {
       const onSuccess = vi.fn();
-      mockedApi.auth.requestPasswordReset.mockResolvedValueOnce(undefined);
+      mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
@@ -392,7 +384,7 @@ describe("Reset Password Features", () => {
 
     it("passes onSuccess to the form", async () => {
       const onSuccess = vi.fn();
-      mockedApi.auth.confirmPasswordReset.mockResolvedValueOnce(undefined);
+      mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>

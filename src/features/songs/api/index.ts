@@ -4,11 +4,10 @@ import type { Song, SongUploadPayload } from "../types";
 /**
  * GET all songs
  */
-export const listSongs = (): Promise<Song[]> => 
-  request<Song[]>("/songs/");
+export const listSongs = (): Promise<Song[]> => request<Song[]>("/songs/");
 
 /**
- * POST a new song. 
+ * POST a new song.
  * Returns the created Song so the UI can add it to the list immediately.
  */
 export const uploadSong = (payload: SongUploadPayload): Promise<Song> =>

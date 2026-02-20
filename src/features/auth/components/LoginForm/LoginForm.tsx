@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { login } from "../../api/"
+import { login } from "../../api/";
 import styles from "../AuthForm.module.css";
 
 interface LoginFormProps {
@@ -59,5 +59,3 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     </>
   );
 };
-
-

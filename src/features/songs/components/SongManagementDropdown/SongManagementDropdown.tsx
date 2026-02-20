@@ -12,7 +12,9 @@ interface SongManagementDropdownProps {
   dropdownItems?: DropdownItem[];
 }
 
-export const SongManagementDropdown: FC<SongManagementDropdownProps> = ({ dropdownItems }) => {
+export const SongManagementDropdown: FC<SongManagementDropdownProps> = ({
+  dropdownItems,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

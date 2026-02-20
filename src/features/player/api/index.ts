@@ -1,7 +1,8 @@
 import { request } from "@/shared/api/client";
 import { type PlayHistoryEntry } from "../types";
 
-export const getPlayHistory = async (): Promise<PlayHistoryEntry[]> => await request<PlayHistoryEntry[]>("/history/");
+export const getPlayHistory = async (): Promise<PlayHistoryEntry[]> =>
+  await request<PlayHistoryEntry[]>("/history/");
 
 export const logPlay = async (songId: number) => {
   try {

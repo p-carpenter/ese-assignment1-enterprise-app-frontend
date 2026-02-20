@@ -2,8 +2,7 @@ import { useState, useEffect, type JSX } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppRoutes } from "./routes";
 
-
-import { type UserProfile } from "./shared/types/index";
+import { type UserProfile } from "@/features/auth/types";
 import "./App.css";
 import { getMe } from "@/features/auth/api";
 

@@ -1,27 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import LoginForm from "../components/features/auth/LoginForm";
-import RegistrationForm from "../components/features/auth/RegistrationForm";
-import { ProtectedRoute } from "../components/features/auth/ProtectedRoute";
-import { api } from "../services/api";
+import { LoginForm } from "./components/LoginForm/LoginForm";
+import { RegistrationForm } from "./components/RegistrationForm/RegistrationForm";
+import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
+import { login, register } from "./api";
 import "@testing-library/jest-dom/vitest";
 
-vi.mock("../services/api", () => ({
-  api: {
-    auth: {
-      login: vi.fn(),
-      register: vi.fn(),
-    },
-  },
+vi.mock("./api", () => ({
+  login: vi.fn(),
+  register: vi.fn(),
 }));
 
-const mockedApi = api as unknown as {
-  auth: {
-    login: ReturnType<typeof vi.fn>;
-    register: ReturnType<typeof vi.fn>;
-  };
-};
+const mockLogin = vi.mocked(login) as unknown as ReturnType<typeof vi.fn>;
+const mockRegister = vi.mocked(register) as unknown as ReturnType<typeof vi.fn>;
 
 describe("Auth features", () => {
   beforeEach(() => {
@@ -30,7 +22,7 @@ describe("Auth features", () => {
 
   it("submits login form and calls onSuccess", async () => {
     const onSuccess = vi.fn();
-    mockedApi.auth.login.mockResolvedValueOnce(undefined);
+    mockLogin.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
@@ -48,18 +40,13 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(mockedApi.auth.login).toHaveBeenCalledWith(
-        "user@example.com",
-        "secret",
-      );
+      expect(mockLogin).toHaveBeenCalledWith("user@example.com", "secret");
       expect(onSuccess).toHaveBeenCalled();
     });
   });
 
   it("shows login error when api rejects", async () => {
-    mockedApi.auth.login.mockRejectedValueOnce(
-      new Error("Invalid credentials"),
-    );
+    mockLogin.mockRejectedValueOnce(new Error("Invalid credentials"));
 
     render(
       <MemoryRouter>
@@ -81,7 +68,7 @@ describe("Auth features", () => {
 
   it("submits registration form and shows success message", async () => {
     const onSuccess = vi.fn();
-    mockedApi.auth.register.mockResolvedValueOnce(undefined);
+    mockRegister.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
@@ -105,7 +92,7 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
-      expect(mockedApi.auth.register).toHaveBeenCalledWith(
+      expect(mockRegister).toHaveBeenCalledWith(
         "newuser",
         "new@example.com",
         "pass1234",

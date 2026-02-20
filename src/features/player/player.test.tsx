@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import MusicPlayer from "../components/features/player/MusicPlayer";
-import { api } from "../services/api";
-import type { Song } from "../types";
+import { MusicPlayer } from "@/features/player";
+import { listSongs, logPlay } from "@/features/songs/api";
+import type { Song } from "@/features/songs/types";
+
+vi.mock("@/features/songs/api", () => ({
+  listSongs: vi.fn(),
+  logPlay: vi.fn(),
+}));
+
+const mockListSongs = vi.mocked(listSongs) as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockLogPlay = vi.mocked(logPlay) as unknown as ReturnType<typeof vi.fn>;
 
 const audioPlayerMocks = {
   play: vi.fn(),
@@ -15,32 +25,11 @@ const audioPlayerMocks = {
 
 vi.mock("react-use-audio-player", () => ({
   useAudioPlayer: () => ({
-    play: audioPlayerMocks.play,
-    pause: audioPlayerMocks.pause,
-    stop: audioPlayerMocks.stop,
+    ...audioPlayerMocks,
     isPlaying: false,
-    load: audioPlayerMocks.load,
-    getPosition: audioPlayerMocks.getPosition,
-    seek: audioPlayerMocks.seek,
     duration: 180,
   }),
 }));
-
-vi.mock("../services/api", () => ({
-  api: {
-    songs: {
-      list: vi.fn(),
-      logPlay: vi.fn(),
-    },
-  },
-}));
-
-const mockedApi = api as unknown as {
-  songs: {
-    list: ReturnType<typeof vi.fn>;
-    logPlay: ReturnType<typeof vi.fn>;
-  };
-};
 
 const mockSongs: Song[] = [
   {
@@ -64,8 +53,8 @@ const mockSongs: Song[] = [
 describe("MusicPlayer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedApi.songs.list.mockResolvedValue(mockSongs);
-    mockedApi.songs.logPlay.mockResolvedValue(undefined);
+    mockListSongs.mockResolvedValue(mockSongs);
+    mockLogPlay.mockResolvedValue(undefined);
   });
 
   it("loads and renders the song library", async () => {
@@ -88,7 +77,7 @@ describe("MusicPlayer", () => {
         "http://example.com/song1.mp3",
         expect.objectContaining({ autoplay: true }),
       );
-      expect(mockedApi.songs.logPlay).toHaveBeenCalledWith(1);
+      expect(mockLogPlay).toHaveBeenCalledWith(1);
     });
   });
 

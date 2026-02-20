@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { register } from "../../api";
 import styles from "../AuthForm.module.css";
 

@@ -7,9 +7,13 @@ export const login = async (email: string, password: string): Promise<void> => {
     body: JSON.stringify({ email, password }),
   });
 };
-export const getMe = async (): Promise<UserProfile> => { return await request("/auth/user/"); };
+export const getMe = async (): Promise<UserProfile> => {
+  return await request("/auth/user/");
+};
 
-export const logout = async (): Promise<void> => { await request("/auth/logout/", { method: "POST" }); };
+export const logout = async (): Promise<void> => {
+  await request("/auth/logout/", { method: "POST" });
+};
 
 export const register = async (
   username: string,
@@ -26,7 +30,7 @@ export const register = async (
       password2,
     }),
   });
-}
+};
 
 export const requestPasswordReset = async (email: string): Promise<void> => {
   await request("/auth/password/reset/", {
@@ -36,11 +40,11 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 };
 
 export const confirmPasswordReset = async (
-      uid: string | undefined,
-      token: string | undefined,
-      new_password1: string,
-      new_password2: string,
-    ): Promise<void> => {
+  uid: string | undefined,
+  token: string | undefined,
+  new_password1: string,
+  new_password2: string,
+): Promise<void> => {
   await request("/auth/password/reset/confirm/", {
     method: "POST",
     body: JSON.stringify({

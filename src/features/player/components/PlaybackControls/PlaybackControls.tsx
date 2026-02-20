@@ -1,6 +1,11 @@
 import { type FC } from "react";
 import styles from "../MusicPlayer/MusicPlayer.module.css";
-import { ButtonPause2Solid, ButtonPlaySolid, ButtonPreviousSolid, ButtonNextSolid } from "@/shared/icons";
+import {
+  ButtonPause2Solid,
+  ButtonPlaySolid,
+  ButtonPreviousSolid,
+  ButtonNextSolid,
+} from "@/shared/icons";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;

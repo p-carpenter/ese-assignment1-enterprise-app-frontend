@@ -42,7 +42,7 @@ export const SongLibrary = ({
       console.error("Error deleting song:", error);
       alert("Failed to delete song. Please try again.");
     }
-};
+  };
 
   return (
     <div className={styles.songList}>

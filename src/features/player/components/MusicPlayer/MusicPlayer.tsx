@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
-import { type Song } from "@/features/songs/types"
+import { type Song } from "@/features/songs/types";
 import styles from "./MusicPlayer.module.css";
 import { SongLibrary } from "@/features/songs";
 import { ProgressBar } from "../ProgressBar/ProgressBar";
@@ -37,7 +37,24 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
   };
 
   useEffect(() => {
-    refreshSongs();
+    let isMounted = true;
+
+    const fetchSongs = async () => {
+      try {
+        const data = await listSongs();
+        if (isMounted) {
+          setSongs(data);
+        }
+      } catch (err) {
+        console.error("Failed to load songs:", err);
+      }
+    };
+
+    fetchSongs();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const playSong = async (song: Song): Promise<void> => {

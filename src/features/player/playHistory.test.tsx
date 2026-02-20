@@ -1,18 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import PlayHistory from "../components/features/player/PlayHistory";
-import { api } from "../services/api";
-import type { Song } from "../types";
+import { PlayHistory } from "./components/PlayHistory/PlayHistory";
+import { getPlayHistory } from "./api";
+import type { Song } from "@/features/songs/types";
 
-vi.mock("../services/api", () => ({
-  api: {
-    playHistory: vi.fn(),
-  },
+vi.mock("./api", () => ({
+  getPlayHistory: vi.fn(),
 }));
 
-const mockedApi = api as unknown as {
-  playHistory: ReturnType<typeof vi.fn>;
-};
+const mockGetPlayHistory = vi.mocked(getPlayHistory) as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 const mockSong: Song = {
   id: 10,
@@ -26,10 +24,11 @@ const mockSong: Song = {
 describe("PlayHistory", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetPlayHistory.mockResolvedValue([]);
   });
 
   it("shows empty state when no history", async () => {
-    mockedApi.playHistory.mockResolvedValueOnce([]);
+    mockGetPlayHistory.mockResolvedValueOnce([]);
 
     render(<PlayHistory keyTrigger={1} />);
 
@@ -37,7 +36,7 @@ describe("PlayHistory", () => {
   });
 
   it("renders history entries from the API", async () => {
-    mockedApi.playHistory.mockResolvedValueOnce([
+    mockGetPlayHistory.mockResolvedValueOnce([
       { song: mockSong, played_at: "2026-02-19T10:30:00.000Z" },
     ]);
 
