@@ -27,12 +27,30 @@
   font-weight: 700;
   color: var(--spotify-white);
   overflow: hidden;
+  position: relative;
 }
 
 .avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.avatar .editOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    color: #FFF;
+}
+.avatar:hover .editOverlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
 .displayName {
@@ -90,4 +108,37 @@
   padding: 16px;
   border-radius: 4px;
   text-align: center;
+}
+
+.editActions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.editInfoValue {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #282828;;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.editInfoValue:hover {
+  border-color: var(--spotify-gray-dark);
+}
+
+.editInfoValue:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background-color: #282828;
+}
+
+.editInfoValue::placeholder {
+  color: var(--spotify-gray);
 }

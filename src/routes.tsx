@@ -43,12 +43,14 @@ export const AppRoutes = ({
           )
         }
       />
+
       <Route
         path="/register"
         element={
           isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
         }
       />
+
       <Route
         path="/reset-password"
         element={
@@ -69,6 +71,7 @@ export const AppRoutes = ({
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/upload"
         element={
@@ -81,11 +84,20 @@ export const AppRoutes = ({
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/profile"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <ProfilePage profile={userProfile} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/edit"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProfilePage profile={userProfile} isEditing={true} />
           </ProtectedRoute>
         }
       />
