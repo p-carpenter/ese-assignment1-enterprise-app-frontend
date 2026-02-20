@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
-import { LoginForm } from "../../components/LoginForm/LoginForm";
+import { AuthLayout } from "@/features/auth";
+import { LoginForm } from "@/features/auth";
 import { AuthFormFooter } from "../../components/AuthFormFooter/AuthFormFooter";
-import styles from "./AuthPages.module.css";
+import { Link } from "react-router-dom";
+import styles from "./LoginPage.module.css";
+import authStyles from "../AuthPages.module.css";
 
 interface LoginPageProps {
   onSuccess: () => void;
@@ -9,27 +11,22 @@ interface LoginPageProps {
 
 export const LoginPage = ({ onSuccess }: LoginPageProps) => {
   return (
-    <>
-      <div className="app-header">
-        <h1 className="app-title">Music Player</h1>
+    <AuthLayout>
+      <LoginForm onSuccess={onSuccess} />
+
+      <Link to="/reset-password" className={styles.forgotPasswordLink}>
+        Forgot your password?
+      </Link>
+
+      <div className={authStyles.divider}>
+        <span>or</span>
       </div>
-      <div className={styles.container}>
-        <LoginForm onSuccess={onSuccess} />
 
-        <Link to="/reset-password" className={styles.forgotPasswordLink}>
-          Forgot your password?
-        </Link>
-
-        <div className={styles.divider}>
-          <span>or</span>
-        </div>
-
-        <AuthFormFooter
-          footerText="Don't have an account?"
-          linkText="Sign up for Spotify"
-          linkTo="/register"
-        />
-      </div>
-    </>
+      <AuthFormFooter
+        footerText="Don't have an account?"
+        linkText="Sign up for Spotify"
+        linkTo="/register"
+      />
+    </AuthLayout>
   );
 };

@@ -1,0 +1,8 @@
+.container {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 48px;
+  background: var(--spotify-dark-elevated);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}

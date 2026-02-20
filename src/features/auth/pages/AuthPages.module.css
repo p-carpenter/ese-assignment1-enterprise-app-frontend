@@ -16,14 +16,8 @@
   letter-spacing: -0.04em;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .divider {
-  margin: 24px 0;
+  margin: 24px 0px 0px;
   text-align: center;
   position: relative;
 }
@@ -47,19 +41,4 @@
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 1px;
-}
-
-.forgotPasswordLink {
-  display: block;
-  text-align: center;
-  color: var(--spotify-white);
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: underline;
-  margin-top: 16px;
-  transition: color 0.2s ease;
-}
-
-.forgotPasswordLink:hover {
-  color: var(--spotify-green);
 }
