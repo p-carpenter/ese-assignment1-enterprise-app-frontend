@@ -1,0 +1,78 @@
+.error {
+  background-color: rgba(230, 0, 0, 0.2);
+  border: 1px solid #e60000;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.success {
+  background-color: rgba(15, 230, 0, 0.311);
+  border: 1px solid #1be600;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.inputField {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: var(--spotify-dark-highlight);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.inputField:hover {
+  border-color: var(--spotify-gray-dark);
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background-color: #282828;
+}
+
+.inputField::placeholder {
+  color: var(--spotify-gray);
+}
+
+.submitButton {
+  width: 100%;
+  background-color: var(--spotify-green);
+  color: var(--spotify-black);
+  border: none;
+  padding: 16px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 16px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--spotify-green-bright);
+  transform: scale(1.04);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: scale(1);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

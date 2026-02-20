@@ -1,0 +1,23 @@
+.footer {
+  text-align: center;
+  padding-top: 16px;
+}
+
+.footerText {
+  color: var(--spotify-gray);
+  font-size: 14px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.footerLink {
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.footerLink:hover {
+  color: var(--spotify-green);
+}

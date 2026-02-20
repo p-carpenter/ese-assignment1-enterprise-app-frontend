@@ -1,0 +1,68 @@
+
+.songList {
+  background: var(--spotify-dark-elevated);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.libraryTitle {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--spotify-white);
+  letter-spacing: -0.04em;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.songItem,
+.songItemActive {
+  padding: 12px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  margin-bottom: 2px;
+}
+
+.songItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.songItemActive {
+  background: rgba(29, 185, 84, 0.2);
+}
+
+.songItemActive:hover {
+  background: rgba(29, 185, 84, 0.3);
+}
+
+.songMeta {
+  line-height: 1.5;
+  flex: 1;
+}
+
+.songTitle {
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--spotify-white);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.duration {
+  font-size: 0.875rem;
+  color: var(--spotify-gray);
+  font-weight: 400;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  min-width: 48px;
+  text-align: right;
+}

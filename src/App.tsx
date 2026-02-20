@@ -5,16 +5,17 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { ProtectedRoute } from "./components/features/auth/ProtectedRoute";
-import { HomePage } from "./pages/HomePage";
-import { UploadPage } from "./pages/UploadPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ResetPasswordPage from "./pages/ResetPassword";
-import RequestResetPasswordPage from "./pages/RequestResetPassword";
-import { api } from "./services/api";
-import { type UserProfile } from "./types";
+import { ProtectedRoute } from "@/features/auth";
+import { HomePage } from "@/features/songs";
+import { UploadPage } from "@/features/songs";
+import { ProfilePage } from "@/features/auth";
+import { LoginPage } from "@/features/auth";
+import { RegisterPage } from "@/features/auth";
+import { ResetPasswordPage } from "@/features/auth";
+import { RequestResetPasswordPage } from "@/features/auth";
+
+import { api } from "./shared/api/client";
+import { type UserProfile } from "./shared/types/index";
 import "./App.css";
 
 // interface AppState {
