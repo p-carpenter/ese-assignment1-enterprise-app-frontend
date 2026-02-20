@@ -8,7 +8,7 @@ describe("ProgressBar", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "requestAnimationFrame",
-      vi.fn((_cb: FrameRequestCallback) => 1),
+      vi.fn((_cb: FrameRequestCallback) => 1), // eslint-disable-line @typescript-eslint/no-unused-vars
     );
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
   });
@@ -41,7 +41,13 @@ describe("ProgressBar", () => {
   });
 
   it("sets the slider max attribute to the track duration", () => {
-    render(<ProgressBar {...defaultProps} duration={240} currentSong={{ duration: 240 }} />);
+    render(
+      <ProgressBar
+        {...defaultProps}
+        duration={240}
+        currentSong={{ duration: 240 }}
+      />,
+    );
     expect(screen.getByRole("slider")).toHaveAttribute("max", "240");
   });
 

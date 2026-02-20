@@ -182,13 +182,17 @@ describe("MusicPlayer", () => {
 
     await waitFor(() => {
       // The h3 title element shows the current song's title in the player area
-      expect(screen.getByRole("heading", { name: "Song A" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Song A" }),
+      ).toBeInTheDocument();
     });
   });
 
   it("shows the correct library count", async () => {
     render(<MusicPlayer />);
-    expect(await screen.findByText(/library \(2 tracks\)/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/library \(2 tracks\)/i),
+    ).toBeInTheDocument();
   });
 
   it("handles listSongs API failure gracefully (empty library)", async () => {

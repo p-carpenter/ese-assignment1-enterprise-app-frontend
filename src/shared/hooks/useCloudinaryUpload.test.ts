@@ -94,7 +94,9 @@ describe("useCloudinaryUpload", () => {
     const file = new File(["data"], "song.mp3", { type: "audio/mp3" });
 
     await act(async () => {
-      await expect(result.current.upload(file)).rejects.toThrow("Upload failed");
+      await expect(result.current.upload(file)).rejects.toThrow(
+        "Upload failed",
+      );
     });
 
     expect(result.current.error).toBe("Upload failed");

@@ -91,9 +91,7 @@ describe("PlayHistory", () => {
     render(<PlayHistory keyTrigger={1} />);
 
     // The component catches the error and leaves the list empty
-    expect(
-      await screen.findByText(/no play history yet/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/no play history yet/i)).toBeInTheDocument();
     consoleSpy.mockRestore();
   });
 });

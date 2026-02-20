@@ -29,9 +29,7 @@ describe("SongDetailsForm", () => {
     });
 
     it("shows a cover art file input when onCoverArtUpload is provided", () => {
-      render(
-        <SongDetailsForm onSubmit={noop} onCoverArtUpload={() => {}} />,
-      );
+      render(<SongDetailsForm onSubmit={noop} onCoverArtUpload={() => {}} />);
       expect(
         document.querySelector('input[accept="image/*"]'),
       ).toBeInTheDocument();
@@ -62,15 +60,17 @@ describe("SongDetailsForm", () => {
 
     it("shows '✓ Audio file ready' when mp3Uploaded=true", () => {
       render(
-        <SongDetailsForm onSubmit={noop} showMp3Upload={true} mp3Uploaded={true} />,
+        <SongDetailsForm
+          onSubmit={noop}
+          showMp3Upload={true}
+          mp3Uploaded={true}
+        />,
       );
       expect(screen.getByText(/audio file ready/i)).toBeInTheDocument();
     });
 
     it("renders an error message when error prop is set", () => {
-      render(
-        <SongDetailsForm onSubmit={noop} error="Something went wrong" />,
-      );
+      render(<SongDetailsForm onSubmit={noop} error="Something went wrong" />);
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
     });
   });
@@ -78,7 +78,9 @@ describe("SongDetailsForm", () => {
   describe("submit button state", () => {
     it("enables the submit button when showMp3Upload=false (no MP3 required)", () => {
       render(<SongDetailsForm onSubmit={noop} showMp3Upload={false} />);
-      expect(screen.getByRole("button", { name: /save song/i })).not.toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /save song/i }),
+      ).not.toBeDisabled();
     });
 
     it("disables the submit button when isSubmitting=true", () => {

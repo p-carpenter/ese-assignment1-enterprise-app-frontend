@@ -39,9 +39,7 @@ describe("PlaybackControls", () => {
 
     it("shows the Pause aria-label when isPlaying=true", () => {
       render(<PlaybackControls {...makeProps({ isPlaying: true })} />);
-      expect(
-        screen.getByRole("button", { name: "Pause" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
     });
   });
 

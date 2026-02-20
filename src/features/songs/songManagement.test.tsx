@@ -278,9 +278,7 @@ describe("Song management", () => {
   describe("SongUploadForm – validation", () => {
     it("submit button is disabled until an audio file is uploaded", () => {
       render(<SongUploadForm onUploadSuccess={vi.fn()} />);
-      expect(
-        screen.getByRole("button", { name: /save song/i }),
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
     });
 
     it("shows an alert when trying to submit without an audio file via direct call", async () => {
@@ -291,9 +289,7 @@ describe("Song management", () => {
       render(<SongUploadForm onUploadSuccess={vi.fn()} />);
       // Button is disabled, so submit via form directly isn't possible in UI,
       // but we verify the button disabled state protects against it.
-      expect(
-        screen.getByRole("button", { name: /save song/i }),
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
       alertSpy.mockRestore();
     });
   });

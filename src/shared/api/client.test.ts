@@ -26,9 +26,7 @@ describe("API client – request()", () => {
   });
 
   it("includes credentials: include on every request", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response("{}", { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
 
     await request("/test/");
 
@@ -39,9 +37,7 @@ describe("API client – request()", () => {
   });
 
   it("sets Content-Type to application/json by default", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response("{}", { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
 
     await request("/test/");
 
@@ -56,9 +52,7 @@ describe("API client – request()", () => {
   });
 
   it("merges custom headers with the default Content-Type header", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response("{}", { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
 
     await request("/test/", { headers: { Authorization: "Bearer token" } });
 
@@ -74,9 +68,7 @@ describe("API client – request()", () => {
   });
 
   it("passes method and body through to fetch", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response("{}", { status: 200 }),
-    );
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
 
     const body = JSON.stringify({ name: "Test" });
     await request("/test/", { method: "POST", body });

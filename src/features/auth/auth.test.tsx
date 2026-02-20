@@ -192,9 +192,7 @@ describe("Auth features", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
-    expect(
-      await screen.findByText("Email already in use"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Email already in use")).toBeInTheDocument();
   });
 
   it("disables the registration button while the request is in flight", async () => {

@@ -118,12 +118,7 @@ describe("Auth API", () => {
     it("POSTs to /auth/password/reset/confirm/ with all required fields", async () => {
       mockRequest.mockResolvedValueOnce(undefined);
 
-      await confirmPasswordReset(
-        "uid123",
-        "token456",
-        "newpass1",
-        "newpass1",
-      );
+      await confirmPasswordReset("uid123", "token456", "newpass1", "newpass1");
 
       expect(mockRequest).toHaveBeenCalledWith(
         "/auth/password/reset/confirm/",

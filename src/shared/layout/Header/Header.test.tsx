@@ -31,9 +31,7 @@ describe("Header", () => {
 
   it("renders an Upload button", () => {
     renderHeader();
-    expect(
-      screen.getByRole("button", { name: /upload/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /upload/i })).toBeInTheDocument();
   });
 
   it("renders a Log Out button", () => {

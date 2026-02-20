@@ -32,9 +32,7 @@ describe("LoginPage", () => {
 
   it("renders a 'Forgot your password?' link", () => {
     renderLoginPage();
-    expect(
-      screen.getByText(/forgot your password\?/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/forgot your password\?/i)).toBeInTheDocument();
   });
 
   it("renders the 'Sign up for Spotify' footer link", () => {
@@ -82,8 +80,6 @@ describe("LoginPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(
-      await screen.findByText("Invalid credentials"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
   });
 });
