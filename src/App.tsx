@@ -1,21 +1,10 @@
 import { useState, useEffect, type JSX } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { ProtectedRoute } from "./components/features/auth/ProtectedRoute";
-import { HomePage } from "./pages/HomePage";
-import { UploadPage } from "./pages/UploadPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ResetPasswordPage from "./pages/ResetPassword";
-import RequestResetPasswordPage from "./pages/RequestResetPassword";
-import { api } from "./services/api";
-import { type UserProfile } from "./types";
+import { BrowserRouter as Router } from "react-router-dom";
+import { AppRoutes } from "./routes";
+
+import { type UserProfile } from "@/features/auth/types";
 import "./App.css";
+import { getMe } from "@/features/auth/api";
 
 // interface AppState {
 //    isAuthenticated: boolean;
@@ -30,8 +19,7 @@ const App = (): JSX.Element => {
 
   // Check authentication status on mount
   useEffect(() => {
-    api.auth
-      .me()
+    getMe()
       .then((profile) => {
         setIsAuthenticated(true);
         setUserProfile(profile);
@@ -46,8 +34,7 @@ const App = (): JSX.Element => {
   const handleAuthSuccess = (): void => {
     setIsAuthenticated(true);
     // Fetch profile after successful auth
-    api.auth
-      .me()
+    getMe()
       .then((profile: UserProfile) => setUserProfile(profile))
       .catch((err: unknown) => console.error("Failed to fetch profile:", err));
   };
@@ -86,71 +73,15 @@ const App = (): JSX.Element => {
   return (
     <Router>
       <div className="app-container">
-        <Routes>
-          {/* Public Routes */}
-          <Route
-            path="/login"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/" replace />
-              ) : (
-                <LoginPage onSuccess={handleAuthSuccess} />
-              )
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <RequestResetPasswordPage
-                onSuccess={() => setIsAuthenticated(false)}
-              />
-            }
-          />
-          <Route
-            path="reset-password/confirm/:uid/:token"
-            element={
-              <ResetPasswordPage onSuccess={() => setIsAuthenticated(false)} />
-            }
-          />
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <HomePage onLogout={handleLogout} avatarUrl={getAvatarUrl()} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/upload"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <UploadPage
-                  onLogout={handleLogout}
-                  userInitial={getUserInitial()}
-                  avatarUrl={getAvatarUrl()}
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <ProfilePage profile={userProfile} />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppRoutes
+          isAuthenticated={isAuthenticated}
+          onAuthSuccess={handleAuthSuccess}
+          onLogout={handleLogout}
+          userProfile={userProfile}
+          userInitial={getUserInitial()}
+          avatarUrl={getAvatarUrl()}
+          onPasswordResetSuccess={() => setIsAuthenticated(false)}
+        />
       </div>
     </Router>
   );
