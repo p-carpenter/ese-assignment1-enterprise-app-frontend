@@ -1,21 +1,10 @@
-import {
-  type Song,
-  type SongUploadPayload,
-  type UserProfile,
-} from "../types/index.ts";
-
 const API_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
-
-interface PlayHistoryEntry {
-  song: Song;
-  played_at: string;
-}
 
 /**
  * Helper for fetch boilerplate
  */
-const request = async <T>(
+export const request = async <T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> => {
@@ -52,108 +41,4 @@ const request = async <T>(
   }
 
   return response.json();
-};
-
-export const api = {
-  songs: {
-    // Fetch all songs
-    list: async (): Promise<Song[]> => request<Song[]>("/songs/"),
-
-    delete: async (songId: number): Promise<void> => {
-      await request(`/songs/${songId}/`, { method: "DELETE" });
-    },
-    // Save a new song
-    upload: async (payload: SongUploadPayload): Promise<Song> =>
-      request<Song>("/songs/", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    // Update an existing song
-    update: async (
-      songId: number,
-      payload: Partial<SongUploadPayload>,
-    ): Promise<Song> =>
-      request<Song>(`/songs/${songId}/`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      }),
-    // Log a play event
-    logPlay: async (songId: number): Promise<void> => {
-      try {
-        await request<void>("/history/", {
-          method: "POST",
-          body: JSON.stringify({ song: songId }),
-        });
-      } catch (err) {
-        console.error("Audit log failed:", err);
-      }
-    },
-  },
-
-  playHistory: async (): Promise<PlayHistoryEntry[]> =>
-    request<PlayHistoryEntry[]>("/history/"),
-
-  auth: {
-    // Auth: Register
-    register: async (
-      username: string,
-      email: string,
-      password1: string,
-      password2: string,
-    ): Promise<void> => {
-      await request("/auth/registration/", {
-        method: "POST",
-        body: JSON.stringify({ username, email, password1, password2 }),
-      });
-    },
-
-    // Auth: Login
-    login: async (email: string, password: string): Promise<void> => {
-      await request("/auth/login/", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-    },
-
-    // Auth: Logout
-    logout: async (): Promise<void> => {
-      await request("/auth/logout/", { method: "POST" });
-    },
-
-    // Auth: Check status and get user profile
-    me: async (): Promise<UserProfile> => {
-      console.log("Calling GET /auth/user/");
-      const response = await request<UserProfile>("/auth/user/", {
-        method: "GET",
-      });
-      console.log("User profile received:", response);
-      return response;
-    },
-
-    // Auth: Request password reset
-    requestPasswordReset: async (email: string): Promise<void> => {
-      await request("/auth/password/reset/", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-    },
-
-    // Auth: Confirm password reset
-    confirmPasswordReset: async (
-      uid: string | undefined,
-      token: string | undefined,
-      new_password1: string,
-      new_password2: string,
-    ): Promise<void> => {
-      await request("/auth/password/reset/confirm/", {
-        method: "POST",
-        body: JSON.stringify({
-          uid,
-          token,
-          new_password1,
-          new_password2,
-        }),
-      });
-    },
-  },
 };

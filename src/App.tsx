@@ -1,18 +1,6 @@
 import { useState, useEffect, type JSX } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { ProtectedRoute } from "@/features/auth";
-import { HomePage } from "@/features/songs";
-import { UploadPage } from "@/features/songs";
-import { ProfilePage } from "@/features/auth";
-import { LoginPage } from "@/features/auth";
-import { RegisterPage } from "@/features/auth";
-import { ResetPasswordPage } from "@/features/auth";
-import { RequestResetPasswordPage } from "@/features/auth";
+import { BrowserRouter as Router } from "react-router-dom";
+import { AppRoutes } from "./routes";
 
 import { api } from "./shared/api/client";
 import { type UserProfile } from "./shared/types/index";
@@ -87,71 +75,15 @@ const App = (): JSX.Element => {
   return (
     <Router>
       <div className="app-container">
-        <Routes>
-          {/* Public Routes */}
-          <Route
-            path="/login"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/" replace />
-              ) : (
-                <LoginPage onSuccess={handleAuthSuccess} />
-              )
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <RequestResetPasswordPage
-                onSuccess={() => setIsAuthenticated(false)}
-              />
-            }
-          />
-          <Route
-            path="reset-password/confirm/:uid/:token"
-            element={
-              <ResetPasswordPage onSuccess={() => setIsAuthenticated(false)} />
-            }
-          />
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <HomePage onLogout={handleLogout} avatarUrl={getAvatarUrl()} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/upload"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <UploadPage
-                  onLogout={handleLogout}
-                  userInitial={getUserInitial()}
-                  avatarUrl={getAvatarUrl()}
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <ProfilePage profile={userProfile} />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppRoutes
+          isAuthenticated={isAuthenticated}
+          onAuthSuccess={handleAuthSuccess}
+          onLogout={handleLogout}
+          userProfile={userProfile}
+          userInitial={getUserInitial()}
+          avatarUrl={getAvatarUrl()}
+          onPasswordResetSuccess={() => setIsAuthenticated(false)}
+        />
       </div>
     </Router>
   );

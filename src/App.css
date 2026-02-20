@@ -3,6 +3,11 @@
   background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);
 }
 
+.loading_text {
+  text-align: center;
+  padding: 60px;
+  color: var(--spotify-gray);
+}
 .app-container {
   padding: 24px;
   max-width: 1400px;
