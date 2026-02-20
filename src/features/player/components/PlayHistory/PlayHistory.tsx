@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from "react";
 import { type Song } from "@/features/songs/types";
-import { api } from "@/shared/api/client";
 import styles from "./PlayHistory.module.css";
+import { getPlayHistory } from "../../api";
 
 interface PlayHistoryProps {
   keyTrigger: number;
@@ -16,8 +16,7 @@ export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
   const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
 
   useEffect(() => {
-    api
-      .playHistory()
+    getPlayHistory()
       .then((data) => setPlayHistory(data))
       .catch((err) => console.error(err));
   }, [keyTrigger]);

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
-import { api } from "@/shared/api/client";
 import { type Song } from "@/features/songs/types"
 import styles from "./MusicPlayer.module.css";
 import { SongLibrary } from "@/features/songs";
 import { ProgressBar } from "../ProgressBar/ProgressBar";
 import { PlaybackControls } from "../PlaybackControls/PlaybackControls";
+import { listSongs, logPlay } from "@/features/songs/api";
 
 interface MusicPlayerProps {
   onSongPlay?: () => void;
@@ -27,11 +27,13 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
 
-  const refreshSongs = () => {
-    api.songs
-      .list()
-      .then((data) => setSongs(data))
-      .catch((err) => console.error("Failed to load library", err));
+  const refreshSongs = async () => {
+    try {
+      const data = await listSongs();
+      setSongs(data);
+    } catch (err) {
+      console.error("Failed to load songs:", err);
+    }
   };
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
     });
 
     try {
-      await api.songs.logPlay(song.id);
+      await logPlay(song.id);
 
       if (onSongPlay) {
         onSongPlay();

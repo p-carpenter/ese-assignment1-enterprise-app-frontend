@@ -2,9 +2,10 @@ import { useState, useEffect, type JSX } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppRoutes } from "./routes";
 
-import { api } from "./shared/api/client";
+
 import { type UserProfile } from "./shared/types/index";
 import "./App.css";
+import { getMe } from "@/features/auth/api";
 
 // interface AppState {
 //    isAuthenticated: boolean;
@@ -19,8 +20,7 @@ const App = (): JSX.Element => {
 
   // Check authentication status on mount
   useEffect(() => {
-    api.auth
-      .me()
+    getMe()
       .then((profile) => {
         setIsAuthenticated(true);
         setUserProfile(profile);
@@ -35,8 +35,7 @@ const App = (): JSX.Element => {
   const handleAuthSuccess = (): void => {
     setIsAuthenticated(true);
     // Fetch profile after successful auth
-    api.auth
-      .me()
+    getMe()
       .then((profile: UserProfile) => setUserProfile(profile))
       .catch((err: unknown) => console.error("Failed to fetch profile:", err));
   };

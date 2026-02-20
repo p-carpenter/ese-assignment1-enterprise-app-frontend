@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { api } from "@/shared/api/client";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
+import { logout } from "@/features/auth/api";
 
 interface HeaderProps {
   onLogout: () => void;
@@ -19,7 +19,7 @@ export const Header = ({
 
   const handleLogout = async (): Promise<void> => {
     try {
-      await api.auth.logout();
+      await logout();
       onLogout();
       navigate("/login");
     } catch (err) {
