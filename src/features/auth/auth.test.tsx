@@ -145,4 +145,83 @@ describe("Auth features", () => {
 
     expect(screen.getByText("Private Page")).toBeInTheDocument();
   });
+
+  it("disables the login button while the request is in flight", async () => {
+    mockLogin.mockImplementationOnce(() => new Promise(() => {})); // never resolves
+
+    render(
+      <MemoryRouter>
+        <LoginForm />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "secret" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /log in/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(submitButton).toBeDisabled());
+  });
+
+  it("shows a registration error when the api rejects", async () => {
+    mockRegister.mockRejectedValueOnce(new Error("Email already in use"));
+
+    render(
+      <MemoryRouter>
+        <RegistrationForm />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Username"), {
+      target: { value: "taken" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "taken@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "pass1234" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
+      target: { value: "pass1234" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
+
+    expect(
+      await screen.findByText("Email already in use"),
+    ).toBeInTheDocument();
+  });
+
+  it("disables the registration button while the request is in flight", async () => {
+    mockRegister.mockImplementationOnce(() => new Promise(() => {}));
+
+    render(
+      <MemoryRouter>
+        <RegistrationForm />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Username"), {
+      target: { value: "newuser" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "new@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "pass1234" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
+      target: { value: "pass1234" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /sign up/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(submitButton).toBeDisabled());
+  });
 });
