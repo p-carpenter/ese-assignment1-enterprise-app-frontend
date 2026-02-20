@@ -129,4 +129,83 @@ describe("MusicPlayer", () => {
       );
     });
   });
+
+  it("wraps around to the last song when pressing Previous on the first track", async () => {
+    render(<MusicPlayer />);
+
+    // Select the first song
+    fireEvent.click(await screen.findByText("Song A"));
+
+    const previousButton = await screen.findByRole("button", {
+      name: "Previous",
+    });
+    fireEvent.click(previousButton);
+
+    await waitFor(() => {
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song2.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
+  });
+
+  it("wraps around to the first song when pressing Next on the last track", async () => {
+    render(<MusicPlayer />);
+
+    // Select the last song
+    fireEvent.click(await screen.findByText("Song B"));
+
+    const nextButton = await screen.findByRole("button", { name: "Next" });
+    fireEvent.click(nextButton);
+
+    await waitFor(() => {
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song1.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
+  });
+
+  it("shows empty-state message when no song is selected", async () => {
+    render(<MusicPlayer />);
+    // Songs load, but none is selected yet
+    await screen.findByText("Song A"); // wait for load
+    expect(
+      screen.getByText(/select a track from the library below/i),
+    ).toBeInTheDocument();
+  });
+
+  it("displays the current song title and artist after selecting a track", async () => {
+    render(<MusicPlayer />);
+
+    fireEvent.click(await screen.findByText("Song A"));
+
+    await waitFor(() => {
+      // The h3 title element shows the current song's title in the player area
+      expect(
+        screen.getByRole("heading", { name: "Song A" }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows the correct library count", async () => {
+    render(<MusicPlayer />);
+    expect(
+      await screen.findByText(/library \(2 tracks\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it("handles listSongs API failure gracefully (empty library)", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockListSongs.mockRejectedValueOnce(new Error("Network error"));
+
+    render(<MusicPlayer />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+    expect(screen.queryByText("Song A")).not.toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+  });
 });
