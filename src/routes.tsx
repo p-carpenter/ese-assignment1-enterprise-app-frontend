@@ -9,57 +9,31 @@ import {
   ProfilePage,
 } from "@/features/auth";
 import { HomePage, UploadPage } from "@/features/songs";
-import { type UserProfile } from "@/features/auth/types";
+import { useAuth } from "@/shared/context/AuthContext";
 
-type AppRoutesProps = {
-  isAuthenticated: boolean;
-  onAuthSuccess: () => void;
-  onLogout: () => void;
-  userProfile: UserProfile | null;
-  userInitial: string;
-  avatarUrl?: string;
-  onPasswordResetSuccess: () => void;
-};
+export const AppRoutes = (): JSX.Element => {
+  const { user } = useAuth();
 
-export const AppRoutes = ({
-  isAuthenticated,
-  onAuthSuccess,
-  onLogout,
-  userProfile,
-  userInitial,
-  avatarUrl,
-  onPasswordResetSuccess,
-}: AppRoutesProps): JSX.Element => {
+  // If user exists, they are authenticated
+  const isAuthenticated = !!user;
+
   return (
     <Routes>
       {/* Public Routes */}
       <Route
         path="/login"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/" replace />
-          ) : (
-            <LoginPage onSuccess={onAuthSuccess} />
-          )
-        }
+        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
-
       <Route
         path="/register"
         element={
           isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
         }
       />
-
-      <Route
-        path="/reset-password"
-        element={
-          <RequestResetPasswordPage onSuccess={onPasswordResetSuccess} />
-        }
-      />
+      <Route path="/reset-password" element={<RequestResetPasswordPage />} />
       <Route
         path="reset-password/confirm/:uid/:token"
-        element={<ResetPasswordPage onSuccess={onPasswordResetSuccess} />}
+        element={<ResetPasswordPage />}
       />
 
       {/* Protected Routes */}
@@ -67,29 +41,23 @@ export const AppRoutes = ({
         path="/"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <HomePage onLogout={onLogout} avatarUrl={avatarUrl} />
+            <HomePage />
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/upload"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <UploadPage
-              onLogout={onLogout}
-              userInitial={userInitial}
-              avatarUrl={avatarUrl}
-            />
+            <UploadPage />
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/profile"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ProfilePage profile={userProfile} />
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
@@ -97,7 +65,7 @@ export const AppRoutes = ({
         path="/profile/edit"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ProfilePage profile={userProfile} isEditing={true} />
+            <ProfilePage isEditing={true} />
           </ProtectedRoute>
         }
       />

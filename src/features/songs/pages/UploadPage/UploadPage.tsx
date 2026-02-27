@@ -1,37 +1,18 @@
-import { useState, type JSX } from "react";
 import { SongUploadForm } from "@/features/songs";
 import { Header } from "@/shared/layout";
 import { Button } from "@/shared/components";
 import { useNavigate } from "react-router-dom";
 
-interface UploadPageProps {
-  onLogout: () => void;
-  userInitial?: string;
-  avatarUrl?: string;
-}
-
-export const UploadPage = ({
-  onLogout,
-  userInitial,
-  avatarUrl,
-}: UploadPageProps): JSX.Element => {
+export const UploadPage = () => {
   const navigate = useNavigate();
-
-  const [, setRefreshKey] = useState(0);
 
   return (
     <>
-      <Header
-        onLogout={onLogout}
-        userInitial={userInitial}
-        avatarUrl={avatarUrl}
-      />
+      <Header />
       <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <SongUploadForm
-          onUploadSuccess={() => setRefreshKey((prev) => prev + 1)}
-        />
+        <SongUploadForm />
         <Button variant="outlined" size="large" onClick={() => navigate("/")}>
-          Back to Home
+          Cancel Upload
         </Button>
       </div>
     </>

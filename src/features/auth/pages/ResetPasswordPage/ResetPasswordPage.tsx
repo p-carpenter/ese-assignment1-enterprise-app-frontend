@@ -3,19 +3,13 @@ import { ResetPasswordForm } from "../../components/ResetPasswordForm/ResetPassw
 import { AuthLayout } from "@/features/auth";
 import authStyles from "../AuthPages.module.css";
 
-interface ResetPasswordPageProps {
-  onSuccess: () => void;
-}
-
-export const ResetPasswordPage = ({ onSuccess }: ResetPasswordPageProps) => {
+export const ResetPasswordPage = () => {
   return (
     <AuthLayout>
-      <ResetPasswordForm onSuccess={onSuccess} />
-
+      <ResetPasswordForm />
       <div className={authStyles.divider}>
         <span>or</span>
       </div>
-
       <AuthFormFooter
         footerText="Sorted out your password?"
         linkText="Go back to login"

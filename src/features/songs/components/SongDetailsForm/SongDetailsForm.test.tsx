@@ -114,7 +114,7 @@ describe("SongDetailsForm", () => {
   });
 
   describe("form submission", () => {
-    it("calls onSubmit with title, artist and empty coverArtUrl by default", () => {
+    it("calls onSubmit with title and artist by default", () => {
       const onSubmit = vi.fn();
       render(<SongDetailsForm onSubmit={onSubmit} />);
 
@@ -129,7 +129,6 @@ describe("SongDetailsForm", () => {
       expect(onSubmit).toHaveBeenCalledWith({
         title: "Test Song",
         artist: "Test Artist",
-        coverArtUrl: "",
       });
     });
 

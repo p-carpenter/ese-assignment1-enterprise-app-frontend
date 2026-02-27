@@ -9,12 +9,38 @@ vi.mock("@/features/auth/api", () => ({
   logout: vi.fn(),
 }));
 
+const mockNavigate = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
+  return { ...actual, useNavigate: () => mockNavigate };
+});
+
+const mockAuthState = {
+  user: {
+    id: 1,
+    username: "john",
+    email: "john@example.com",
+    avatar_url: "",
+  },
+  setUser: vi.fn(),
+  loading: false,
+  refreshUser: vi.fn(),
+};
+
+vi.mock("@/shared/context/AuthContext", () => ({
+  useAuth: () => mockAuthState,
+}));
+
 const mockLogout = vi.mocked(logout);
 
-const renderHeader = (props: Partial<Parameters<typeof Header>[0]> = {}) => {
+const renderHeader = () => {
   return render(
     <MemoryRouter>
-      <Header onLogout={() => {}} {...props} />
+      <Header />
     </MemoryRouter>,
   );
 };
@@ -22,6 +48,12 @@ const renderHeader = (props: Partial<Parameters<typeof Header>[0]> = {}) => {
 describe("Header", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuthState.user = {
+      id: 1,
+      username: "john",
+      email: "john@example.com",
+      avatar_url: "",
+    };
   });
 
   it("renders the app title", () => {
@@ -47,40 +79,47 @@ describe("Header", () => {
   });
 
   it("displays the user initial when no avatarUrl is given", () => {
-    renderHeader({ userInitial: "J" });
+    renderHeader();
     expect(screen.getByText("J")).toBeInTheDocument();
   });
 
   it("uppercases the user initial", () => {
-    renderHeader({ userInitial: "a" });
+    mockAuthState.user = {
+      ...mockAuthState.user,
+      username: "alex",
+    };
+    renderHeader();
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
   it("renders an avatar img when avatarUrl is provided", () => {
-    renderHeader({ avatarUrl: "http://example.com/avatar.jpg" });
+    mockAuthState.user = {
+      ...mockAuthState.user,
+      avatar_url: "http://example.com/avatar.jpg",
+    };
+    renderHeader();
     const img = screen.getByAltText("Profile");
     expect(img).toHaveAttribute("src", "http://example.com/avatar.jpg");
   });
 
-  it("calls logout() and then onLogout() when the Log Out button is clicked", async () => {
-    const onLogout = vi.fn();
+  it("calls logout(), clears user, and navigates on Log Out", async () => {
     mockLogout.mockResolvedValueOnce(undefined);
 
-    renderHeader({ onLogout });
+    renderHeader();
     fireEvent.click(screen.getByRole("button", { name: /log out/i }));
 
     await waitFor(() => {
       expect(mockLogout).toHaveBeenCalledTimes(1);
-      expect(onLogout).toHaveBeenCalledTimes(1);
+      expect(mockAuthState.setUser).toHaveBeenCalledWith(null);
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 
-  it("still calls onLogout even when logout() rejects", async () => {
-    const onLogout = vi.fn();
+  it("logs an error when logout() rejects", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockLogout.mockRejectedValueOnce(new Error("network error"));
 
-    renderHeader({ onLogout });
+    renderHeader();
     fireEvent.click(screen.getByRole("button", { name: /log out/i }));
 
     // onLogout should not be called when logout() throws (the catch block

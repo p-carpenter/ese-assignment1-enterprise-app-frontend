@@ -1,14 +1,9 @@
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import styles from "../SongUploadForm/SongUploadForm.module.css";
-import { type Song } from "../../types";
 
 interface SongDetailsFormProps {
-  initialValues?: Partial<Song>;
-  onSubmit: (values: {
-    title: string;
-    artist: string;
-    coverArtUrl: string;
-  }) => void;
+  initialValues?: { title?: string; artist?: string };
+  onSubmit: (values: { title: string; artist: string }) => void;
   isSubmitting?: boolean;
   error?: string | null;
   showMp3Upload?: boolean;
@@ -29,71 +24,70 @@ export const SongDetailsForm = ({
   onMp3Upload,
   mp3Uploaded = false,
   mp3Uploading = false,
-  mp3Label = "Select MP3", // eslint-disable-line @typescript-eslint/no-unused-vars
+  mp3Label = "Select MP3",
   coverArtUploading = false,
   onCoverArtUpload,
-}: SongDetailsFormProps): JSX.Element => {
+}: SongDetailsFormProps) => {
+  // Only track the text inputs that the user actually types into
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
-  const [coverArtUrl] = useState(initialValues.cover_art_url || "");
-  // For cover art upload
-  const handleCoverArt = async (file: File) => {
-    if (onCoverArtUpload) {
-      onCoverArtUpload(file);
-    }
-  };
-
-  // For MP3 upload
-  const handleMp3 = async (file: File) => {
-    if (onMp3Upload) {
-      onMp3Upload(file);
-    }
-  };
 
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({
-      title,
-      artist,
-      coverArtUrl,
-    });
+    // Stop passing the URLs back. The parent already has them.
+    onSubmit({ title, artist }); 
   };
 
   return (
     <form className={styles.container} onSubmit={handleSubmit}>
       <h3 className={styles.title}>Song Details</h3>
+      
       <input
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         className={styles.inputField}
       />
+      
       <input
         placeholder="Artist"
         value={artist}
         onChange={(e) => setArtist(e.target.value)}
         className={styles.inputField}
       />
+
       {/* Cover Art Upload */}
       {onCoverArtUpload && (
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => e.target.files && handleCoverArt(e.target.files[0])}
-          disabled={coverArtUploading}
-        />
+        <div className={styles.fileUploadWrapper}>
+          <label className={styles.uploadLabel}>
+            {coverArtUploading ? "Uploading Cover Art..." : "Select Cover Art"}
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => e.target.files && onCoverArtUpload(e.target.files[0])}
+            disabled={coverArtUploading}
+          />
+        </div>
       )}
-      {/* MP3 Upload (only for upload) */}
+
+      {/* MP3 Upload */}
       {showMp3Upload && onMp3Upload && (
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={(e) => e.target.files && handleMp3(e.target.files[0])}
-          disabled={mp3Uploading}
-        />
+        <div className={styles.fileUploadWrapper}>
+          <label className={styles.uploadLabel}>{mp3Label}</label>
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => e.target.files && onMp3Upload(e.target.files[0])}
+            disabled={mp3Uploading}
+          />
+        </div>
       )}
+      
       {mp3Uploaded && <p className={styles.success}>✓ Audio file ready</p>}
+      
       {error && <div className={styles.error}>{error}</div>}
+      
       <button
         type="submit"
         disabled={isSubmitting || (showMp3Upload && !mp3Uploaded)}

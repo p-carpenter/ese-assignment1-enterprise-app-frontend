@@ -1,54 +1,40 @@
-import { useEffect, useRef, useState, type ChangeEvent, type JSX } from "react";
+import { useRef, useState, type ChangeEvent, type JSX } from "react";
 import { useNavigate } from "react-router-dom";
-import { type UserProfile } from "../../types";
 import defaultAvatar from "@/shared/assets/default_avatar.png";
 import { Button } from "@/shared/components";
 import styles from "./ProfilePage.module.css";
 import { PencilSolid } from "@/shared/icons";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import { updateProfile } from "../../api";
+import { useAuth } from "@/shared/context/AuthContext";
 
-interface ProfilePageProps {
-  profile: UserProfile | null;
-  isEditing?: boolean;
-}
-
-export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): JSX.Element => {
+export const ProfilePage = ({ isEditing = false }: { isEditing?: boolean }): JSX.Element => {
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
 
-  const [newUsername, setNewUsername] = useState("");
-  const [newAvatarUrl, setNewAvatarUrl] = useState("");
+  const [newUsername, setNewUsername] = useState(user?.username ?? "");
+  const [newAvatarUrl, setNewAvatarUrl] = useState(user?.avatar_url ?? "");
+
   const { upload, isUploading, error: uploadError } = useCloudinaryUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!profile) return;
-    if (!isEditing) {
-      setNewUsername(profile.username ?? "");
-      setNewAvatarUrl(profile.avatar_url ?? "");
-    }
-  }, [isEditing, profile]);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      await handleAvatarUpload(file);
-    }
-  };
-
-  const handleAvatarUpload = async (file: File) => {
-    try {
-      const cloudinaryResponse = await upload(file);
-      setNewAvatarUrl(cloudinaryResponse.secure_url);
-    } catch (err) {
-      console.error("New profile avatar upload failed:", err);
+      try {
+        const cloudinaryResponse = await upload(file);
+        setNewAvatarUrl(cloudinaryResponse.secure_url);
+      } catch (err) {
+        console.error("New profile avatar upload failed:", err);
+      }
     }
   };
 
   const handleSave = async () => {
-    if (!profile) return;
+    if (!user) return;
     try {
-      await updateProfile(newUsername || profile.username, newAvatarUrl);
+      const updatedUser = await updateProfile(newUsername, newAvatarUrl);
+      setUser(updatedUser);
       navigate("/profile");
     } catch (err) {
       console.error("Failed to update profile:", err);
@@ -56,15 +42,12 @@ export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): J
   };
 
   const handleCancel = () => {
-    if (profile) {
-      setNewUsername(profile.username ?? "");
-      setNewAvatarUrl(profile.avatar_url ?? "");
-    }
+    setNewUsername(user?.username ?? "");
+    setNewAvatarUrl(user?.avatar_url ?? "");
     navigate("/profile");
   };
 
-
-  if (!profile) {
+  if (!user) {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
@@ -77,16 +60,14 @@ export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): J
     );
   }
 
-  const username = profile.username;
-  const avatarUrl = profile.avatar_url;
-  const displayAvatarUrl = newAvatarUrl || avatarUrl;
+  const displayAvatarUrl = newAvatarUrl || user.avatar_url;
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.avatarSection}>
           <div className={styles.avatar}>
-            { isEditing && (
+            {isEditing && (
               <div
                 className={styles.editOverlay}
                 onClick={() => fileInputRef.current?.click()}
@@ -109,7 +90,7 @@ export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): J
               <img src={defaultAvatar} alt="Default Profile" />
             )}
           </div>
-          <h1 className={styles.displayName}>{username}</h1>
+          <h1 className={styles.displayName}>{user.username}</h1>
           {!isEditing && (
             <Button variant="outlined" size="small" onClick={() => navigate("/profile/edit")}>
               Edit Profile
@@ -121,14 +102,21 @@ export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): J
 
         <div className={styles.infoSection}>
           <div className={styles.infoLabel}>Username</div>
-          {isEditing ?
-            (<input className={styles.editInfoValue} placeholder={`${username}`} value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />)
-            : (<div className={styles.infoValue}>{username}</div>)}
+          {isEditing ? (
+            <input
+              className={styles.editInfoValue}
+              placeholder={user.username}
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+            />
+          ) : (
+            <div className={styles.infoValue}>{user.username}</div>
+          )}
           <div className={styles.infoLabel}>Email</div>
-          <div className={styles.infoValue}>{profile.email}</div>
+          <div className={styles.infoValue}>{user.email}</div>
 
           <div className={styles.infoLabel}>User ID</div>
-          <div className={styles.infoValue}>#{profile.id}</div>
+          <div className={styles.infoValue}>#{user.id}</div>
         </div>
 
         {isEditing ? (
@@ -145,9 +133,7 @@ export const ProfilePage = ({ profile, isEditing = false }: ProfilePageProps): J
             Back to Home
           </Button>
         )}
-        {uploadError && (
-          <div className={styles.error}>{String(uploadError)}</div>
-        )}
+        {uploadError && <div className={styles.error}>{String(uploadError)}</div>}
       </div>
     </div>
   );
