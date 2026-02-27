@@ -1,7 +1,7 @@
 import { type JSX } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppRoutes } from "./routes";
-import { useAuth } from "@/shared/context/AuthContext"; // <-- Add this
+import { useAuth } from "@/shared/context/AuthContext";
 import "./App.css";
 
 export const App = (): JSX.Element => {
