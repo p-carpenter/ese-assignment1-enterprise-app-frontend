@@ -38,7 +38,7 @@ export const updateSong = (
  * GET details for a single song.
  */
 export const getSongDetails = (songId: number): Promise<Song> =>
-  request<Song>(`/songs/${songId}//`);
+  request<Song>(`/songs/${songId}/`);
 
 /**
  * GET search results.

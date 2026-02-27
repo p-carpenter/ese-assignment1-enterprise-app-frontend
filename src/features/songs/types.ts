@@ -15,12 +15,3 @@ export interface SongUploadPayload {
   cover_art_url?: string;
   duration: number;
 }
-
-export interface Playlist {
-  id: number;
-  title: string;
-  description: string;
-  is_public: boolean;
-  owner: string;
-  songs: Array<Song>;
-}

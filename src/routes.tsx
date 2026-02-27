@@ -12,6 +12,8 @@ import { UploadPage } from "@/features/songs";
 import { HomePage } from "@/shared/HomePage/HomePage";
 import { useAuth } from "@/shared/context/AuthContext";
 import { EmailVerificationPage } from "./features/auth/pages/EmailVerificationPage/EmailVerificationPage";
+import { PlaylistDetailPage } from "./features/playlists/pages/PlaylistDetailPage";
+import { PlaylistsPage } from "./features/playlists/pages/PlaylistsPage";
 
 export const AppRoutes = (): JSX.Element => {
   const { user } = useAuth();
@@ -76,7 +78,11 @@ export const AppRoutes = (): JSX.Element => {
         }
       />
 
-      {/* Fallback */}
+      {/* Playlist Routes */}
+      <Route path="/playlists" element={<PlaylistsPage />} />
+      <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
+
+      {/* Fallback Route - Navigate to Home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
