@@ -35,20 +35,20 @@ export const SongDetailsForm = ({
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Stop passing the URLs back. The parent already has them.
-    onSubmit({ title, artist }); 
+    onSubmit({ title, artist });
   };
 
   return (
     <form className={styles.container} onSubmit={handleSubmit}>
       <h3 className={styles.title}>Song Details</h3>
-      
+
       <input
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         className={styles.inputField}
       />
-      
+
       <input
         placeholder="Artist"
         value={artist}
@@ -65,7 +65,9 @@ export const SongDetailsForm = ({
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => e.target.files && onCoverArtUpload(e.target.files[0])}
+            onChange={(e) =>
+              e.target.files && onCoverArtUpload(e.target.files[0])
+            }
             disabled={coverArtUploading}
           />
         </div>
@@ -83,11 +85,11 @@ export const SongDetailsForm = ({
           />
         </div>
       )}
-      
+
       {mp3Uploaded && <p className={styles.success}>✓ Audio file ready</p>}
-      
+
       {error && <div className={styles.error}>{error}</div>}
-      
+
       <button
         type="submit"
         disabled={isSubmitting || (showMp3Upload && !mp3Uploaded)}

@@ -1,111 +1,46 @@
-import { useEffect, useMemo, useState, type JSX } from "react";
-import { useAudioPlayer } from "react-use-audio-player";
-import { type Song } from "@/features/songs/types";
+import { useEffect, type JSX } from "react";
 import styles from "./MusicPlayer.module.css";
 import { SongLibrary } from "@/features/songs";
+import { type Song } from "@/features/songs/types";
 import { ProgressBar } from "../ProgressBar/ProgressBar";
 import { PlaybackControls } from "../PlaybackControls/PlaybackControls";
-import { listSongs, logPlay } from "@/features/songs/api";
+import { usePlayer } from "../../context/PlayerContext";
 
 interface MusicPlayerProps {
   onSongPlay?: () => void;
 }
 
 export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
-  // Extract isLoading here
   const {
-    play,
-    pause,
-    stop,
+    songs,
+    currentSong,
     isPlaying,
     isLoading,
-    load,
-    getPosition,
-    seek,
     duration,
-  } = useAudioPlayer();
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
-
-  const refreshSongs = async () => {
-    try {
-      const data = await listSongs();
-      setSongs(data);
-    } catch (err) {
-      console.error("Failed to load songs:", err);
-    }
-  };
+    play,
+    pause,
+    seek,
+    getPosition,
+    refreshSongs,
+    playSong,
+    playPrev,
+    playNext,
+  } = usePlayer();
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchSongs = async () => {
-      try {
-        const data = await listSongs();
-        if (isMounted) {
-          setSongs(data);
-        }
-      } catch (err) {
-        console.error("Failed to load songs:", err);
-      }
-    };
-
-    fetchSongs();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const playSong = async (song: Song): Promise<void> => {
-    if (currentSong?.id === song.id) {
-      if (isPlaying) {
-        pause();
-      } else {
-        play();
-      }
-      return;
+    if (songs.length === 0) {
+      void refreshSongs();
     }
+  }, [refreshSongs, songs.length]);
 
-    stop();
-    setCurrentSong(song);
-
-    load(song.file_url, {
-      autoplay: true,
-      format: "mp3",
-      html5: true,
-      onend: () => console.log("Song finished!"),
-    });
-
-    try {
-      await logPlay(song.id);
-
-      if (onSongPlay) {
-        onSongPlay();
-      }
-    } catch (err) {
-      console.error("Failed to log play:", err);
-    }
-  };
-
-  const currentIndex = useMemo((): number => {
-    if (!currentSong) return -1;
-    return songs.findIndex((song) => song.id === currentSong.id);
-  }, [songs, currentSong]);
+  const handleSongClick = (song: Song) => playSong(song, { onSongPlay });
 
   const handlePrev = (): void => {
-    if (songs.length === 0) return;
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : songs.length - 1;
-    void playSong(songs[prevIndex]);
+    void playPrev();
   };
 
   const handleNext = (): void => {
-    if (songs.length === 0) return;
-    const nextIndex =
-      currentIndex >= 0 && currentIndex < songs.length - 1
-        ? currentIndex + 1
-        : 0;
-    void playSong(songs[nextIndex]);
+    void playNext();
   };
 
   return (
@@ -149,7 +84,7 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
       <SongLibrary
         songs={songs}
         currentSongId={currentSong?.id}
-        onSongClick={playSong}
+        onSongClick={handleSongClick}
         onSongsChanged={refreshSongs}
       />
     </div>

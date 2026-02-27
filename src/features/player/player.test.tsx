@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MusicPlayer } from "@/features/player";
+import { PlayerProvider } from "@/features/player";
 import { listSongs, logPlay } from "@/features/songs/api";
 import type { Song } from "@/features/songs/types";
 
@@ -51,6 +52,13 @@ const mockSongs: Song[] = [
 ];
 
 describe("MusicPlayer", () => {
+  const renderWithProvider = () =>
+    render(
+      <PlayerProvider>
+        <MusicPlayer />
+      </PlayerProvider>,
+    );
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockListSongs.mockResolvedValue(mockSongs);
@@ -58,7 +66,7 @@ describe("MusicPlayer", () => {
   });
 
   it("loads and renders the song library", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     expect(await screen.findByText("Song A")).toBeInTheDocument();
     expect(screen.getByText("Song B")).toBeInTheDocument();
@@ -66,7 +74,7 @@ describe("MusicPlayer", () => {
   });
 
   it("plays a song when selected and logs play", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     const songTitle = await screen.findByText("Song A");
     fireEvent.click(songTitle);
@@ -82,7 +90,7 @@ describe("MusicPlayer", () => {
   });
 
   it("calls play when clicking the play button", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     fireEvent.click(await screen.findByText("Song A"));
 
@@ -95,7 +103,7 @@ describe("MusicPlayer", () => {
   });
 
   it("calls next when clicking the next button", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     fireEvent.click(await screen.findByText("Song A"));
 
@@ -112,7 +120,7 @@ describe("MusicPlayer", () => {
   });
 
   it("calls previous when clicking the previous button", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     fireEvent.click(await screen.findByText("Song B"));
 
@@ -131,7 +139,7 @@ describe("MusicPlayer", () => {
   });
 
   it("wraps around to the last song when pressing Previous on the first track", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     // Select the first song
     fireEvent.click(await screen.findByText("Song A"));
@@ -150,7 +158,7 @@ describe("MusicPlayer", () => {
   });
 
   it("wraps around to the first song when pressing Next on the last track", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     // Select the last song
     fireEvent.click(await screen.findByText("Song B"));
@@ -167,7 +175,7 @@ describe("MusicPlayer", () => {
   });
 
   it("shows empty-state message when no song is selected", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
     // Songs load, but none is selected yet
     await screen.findByText("Song A"); // wait for load
     expect(
@@ -176,7 +184,7 @@ describe("MusicPlayer", () => {
   });
 
   it("displays the current song title and artist after selecting a track", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     fireEvent.click(await screen.findByText("Song A"));
 
@@ -189,7 +197,7 @@ describe("MusicPlayer", () => {
   });
 
   it("shows the correct library count", async () => {
-    render(<MusicPlayer />);
+    renderWithProvider();
     expect(
       await screen.findByText(/library \(2 tracks\)/i),
     ).toBeInTheDocument();
@@ -199,7 +207,7 @@ describe("MusicPlayer", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockListSongs.mockRejectedValueOnce(new Error("Network error"));
 
-    render(<MusicPlayer />);
+    renderWithProvider();
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalled();
