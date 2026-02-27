@@ -35,6 +35,27 @@ vi.mock("@/shared/context/AuthContext", () => ({
   useAuth: () => mockAuthState,
 }));
 
+const mockPlayerState = {
+  currentSong: {
+    id: 1,
+    title: "Track One",
+    artist: "Artist One",
+    duration: 120,
+    file_url: "http://example.com/track.mp3",
+    cover_art_url: "",
+  },
+  isPlaying: false,
+  isLoading: false,
+  play: vi.fn(),
+  pause: vi.fn(),
+  playPrev: vi.fn().mockResolvedValue(undefined),
+  playNext: vi.fn().mockResolvedValue(undefined),
+};
+
+vi.mock("@/features/player", () => ({
+  usePlayer: () => mockPlayerState,
+}));
+
 const mockLogout = vi.mocked(logout);
 
 const renderHeader = () => {
@@ -54,6 +75,16 @@ describe("Header", () => {
       email: "john@example.com",
       avatar_url: "",
     };
+    mockPlayerState.currentSong = {
+      id: 1,
+      title: "Track One",
+      artist: "Artist One",
+      duration: 120,
+      file_url: "http://example.com/track.mp3",
+      cover_art_url: "",
+    };
+    mockPlayerState.isPlaying = false;
+    mockPlayerState.isLoading = false;
   });
 
   it("renders the app title", () => {
@@ -76,6 +107,27 @@ describe("Header", () => {
   it("renders a profile/avatar button", () => {
     renderHeader();
     expect(screen.getByTitle("View Profile")).toBeInTheDocument();
+  });
+
+  it("renders mini-player track information", () => {
+    renderHeader();
+    expect(screen.getByText("Track One")).toBeInTheDocument();
+    expect(screen.getByText("Artist One")).toBeInTheDocument();
+  });
+
+  it("toggles playback from mini-player control", () => {
+    renderHeader();
+    fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    expect(mockPlayerState.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls previous and next from mini-player controls", () => {
+    renderHeader();
+    fireEvent.click(screen.getByRole("button", { name: "Previous track" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next track" }));
+
+    expect(mockPlayerState.playPrev).toHaveBeenCalledTimes(1);
+    expect(mockPlayerState.playNext).toHaveBeenCalledTimes(1);
   });
 
   it("displays the user initial when no avatarUrl is given", () => {

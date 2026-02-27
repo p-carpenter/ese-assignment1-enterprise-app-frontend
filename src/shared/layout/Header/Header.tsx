@@ -4,6 +4,7 @@ import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { logout } from "@/features/auth/api";
 import { useAuth } from "@/shared/context/AuthContext";
+import MiniPlayer from "@/features/player/components/MniPlayer/MiniPlayer";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export const Header = (): JSX.Element => {
   return (
     <div className={styles.header}>
       <h1 className={styles.title}>Music Player</h1>
+      <MiniPlayer />
       <div className={styles.actions}>
         <Button
           variant="primary"

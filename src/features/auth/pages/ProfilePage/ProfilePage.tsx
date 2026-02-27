@@ -7,6 +7,7 @@ import { PencilSolid } from "@/shared/icons";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import { updateProfile } from "../../api";
 import { useAuth } from "@/shared/context/AuthContext";
+import { Header } from "@/shared/layout";
 
 export const ProfilePage = ({
   isEditing = false,
@@ -67,6 +68,8 @@ export const ProfilePage = ({
   const displayAvatarUrl = newAvatarUrl || user.avatar_url;
 
   return (
+    <>
+    <Header />
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.avatarSection}>
@@ -151,5 +154,6 @@ export const ProfilePage = ({
         )}
       </div>
     </div>
+    </>
   );
 };
