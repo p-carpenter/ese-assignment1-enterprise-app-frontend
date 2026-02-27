@@ -26,7 +26,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await getMe();
       setUser(data);
-    } catch (_err) {
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
       setUser(null);
     } finally {
       setLoading(false);
