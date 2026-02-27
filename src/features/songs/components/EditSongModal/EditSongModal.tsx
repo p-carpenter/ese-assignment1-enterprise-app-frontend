@@ -41,7 +41,6 @@ export const EditSongModal = ({
   }: {
     title: string;
     artist: string;
-    coverArtUrl: string;
   }) => {
     try {
       await updateSong(song.id, {
@@ -65,7 +64,6 @@ export const EditSongModal = ({
         initialValues={{
           title: song.title,
           artist: song.artist,
-          cover_art_url: coverArtUrl,
         }}
         onSubmit={handleSubmit}
         isSubmitting={isUploading}

@@ -3,15 +3,7 @@ import { MusicPlayer } from "@/features/player";
 import { PlayHistory } from "@/features/player";
 import { Header } from "@/shared/layout";
 
-interface HomePageProps {
-  onLogout: () => void;
-  avatarUrl?: string;
-}
-
-export const HomePage = ({
-  onLogout,
-  avatarUrl,
-}: HomePageProps): JSX.Element => {
+export const HomePage = (): JSX.Element => {
   const [historyTrigger, setHistoryTrigger] = useState(0);
 
   const refreshHistory = () => {
@@ -20,7 +12,7 @@ export const HomePage = ({
 
   return (
     <>
-      <Header onLogout={onLogout} avatarUrl={avatarUrl} />
+      <Header />
       <div className="app-grid">
         {/* LEFT COLUMN: Player */}
         <div>
