@@ -7,6 +7,7 @@ export const login = async (email: string, password: string): Promise<void> => {
     body: JSON.stringify({ email, password }),
   });
 };
+
 export const getMe = async (): Promise<UserProfile> => {
   return await request("/auth/user/");
 };
@@ -52,6 +53,21 @@ export const confirmPasswordReset = async (
       token,
       new_password1,
       new_password2,
+    }),
+  });
+};
+
+export const updateProfile = async (
+  username: string,
+  avatar_url?: string,
+): Promise<UserProfile> => {
+
+  return await request("/auth/user/", {
+    method: "PATCH",
+    credentials: "include",
+    body: JSON.stringify({
+      username,
+      avatar_url,
     }),
   });
 };
