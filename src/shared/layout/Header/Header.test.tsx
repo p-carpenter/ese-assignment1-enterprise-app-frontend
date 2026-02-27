@@ -174,8 +174,6 @@ describe("Header", () => {
     renderHeader();
     fireEvent.click(screen.getByRole("button", { name: /log out/i }));
 
-    // onLogout should not be called when logout() throws (the catch block
-    // only logs the error and does not call onLogout)
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalled();
     });

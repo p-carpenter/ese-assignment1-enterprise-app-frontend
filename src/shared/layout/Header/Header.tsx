@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { logout } from "@/features/auth/api";
 import { useAuth } from "@/shared/context/AuthContext";
-import MiniPlayer from "@/features/player/components/MniPlayer/MiniPlayer";
+import { MiniPlayer } from "@/features/player/components/MiniPlayer/MiniPlayer";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();

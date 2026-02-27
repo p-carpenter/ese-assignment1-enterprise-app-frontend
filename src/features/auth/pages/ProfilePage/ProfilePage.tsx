@@ -69,91 +69,95 @@ export const ProfilePage = ({
 
   return (
     <>
-    <Header />
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <div className={styles.avatarSection}>
-          <div className={styles.avatar}>
-            {isEditing && (
-              <div
-                className={styles.editOverlay}
-                onClick={() => fileInputRef.current?.click()}
+      <Header />
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <div className={styles.avatarSection}>
+            <div className={styles.avatar}>
+              {isEditing && (
+                <div
+                  className={styles.editOverlay}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <PencilSolid className={styles.editIcon} />
+                </div>
+              )}
+              {isEditing && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+              )}
+              {displayAvatarUrl ? (
+                <img src={displayAvatarUrl} alt="Profile" />
+              ) : (
+                <img src={defaultAvatar} alt="Default Profile" />
+              )}
+            </div>
+            <h1 className={styles.displayName}>{user.username}</h1>
+            {!isEditing && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => navigate("/profile/edit")}
               >
-                <PencilSolid className={styles.editIcon} />
-              </div>
-            )}
-            {isEditing && (
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-            )}
-            {displayAvatarUrl ? (
-              <img src={displayAvatarUrl} alt="Profile" />
-            ) : (
-              <img src={defaultAvatar} alt="Default Profile" />
+                Edit Profile
+              </Button>
             )}
           </div>
-          <h1 className={styles.displayName}>{user.username}</h1>
-          {!isEditing && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => navigate("/profile/edit")}
-            >
-              Edit Profile
-            </Button>
-          )}
-        </div>
 
-        <div className={styles.divider}></div>
+          <div className={styles.divider}></div>
 
-        <div className={styles.infoSection}>
-          <div className={styles.infoLabel}>Username</div>
+          <div className={styles.infoSection}>
+            <div className={styles.infoLabel}>Username</div>
+            {isEditing ? (
+              <input
+                className={styles.editInfoValue}
+                placeholder={user.username}
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            ) : (
+              <div className={styles.infoValue}>{user.username}</div>
+            )}
+            <div className={styles.infoLabel}>Email</div>
+            <div className={styles.infoValue}>{user.email}</div>
+
+            <div className={styles.infoLabel}>User ID</div>
+            <div className={styles.infoValue}>#{user.id}</div>
+          </div>
+
           {isEditing ? (
-            <input
-              className={styles.editInfoValue}
-              placeholder={user.username}
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-            />
+            <div className={styles.editActions}>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={handleSave}
+                disabled={isUploading}
+              >
+                Save
+              </Button>
+              <Button variant="outlined" size="large" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </div>
           ) : (
-            <div className={styles.infoValue}>{user.username}</div>
-          )}
-          <div className={styles.infoLabel}>Email</div>
-          <div className={styles.infoValue}>{user.email}</div>
-
-          <div className={styles.infoLabel}>User ID</div>
-          <div className={styles.infoValue}>#{user.id}</div>
-        </div>
-
-        {isEditing ? (
-          <div className={styles.editActions}>
             <Button
               variant="outlined"
               size="large"
-              onClick={handleSave}
-              disabled={isUploading}
+              onClick={() => navigate("/")}
             >
-              Save
+              Back to Home
             </Button>
-            <Button variant="outlined" size="large" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <Button variant="outlined" size="large" onClick={() => navigate("/")}>
-            Back to Home
-          </Button>
-        )}
-        {uploadError && (
-          <div className={styles.error}>{String(uploadError)}</div>
-        )}
+          )}
+          {uploadError && (
+            <div className={styles.error}>{String(uploadError)}</div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
