@@ -10,6 +10,7 @@ import {
 } from "@/features/auth";
 import { HomePage, UploadPage } from "@/features/songs";
 import { useAuth } from "@/shared/context/AuthContext";
+import { EmailVerificationPage } from "./features/auth/pages/EmailVerificationPage/EmailVerificationPage";
 
 export const AppRoutes = (): JSX.Element => {
   const { user } = useAuth();
@@ -29,6 +30,10 @@ export const AppRoutes = (): JSX.Element => {
         element={
           isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
         }
+      />
+      <Route
+        path="account-confirm-email/:key"
+        element={<EmailVerificationPage />}
       />
       <Route path="/reset-password" element={<RequestResetPasswordPage />} />
       <Route

@@ -22,13 +22,24 @@ export const register = async (
   password1: string,
   password2: string,
 ): Promise<void> => {
-  await request("/auth/register/", {
+  await request("/auth/registration/", {
     method: "POST",
     body: JSON.stringify({
       username,
       email,
       password1,
       password2,
+    }),
+  });
+};
+
+export const verifyRegistrationEmail = async (
+  key: string | undefined,
+): Promise<void> => {
+  await request(`/auth/registration/verify-email`, {
+    method: "POST",
+    body: JSON.stringify({
+      key,
     }),
   });
 };
