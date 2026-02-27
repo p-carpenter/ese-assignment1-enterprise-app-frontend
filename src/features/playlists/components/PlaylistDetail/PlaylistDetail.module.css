@@ -1,0 +1,38 @@
+.container {
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: #ccc;
+  margin-bottom: 0.5rem;
+}
+
+.owner {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.songSection {
+  margin-top: 2rem;
+}
+
+.songsTitle {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+}

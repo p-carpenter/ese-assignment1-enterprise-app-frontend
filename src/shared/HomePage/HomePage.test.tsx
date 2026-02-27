@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
+import { AuthProvider } from "@/shared/context/AuthContext";
 import "@testing-library/jest-dom/vitest";
 
 // Stub heavy child components so this test focuses on page composition
@@ -32,7 +33,9 @@ describe("HomePage", () => {
   it("renders the Header", () => {
     render(
       <MemoryRouter>
-        <HomePage />
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId("header")).toBeInTheDocument();
@@ -41,7 +44,9 @@ describe("HomePage", () => {
   it("renders the MusicPlayer", () => {
     render(
       <MemoryRouter>
-        <HomePage />
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId("music-player")).toBeInTheDocument();
@@ -50,7 +55,9 @@ describe("HomePage", () => {
   it("renders the PlayHistory panel", () => {
     render(
       <MemoryRouter>
-        <HomePage />
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId("play-history")).toBeInTheDocument();
@@ -59,7 +66,9 @@ describe("HomePage", () => {
   it("initialises PlayHistory with keyTrigger=0", () => {
     render(
       <MemoryRouter>
-        <HomePage />
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId("play-history")).toHaveTextContent("trigger:0");
@@ -68,7 +77,9 @@ describe("HomePage", () => {
   it("increments the PlayHistory keyTrigger when a song is played", async () => {
     render(
       <MemoryRouter>
-        <HomePage />
+        <AuthProvider>
+          <HomePage />
+        </AuthProvider>
       </MemoryRouter>,
     );
 

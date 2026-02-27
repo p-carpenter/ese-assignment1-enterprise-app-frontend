@@ -3,6 +3,7 @@ import { MusicPlayer } from "@/features/player";
 import { PlayHistory } from "@/features/player";
 import { Header } from "@/shared/layout";
 import { SongLibrary } from "@/features/songs";
+import { PlaylistList } from "@/features/playlists/components/PlaylistList";
 
 export const HomePage = (): JSX.Element => {
   const [historyTrigger, setHistoryTrigger] = useState(0);
@@ -23,6 +24,7 @@ export const HomePage = (): JSX.Element => {
 
         {/* RIGHT COLUMN: History */}
         <div>
+          <PlaylistList />
           <PlayHistory keyTrigger={historyTrigger} />
         </div>
       </div>

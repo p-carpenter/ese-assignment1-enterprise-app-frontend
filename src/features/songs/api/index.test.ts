@@ -113,12 +113,12 @@ describe("Songs API", () => {
   });
 
   describe("getSongDetails", () => {
-    it("GETs /songs/:id// and returns a single song", async () => {
+    it("GETs /songs/:id/ and returns a single song", async () => {
       mockRequest.mockResolvedValueOnce(mockSong);
 
       const result = await getSongDetails(1);
 
-      expect(mockRequest).toHaveBeenCalledWith("/songs/1//");
+      expect(mockRequest).toHaveBeenCalledWith("/songs/1/");
       expect(result).toEqual(mockSong);
     });
   });

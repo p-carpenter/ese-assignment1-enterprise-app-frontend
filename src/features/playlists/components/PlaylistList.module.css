@@ -1,0 +1,52 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.container {
+  padding: 1rem;
+}
+
+.addButton {
+  margin-left: auto;
+  cursor: pointer;
+  color: var(--spotify-white);
+  font-size: 1.5rem;
+  transition: color 0.2s ease;
+  height: 36px;
+  width: 36px;
+}
+
+.addButton:hover {
+  color: var(--spotify-green);
+}
+
+.title {
+  margin-bottom: 1rem;
+}
+
+.playlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.playlist li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.playlist li:last-child {
+  border-bottom: none;
+}
+
+.playlist a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.playlist a:hover {
+  background-color: #2a2a2a;
+}

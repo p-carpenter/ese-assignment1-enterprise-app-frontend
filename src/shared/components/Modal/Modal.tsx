@@ -22,7 +22,13 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className={styles.closeButton}
           onClick={onClose}
