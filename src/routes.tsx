@@ -8,7 +8,8 @@ import {
   RequestResetPasswordPage,
   ProfilePage,
 } from "@/features/auth";
-import { HomePage, UploadPage } from "@/features/songs";
+import { UploadPage } from "@/features/songs";
+import { HomePage } from "@/shared/HomePage/HomePage";
 import { useAuth } from "@/shared/context/AuthContext";
 import { EmailVerificationPage } from "./features/auth/pages/EmailVerificationPage/EmailVerificationPage";
 

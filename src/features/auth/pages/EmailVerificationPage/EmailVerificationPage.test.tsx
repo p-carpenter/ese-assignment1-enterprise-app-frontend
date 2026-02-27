@@ -74,14 +74,18 @@ describe("EmailVerificationPage", () => {
 
   it("shows an error and does not redirect when verification fails", async () => {
     mockVerifyRegistrationEmail.mockRejectedValueOnce(
-      new Error("Failed to confirm your email. The key may be invalid or expired."),
+      new Error(
+        "Failed to confirm your email. The key may be invalid or expired.",
+      ),
     );
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
 
     renderPageAtRoute("/verify/bad-key", "/verify/:key");
 
     expect(
-      await screen.findByText("Failed to confirm your email. The key may be invalid or expired."),
+      await screen.findByText(
+        "Failed to confirm your email. The key may be invalid or expired.",
+      ),
     ).toBeInTheDocument();
 
     const redirectTimerCall = setTimeoutSpy.mock.calls.find(
