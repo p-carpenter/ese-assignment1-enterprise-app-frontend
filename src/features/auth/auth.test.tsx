@@ -4,29 +4,38 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { LoginForm } from "./components/LoginForm/LoginForm";
 import { RegistrationForm } from "./components/RegistrationForm/RegistrationForm";
 import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
-import { login, register } from "./api";
+import { login, register, getMe } from "./api";
+import { AuthProvider } from "@/shared/context/AuthContext";
 import "@testing-library/jest-dom/vitest";
 
 vi.mock("./api", () => ({
   login: vi.fn(),
   register: vi.fn(),
+  getMe: vi.fn(),
 }));
 
 const mockLogin = vi.mocked(login) as unknown as ReturnType<typeof vi.fn>;
 const mockRegister = vi.mocked(register) as unknown as ReturnType<typeof vi.fn>;
+const mockGetMe = vi.mocked(getMe) as unknown as ReturnType<typeof vi.fn>;
 
 describe("Auth features", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetMe.mockResolvedValue({
+      id: 1,
+      username: "testuser",
+      email: "test@example.com",
+    });
   });
 
-  it("submits login form and calls onSuccess", async () => {
-    const onSuccess = vi.fn();
+  it("submits login form and refreshes user", async () => {
     mockLogin.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
-        <LoginForm onSuccess={onSuccess} />
+        <AuthProvider>
+          <LoginForm />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
@@ -41,7 +50,7 @@ describe("Auth features", () => {
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith("user@example.com", "secret");
-      expect(onSuccess).toHaveBeenCalled();
+      expect(mockGetMe).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -50,7 +59,9 @@ describe("Auth features", () => {
 
     render(
       <MemoryRouter>
-        <LoginForm />
+        <AuthProvider>
+          <LoginForm />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
@@ -67,12 +78,11 @@ describe("Auth features", () => {
   });
 
   it("submits registration form and shows success message", async () => {
-    const onSuccess = vi.fn();
     mockRegister.mockResolvedValueOnce(undefined);
 
     render(
       <MemoryRouter>
-        <RegistrationForm onSuccess={onSuccess} />
+        <RegistrationForm />
       </MemoryRouter>,
     );
 
@@ -98,7 +108,6 @@ describe("Auth features", () => {
         "pass1234",
         "pass1234",
       );
-      expect(onSuccess).toHaveBeenCalled();
     });
 
     expect(
@@ -151,7 +160,9 @@ describe("Auth features", () => {
 
     render(
       <MemoryRouter>
-        <LoginForm />
+        <AuthProvider>
+          <LoginForm />
+        </AuthProvider>
       </MemoryRouter>,
     );
 

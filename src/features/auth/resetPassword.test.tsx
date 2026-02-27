@@ -121,13 +121,12 @@ describe("Reset Password Features", () => {
       });
     });
 
-    it("calls onSuccess callback after successful request", async () => {
-      const onSuccess = vi.fn();
+    it("completes the reset request flow", async () => {
       mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
-          <RequestResetPasswordForm onSuccess={onSuccess} />
+          <RequestResetPasswordForm />
         </MemoryRouter>,
       );
 
@@ -140,7 +139,9 @@ describe("Reset Password Features", () => {
       );
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalled();
+        expect(mockRequestPasswordReset).toHaveBeenCalledWith(
+          "user@example.com",
+        );
       });
     });
   });
@@ -283,17 +284,13 @@ describe("Reset Password Features", () => {
       });
     });
 
-    it("calls onSuccess callback after successful password reset", async () => {
-      const onSuccess = vi.fn();
+    it("submits a password reset successfully", async () => {
       mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
           <Routes>
-            <Route
-              path="/reset/:uid/:token"
-              element={<ResetPasswordForm onSuccess={onSuccess} />}
-            />
+            <Route path="/reset/:uid/:token" element={<ResetPasswordForm />} />
           </Routes>
         </MemoryRouter>,
       );
@@ -309,18 +306,21 @@ describe("Reset Password Features", () => {
       fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalled();
+        expect(mockConfirmPasswordReset).toHaveBeenCalledWith(
+          "abc123",
+          "token123",
+          "newpass123",
+          "newpass123",
+        );
       });
     });
   });
 
   describe("RequestResetPasswordPage", () => {
     it("renders the form and footer", () => {
-      const onSuccess = vi.fn();
-
       render(
         <MemoryRouter>
-          <RequestResetPasswordPage onSuccess={onSuccess} />
+          <RequestResetPasswordPage />
         </MemoryRouter>,
       );
 
@@ -332,13 +332,12 @@ describe("Reset Password Features", () => {
       expect(screen.getByText("Go back to login")).toBeInTheDocument();
     });
 
-    it("passes onSuccess to the form", async () => {
-      const onSuccess = vi.fn();
+    it("submits the form and calls the API", async () => {
       mockRequestPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter>
-          <RequestResetPasswordPage onSuccess={onSuccess} />
+          <RequestResetPasswordPage />
         </MemoryRouter>,
       );
 
@@ -351,22 +350,19 @@ describe("Reset Password Features", () => {
       );
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalled();
+        expect(mockRequestPasswordReset).toHaveBeenCalledWith(
+          "user@example.com",
+        );
       });
     });
   });
 
   describe("ResetPasswordPage", () => {
     it("renders the form and footer", () => {
-      const onSuccess = vi.fn();
-
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
           <Routes>
-            <Route
-              path="/reset/:uid/:token"
-              element={<ResetPasswordPage onSuccess={onSuccess} />}
-            />
+            <Route path="/reset/:uid/:token" element={<ResetPasswordPage />} />
           </Routes>
         </MemoryRouter>,
       );
@@ -382,17 +378,13 @@ describe("Reset Password Features", () => {
       expect(screen.getByText("Go back to login")).toBeInTheDocument();
     });
 
-    it("passes onSuccess to the form", async () => {
-      const onSuccess = vi.fn();
+    it("submits the form and calls the API", async () => {
       mockConfirmPasswordReset.mockResolvedValueOnce(undefined);
 
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
           <Routes>
-            <Route
-              path="/reset/:uid/:token"
-              element={<ResetPasswordPage onSuccess={onSuccess} />}
-            />
+            <Route path="/reset/:uid/:token" element={<ResetPasswordPage />} />
           </Routes>
         </MemoryRouter>,
       );
@@ -408,7 +400,12 @@ describe("Reset Password Features", () => {
       fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalled();
+        expect(mockConfirmPasswordReset).toHaveBeenCalledWith(
+          "abc123",
+          "token123",
+          "newpass123",
+          "newpass123",
+        );
       });
     });
   });

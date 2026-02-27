@@ -2,13 +2,7 @@ import { useState } from "react";
 import styles from "../AuthForm.module.css";
 import { requestPasswordReset } from "../../api";
 
-interface RequestResetPasswordFormProps {
-  onSuccess?: () => void;
-}
-
-export const RequestResetPasswordForm = ({
-  onSuccess,
-}: RequestResetPasswordFormProps) => {
+export const RequestResetPasswordForm = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -22,7 +16,6 @@ export const RequestResetPasswordForm = ({
     try {
       await requestPasswordReset(email);
       setSuccess(true);
-      onSuccess?.();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to request password reset",

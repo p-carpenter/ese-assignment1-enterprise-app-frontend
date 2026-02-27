@@ -3,7 +3,7 @@ import styles from "./FileSelect.module.css";
 
 interface FileSelectProps {
   onFileSelect: (file: File) => void;
-  accept: string; // e.g. "audio/*" or "image/*"
+  accept: string; // "audio/*" or "image/*"
   label?: string;
 }
 

@@ -3,29 +3,24 @@ import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { logout } from "@/features/auth/api";
+import { useAuth } from "@/shared/context/AuthContext";
 
-interface HeaderProps {
-  onLogout: () => void;
-  userInitial?: string;
-  avatarUrl?: string;
-}
-
-export const Header = ({
-  onLogout,
-  userInitial = "U",
-  avatarUrl,
-}: HeaderProps): JSX.Element => {
+export const Header = (): JSX.Element => {
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
 
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      onLogout();
+      setUser(null);
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
+
+  const userInitial = user?.username?.charAt(0).toUpperCase() || "U";
+  const avatarUrl = user?.avatar_url;
 
   return (
     <div className={styles.header}>
@@ -43,11 +38,7 @@ export const Header = ({
           onClick={() => navigate("/profile")}
           title="View Profile"
         >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" />
-          ) : (
-            userInitial.toUpperCase()
-          )}
+          {avatarUrl ? <img src={avatarUrl} alt="Profile" /> : userInitial}
         </button>
         <Button variant="outlined" size="small" onClick={handleLogout}>
           Log Out

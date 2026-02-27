@@ -6,6 +6,7 @@ import type { Song } from "@/features/songs/types";
 import { SongUploadForm } from "@/features/songs";
 import { SongLibrary } from "@/features/songs";
 import { uploadSong, deleteSong, updateSong } from "./api";
+import { useNavigate } from "react-router-dom";
 
 vi.mock("./api", () => ({
   uploadSong: vi.fn(),
@@ -16,6 +17,14 @@ vi.mock("./api", () => ({
 vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
   useCloudinaryUpload: vi.fn(),
 }));
+
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
+  return { ...actual, useNavigate: vi.fn() };
+});
 
 const mockUploadSong = vi.mocked(uploadSong) as unknown as ReturnType<
   typeof vi.fn
@@ -30,6 +39,7 @@ const mockDeleteSong = vi.mocked(deleteSong) as unknown as ReturnType<
 const mockedUseCloudinary = useCloudinaryUpload as unknown as ReturnType<
   typeof vi.fn
 >;
+const mockedUseNavigate = useNavigate as unknown as ReturnType<typeof vi.fn>;
 
 const mockSongs: Song[] = [
   {
@@ -53,6 +63,7 @@ const mockSongs: Song[] = [
 describe("Song management", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedUseNavigate.mockReturnValue(vi.fn());
     mockedUseCloudinary.mockReturnValue({
       upload: vi.fn().mockResolvedValue({
         secure_url: "http://audio.url/song.mp3",
@@ -75,11 +86,10 @@ describe("Song management", () => {
     });
   });
   describe("create", () => {
-    it("uploads a song and calls onUploadSuccess", async () => {
-      const onUploadSuccess = vi.fn();
+    it("uploads a song and navigates home", async () => {
       mockUploadSong.mockResolvedValueOnce(mockSongs[0]);
 
-      render(<SongUploadForm onUploadSuccess={onUploadSuccess} />);
+      render(<SongUploadForm />);
 
       fireEvent.change(screen.getByPlaceholderText("Title"), {
         target: { value: "Test Song" },
@@ -106,7 +116,6 @@ describe("Song management", () => {
           file_url: "http://audio.url/song.mp3",
           duration: 123,
         });
-        expect(onUploadSuccess).toHaveBeenCalled();
       });
     });
   });
@@ -277,7 +286,7 @@ describe("Song management", () => {
 
   describe("SongUploadForm – validation", () => {
     it("submit button is disabled until an audio file is uploaded", () => {
-      render(<SongUploadForm onUploadSuccess={vi.fn()} />);
+      render(<SongUploadForm />);
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
     });
 
@@ -286,7 +295,7 @@ describe("Song management", () => {
       // which cannot be triggered via the normal disabled-button path but is
       // reachable through the form's submit event.
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-      render(<SongUploadForm onUploadSuccess={vi.fn()} />);
+      render(<SongUploadForm />);
       // Button is disabled, so submit via form directly isn't possible in UI,
       // but we verify the button disabled state protects against it.
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();

@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { login } from "../../api/";
 import styles from "../AuthForm.module.css";
+import { useAuth } from "@/shared/context/AuthContext";
 
-interface LoginFormProps {
-  onSuccess?: () => void;
-}
-
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+export const LoginForm = () => {
+  const { refreshUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +17,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
     try {
       await login(email, password);
-      onSuccess?.();
+      await refreshUser();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

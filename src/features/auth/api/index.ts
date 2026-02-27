@@ -61,7 +61,6 @@ export const updateProfile = async (
   username: string,
   avatar_url?: string,
 ): Promise<UserProfile> => {
-
   return await request("/auth/user/", {
     method: "PATCH",
     credentials: "include",

@@ -3,28 +3,18 @@ import { RequestResetPasswordForm } from "../../components/RequestResetPasswordF
 import { AuthLayout } from "../../components/AuthLayout/AuthLayout";
 import authStyles from "../AuthPages.module.css";
 
-interface RequestResetPasswordPageProps {
-  onSuccess: () => void;
-}
-
-export const RequestResetPasswordPage = ({
-  onSuccess,
-}: RequestResetPasswordPageProps) => {
+export const RequestResetPasswordPage = () => {
   return (
-    <>
-      <AuthLayout>
-        <RequestResetPasswordForm onSuccess={onSuccess} />
-
-        <div className={authStyles.divider}>
-          <span>or</span>
-        </div>
-
-        <AuthFormFooter
-          footerText="Remembered your password?"
-          linkText="Go back to login"
-          linkTo="/login"
-        />
-      </AuthLayout>
-    </>
+    <AuthLayout>
+      <RequestResetPasswordForm />
+      <div className={authStyles.divider}>
+        <span>or</span>
+      </div>
+      <AuthFormFooter
+        footerText="Remembered your password?"
+        linkText="Go back to login"
+        linkTo="/login"
+      />
+    </AuthLayout>
   );
 };

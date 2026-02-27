@@ -3,11 +3,7 @@ import { confirmPasswordReset } from "../../api";
 import styles from "../AuthForm.module.css";
 import { useParams } from "react-router-dom";
 
-interface ResetPasswordFormProps {
-  onSuccess?: () => void;
-}
-
-export const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
+export const ResetPasswordForm = () => {
   const { uid, token } = useParams<{ uid: string; token: string }>();
 
   const [password, setPassword] = useState("");
@@ -29,7 +25,6 @@ export const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
     try {
       await confirmPasswordReset(uid, token, password, confirmPassword);
       setSuccess(true);
-      onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to reset password");
     } finally {

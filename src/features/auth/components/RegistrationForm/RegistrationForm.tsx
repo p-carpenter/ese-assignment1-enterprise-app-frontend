@@ -2,11 +2,7 @@ import { useState } from "react";
 import { register } from "../../api";
 import styles from "../AuthForm.module.css";
 
-interface RegistrationFormProps {
-  onSuccess?: () => void;
-}
-
-export const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
+export const RegistrationForm = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +19,6 @@ export const RegistrationForm = ({ onSuccess }: RegistrationFormProps) => {
     try {
       await register(username, email, password, password2);
       setSuccess(true);
-      onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
