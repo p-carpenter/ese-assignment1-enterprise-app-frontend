@@ -51,6 +51,10 @@ vi.mock("@/shared/context/AuthContext", () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
+vi.mock("@/shared/layout", () => ({
+  Header: () => <div data-testid="header" />,
+}));
+
 const renderProfile = (
   userOverride?: Partial<typeof mockUser> | null,
   isEditing = false,
