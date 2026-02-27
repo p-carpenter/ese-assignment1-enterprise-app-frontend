@@ -34,7 +34,7 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
     (song: Song) => {
       void playSong(song, { onSongPlay });
     },
-    [playSong, onSongPlay]
+    [playSong, onSongPlay],
   );
 
   return (

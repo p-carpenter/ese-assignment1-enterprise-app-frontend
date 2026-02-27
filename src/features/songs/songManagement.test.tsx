@@ -91,7 +91,7 @@ describe("Song management", () => {
 
   describe("read", () => {
     it("renders the list of songs (read)", () => {
-      render(<SongLibrary/>);
+      render(<SongLibrary />);
 
       expect(screen.getByText("Song A")).toBeInTheDocument();
       expect(screen.getByText("Song B")).toBeInTheDocument();

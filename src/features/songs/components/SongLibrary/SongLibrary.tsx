@@ -6,72 +6,78 @@ import { deleteSong } from "../../api";
 import { EditSongModal } from "../EditSongModal/EditSongModal";
 import { usePlayer } from "../../../../shared/context/PlayerContext";
 
-const SongRow = memo(({
-  song,
-  isActive,
-  onPlay,
-  onEdit,
-  onDelete
-}: {
-  song: Song;
-  isActive: boolean;
-  onPlay: (song: Song) => void;
-  onEdit: (song: Song) => void;
-  onDelete: (id: number) => void;
-}) => {
-  return (
-    <li
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('.dropdown-container')) return;
-        onPlay(song);
-      }}
-      className={isActive ? styles.songItemActive : styles.songItem}
-    >
-      <div className={styles.songMeta}>
-        <strong className={styles.songTitle}>{song.title}</strong>
-        <br />
-        <span className={styles.songArtist}>{song.artist}</span>
-      </div>
-      <span className={styles.duration}>{formatTime(song.duration)}</span>
+const SongRow = memo(
+  ({
+    song,
+    isActive,
+    onPlay,
+    onEdit,
+    onDelete,
+  }: {
+    song: Song;
+    isActive: boolean;
+    onPlay: (song: Song) => void;
+    onEdit: (song: Song) => void;
+    onDelete: (id: number) => void;
+  }) => {
+    return (
+      <li
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest(".dropdown-container")) return;
+          onPlay(song);
+        }}
+        className={isActive ? styles.songItemActive : styles.songItem}
+      >
+        <div className={styles.songMeta}>
+          <strong className={styles.songTitle}>{song.title}</strong>
+          <br />
+          <span className={styles.songArtist}>{song.artist}</span>
+        </div>
+        <span className={styles.duration}>{formatTime(song.duration)}</span>
 
-      <div className="dropdown-container">
-        <SongManagementDropdown
-          dropdownItems={[
-            { label: "Edit", onSelect: () => onEdit(song) },
-            { label: "Delete", onSelect: () => onDelete(song.id) },
-          ]}
-        />
-      </div>
-    </li>
-  );
-});
-
+        <div className="dropdown-container">
+          <SongManagementDropdown
+            dropdownItems={[
+              { label: "Edit", onSelect: () => onEdit(song) },
+              { label: "Delete", onSelect: () => onDelete(song.id) },
+            ]}
+          />
+        </div>
+      </li>
+    );
+  },
+);
 
 SongRow.displayName = "SongRow";
-
 
 export const SongLibrary = (): JSX.Element => {
   const { songs, currentSong, playSong, refreshSongs } = usePlayer();
 
   const [editSong, setEditSong] = useState<Song | null>(null);
 
-  const handlePlay = useCallback((song: Song) => {
-    void playSong(song);
-  }, [playSong]);
+  const handlePlay = useCallback(
+    (song: Song) => {
+      void playSong(song);
+    },
+    [playSong],
+  );
 
   const handleEdit = useCallback((song: Song) => {
     setEditSong(song);
   }, []);
 
-  const handleDelete = useCallback(async (songId: number) => {
-    try {
-      await deleteSong(songId);
-      void refreshSongs();
-    } catch (error) {
-      console.error("Error deleting song:", error);
-      alert("Failed to delete song. Please try again.");
-    }
-  }, [refreshSongs]);
+  const handleDelete = useCallback(
+    async (songId: number) => {
+      try {
+        await deleteSong(songId);
+        void refreshSongs();
+      } catch (error) {
+        console.error("Error deleting song:", error);
+        alert("Failed to delete song. Please try again.");
+      }
+    },
+    [refreshSongs],
+  );
 
   return (
     <div className={styles.songList}>
