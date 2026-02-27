@@ -82,7 +82,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         autoplay: true,
         format: "mp3",
         html5: true,
-        onend: () => console.log("Song finished!"),
+        onend: () => {
+          const currentIndexInQueue = songs.findIndex(
+            (queuedSong) => queuedSong.id === song.id,
+          );
+
+          if (currentIndexInQueue === -1 || songs.length === 0) return;
+
+          const nextSongIndex =
+            currentIndexInQueue < songs.length - 1 ? currentIndexInQueue + 1 : 0;
+          const nextSong = songs[nextSongIndex];
+
+          void playSong(nextSong, options);
+        },
       });
 
       try {
@@ -92,7 +104,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to log play:", err);
       }
     },
-    [currentSong, isPlaying, load, pause, play, stop],
+    [currentSong, isPlaying, load, pause, play, songs, stop],
   );
 
   const currentIndex = useMemo((): number => {

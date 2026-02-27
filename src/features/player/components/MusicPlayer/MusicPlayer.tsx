@@ -28,10 +28,8 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
   } = usePlayer();
 
   useEffect(() => {
-    if (songs.length === 0) {
-      void refreshSongs();
-    }
-  }, [refreshSongs, songs.length]);
+    void refreshSongs();
+  }, [refreshSongs]);
 
   const handleSongClick = (song: Song) => playSong(song, { onSongPlay });
 

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { MusicPlayer } from "@/features/player";
 import { PlayerProvider } from "@/features/player";
 import { listSongs, logPlay } from "@/features/songs/api";
@@ -169,6 +175,37 @@ describe("MusicPlayer", () => {
     await waitFor(() => {
       expect(audioPlayerMocks.load).toHaveBeenCalledWith(
         "http://example.com/song1.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
+  });
+
+  it("automatically plays the next song when the current song ends", async () => {
+    renderWithProvider();
+
+    fireEvent.click(await screen.findByText("Song A"));
+
+    await waitFor(() => {
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song1.mp3",
+        expect.objectContaining({ autoplay: true }),
+      );
+    });
+
+    const firstLoadCall = audioPlayerMocks.load.mock.calls[0];
+    const firstLoadOptions = firstLoadCall?.[1] as {
+      onend?: () => void;
+    };
+
+    expect(firstLoadOptions?.onend).toBeTypeOf("function");
+
+    await act(async () => {
+      firstLoadOptions.onend?.();
+    });
+
+    await waitFor(() => {
+      expect(audioPlayerMocks.load).toHaveBeenCalledWith(
+        "http://example.com/song2.mp3",
         expect.objectContaining({ autoplay: true }),
       );
     });
