@@ -3,7 +3,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -49,6 +51,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
 
+  const currentIndex = useMemo((): number => {
+    if (!currentSong) return -1;
+    return songs.findIndex((song) => song.id === currentSong.id);
+  }, [currentSong, songs]);
+
+  const playNextRef = useRef<(() => Promise<void>) | undefined>(undefined);
+
   const refreshSongs = useCallback(async () => {
     try {
       const data = await listSongs();
@@ -83,17 +92,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         format: "mp3",
         html5: true,
         onend: () => {
-          const currentIndexInQueue = songs.findIndex(
-            (queuedSong) => queuedSong.id === song.id,
-          );
-
-          if (currentIndexInQueue === -1 || songs.length === 0) return;
-
-          const nextSongIndex =
-            currentIndexInQueue < songs.length - 1 ? currentIndexInQueue + 1 : 0;
-          const nextSong = songs[nextSongIndex];
-
-          void playSong(nextSong, options);
+          void playNextRef.current?.();
         },
       });
 
@@ -104,13 +103,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to log play:", err);
       }
     },
-    [currentSong, isPlaying, load, pause, play, songs, stop],
+    [currentSong?.id, isPlaying, load, pause, play, stop],
   );
-
-  const currentIndex = useMemo((): number => {
-    if (!currentSong) return -1;
-    return songs.findIndex((song) => song.id === currentSong.id);
-  }, [currentSong, songs]);
 
   const playPrev = useCallback(async (): Promise<void> => {
     if (songs.length === 0) return;
@@ -126,6 +120,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         : 0;
     await playSong(songs[nextIndex]);
   }, [currentIndex, playSong, songs]);
+
+  useEffect(() => {
+    playNextRef.current = playNext;
+  }, [playNext]);
 
   return (
     <PlayerContext.Provider

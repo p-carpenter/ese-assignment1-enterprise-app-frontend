@@ -7,6 +7,7 @@ import { SongUploadForm } from "@/features/songs";
 import { SongLibrary } from "@/features/songs";
 import { uploadSong, deleteSong, updateSong } from "./api";
 import { useNavigate } from "react-router-dom";
+import { usePlayer } from "@/shared/context/PlayerContext";
 
 vi.mock("./api", () => ({
   uploadSong: vi.fn(),
@@ -26,6 +27,10 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: vi.fn() };
 });
 
+vi.mock("@/shared/context/PlayerContext", () => ({
+  usePlayer: vi.fn(),
+}));
+
 const mockUploadSong = vi.mocked(uploadSong) as unknown as ReturnType<
   typeof vi.fn
 >;
@@ -40,6 +45,7 @@ const mockedUseCloudinary = useCloudinaryUpload as unknown as ReturnType<
   typeof vi.fn
 >;
 const mockedUseNavigate = useNavigate as unknown as ReturnType<typeof vi.fn>;
+const mockedUsePlayer = usePlayer as unknown as ReturnType<typeof vi.fn>;
 
 const mockSongs: Song[] = [
   {
@@ -61,9 +67,18 @@ const mockSongs: Song[] = [
 ];
 
 describe("Song management", () => {
+  const mockPlaySong = vi.fn().mockResolvedValue(undefined);
+  const mockRefreshSongs = vi.fn().mockResolvedValue(undefined);
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUseNavigate.mockReturnValue(vi.fn());
+    mockedUsePlayer.mockReturnValue({
+      songs: mockSongs,
+      currentSong: null,
+      playSong: mockPlaySong,
+      refreshSongs: mockRefreshSongs,
+    });
     mockedUseCloudinary.mockReturnValue({
       upload: vi.fn().mockResolvedValue({
         secure_url: "http://audio.url/song.mp3",
@@ -76,8 +91,7 @@ describe("Song management", () => {
 
   describe("read", () => {
     it("renders the list of songs (read)", () => {
-      const onSongClick = vi.fn();
-      render(<SongLibrary songs={mockSongs} onSongClick={onSongClick} />);
+      render(<SongLibrary/>);
 
       expect(screen.getByText("Song A")).toBeInTheDocument();
       expect(screen.getByText("Song B")).toBeInTheDocument();
@@ -165,16 +179,7 @@ describe("Song management", () => {
   describe("delete", () => {
     it("calls api.deleteSong when Delete is clicked and re-renders the song list", async () => {
       mockDeleteSong.mockResolvedValueOnce({});
-      const onSongClick = vi.fn();
-      const onSongsChanged = vi.fn();
-
-      const { rerender } = render(
-        <SongLibrary
-          songs={mockSongs}
-          onSongClick={onSongClick}
-          onSongsChanged={onSongsChanged}
-        />,
-      );
+      render(<SongLibrary />);
 
       const moreButtons = screen.getAllByRole("button");
       fireEvent.click(moreButtons[0]);
@@ -184,18 +189,8 @@ describe("Song management", () => {
 
       await waitFor(() => {
         expect(mockDeleteSong).toHaveBeenCalledWith(mockSongs[0].id);
-        expect(onSongsChanged).toHaveBeenCalled();
+        expect(mockRefreshSongs).toHaveBeenCalled();
       });
-
-      // Check song is deleted from the list
-      rerender(
-        <SongLibrary
-          songs={mockSongs.filter((song) => song.id !== mockSongs[0].id)}
-          onSongClick={onSongClick}
-          onSongsChanged={onSongsChanged}
-        />,
-      );
-      expect(screen.queryByText("Song A")).not.toBeInTheDocument();
     });
 
     it("shows an alert and does not call onSongsChanged when deleteSong fails", async () => {
@@ -204,22 +199,14 @@ describe("Song management", () => {
         .spyOn(console, "error")
         .mockImplementation(() => {});
       mockDeleteSong.mockRejectedValueOnce(new Error("Server error"));
-
-      const onSongsChanged = vi.fn();
-      render(
-        <SongLibrary
-          songs={mockSongs}
-          onSongClick={vi.fn()}
-          onSongsChanged={onSongsChanged}
-        />,
-      );
+      render(<SongLibrary />);
 
       fireEvent.click(screen.getAllByRole("button")[0]); // open dropdown
       fireEvent.click(await screen.findByText("Delete"));
 
       await waitFor(() => {
         expect(alertSpy).toHaveBeenCalled();
-        expect(onSongsChanged).not.toHaveBeenCalled();
+        expect(mockRefreshSongs).not.toHaveBeenCalled();
       });
 
       alertSpy.mockRestore();
@@ -229,32 +216,38 @@ describe("Song management", () => {
 
   describe("SongLibrary – display", () => {
     it("shows the correct track count in the heading", () => {
-      render(<SongLibrary songs={mockSongs} onSongClick={vi.fn()} />);
+      render(<SongLibrary />);
       expect(screen.getByText(/library \(2 tracks\)/i)).toBeInTheDocument();
     });
 
     it("renders an empty library with 0 tracks", () => {
-      render(<SongLibrary songs={[]} onSongClick={vi.fn()} />);
+      mockedUsePlayer.mockReturnValue({
+        songs: [],
+        currentSong: null,
+        playSong: mockPlaySong,
+        refreshSongs: mockRefreshSongs,
+      });
+      render(<SongLibrary />);
       expect(screen.getByText(/library \(0 tracks\)/i)).toBeInTheDocument();
     });
 
     it("highlights the currently-playing song", () => {
-      render(
-        <SongLibrary
-          songs={mockSongs}
-          currentSongId={mockSongs[0].id}
-          onSongClick={vi.fn()}
-        />,
-      );
-      // The active class is applied to the first li; just verify it renders
+      mockedUsePlayer.mockReturnValue({
+        songs: mockSongs,
+        currentSong: mockSongs[0],
+        playSong: mockPlaySong,
+        refreshSongs: mockRefreshSongs,
+      });
+      const { container } = render(<SongLibrary />);
+      const firstItem = container.querySelector("li");
+      expect(firstItem?.className).toMatch(/songItemActive/);
       expect(screen.getByText("Song A")).toBeInTheDocument();
     });
 
     it("calls onSongClick with the correct song when a list item is clicked", () => {
-      const onSongClick = vi.fn();
-      render(<SongLibrary songs={mockSongs} onSongClick={onSongClick} />);
+      render(<SongLibrary />);
       fireEvent.click(screen.getByText("Song B"));
-      expect(onSongClick).toHaveBeenCalledWith(mockSongs[1]);
+      expect(mockPlaySong).toHaveBeenCalledWith(mockSongs[1]);
     });
   });
 

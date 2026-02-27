@@ -1,10 +1,9 @@
-import { useEffect, type JSX } from "react";
+import { useEffect, useCallback, type JSX } from "react";
 import styles from "./MusicPlayer.module.css";
-import { SongLibrary } from "@/features/songs";
 import { type Song } from "@/features/songs/types";
 import { ProgressBar } from "../ProgressBar/ProgressBar";
 import { PlaybackControls } from "../PlaybackControls/PlaybackControls";
-import { usePlayer } from "../../context/PlayerContext";
+import { usePlayer } from "../../../../shared/context/PlayerContext";
 
 interface MusicPlayerProps {
   onSongPlay?: () => void;
@@ -31,15 +30,12 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
     void refreshSongs();
   }, [refreshSongs]);
 
-  const handleSongClick = (song: Song) => playSong(song, { onSongPlay });
-
-  const handlePrev = (): void => {
-    void playPrev();
-  };
-
-  const handleNext = (): void => {
-    void playNext();
-  };
+  useCallback(
+    (song: Song) => {
+      void playSong(song, { onSongPlay });
+    },
+    [playSong, onSongPlay]
+  );
 
   return (
     <div className={styles.container}>
@@ -59,8 +55,8 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
               isLoading={isLoading}
               onPlay={play}
               onPause={pause}
-              onPrev={handlePrev}
-              onNext={handleNext}
+              onPrev={playPrev}
+              onNext={playNext}
               disablePrev={songs.length === 0}
               disableNext={songs.length === 0}
             />
@@ -78,13 +74,6 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
           </p>
         )}
       </div>
-
-      <SongLibrary
-        songs={songs}
-        currentSongId={currentSong?.id}
-        onSongClick={handleSongClick}
-        onSongsChanged={refreshSongs}
-      />
     </div>
   );
 };

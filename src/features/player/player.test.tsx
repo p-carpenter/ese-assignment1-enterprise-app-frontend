@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { MusicPlayer } from "@/features/player";
 import { PlayerProvider } from "@/features/player";
+import { SongLibrary } from "@/features/songs";
 import { listSongs, logPlay } from "@/features/songs/api";
 import type { Song } from "@/features/songs/types";
 
@@ -62,6 +63,7 @@ describe("MusicPlayer", () => {
     render(
       <PlayerProvider>
         <MusicPlayer />
+        <SongLibrary />
       </PlayerProvider>,
     );
 

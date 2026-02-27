@@ -20,6 +20,10 @@ vi.mock("@/shared/layout", () => ({
   Header: () => <div data-testid="header">Header</div>,
 }));
 
+vi.mock("@/features/songs", () => ({
+  SongLibrary: () => <div data-testid="song-library">Song Library</div>,
+}));
+
 describe("HomePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -2,6 +2,7 @@ import { useState, type JSX } from "react";
 import { MusicPlayer } from "@/features/player";
 import { PlayHistory } from "@/features/player";
 import { Header } from "@/shared/layout";
+import { SongLibrary } from "@/features/songs";
 
 export const HomePage = (): JSX.Element => {
   const [historyTrigger, setHistoryTrigger] = useState(0);
@@ -17,6 +18,7 @@ export const HomePage = (): JSX.Element => {
         {/* LEFT COLUMN: Player */}
         <div>
           <MusicPlayer onSongPlay={refreshHistory} />
+          <SongLibrary />
         </div>
 
         {/* RIGHT COLUMN: History */}

@@ -1,85 +1,102 @@
-import { useState, type JSX } from "react";
+import { useState, useCallback, memo, type JSX } from "react";
 import { type Song } from "../../types";
 import styles from "./SongLibrary.module.css";
 import { SongManagementDropdown } from "../SongManagementDropdown/SongManagementDropdown";
 import { deleteSong } from "../../api";
 import { EditSongModal } from "../EditSongModal/EditSongModal";
+import { usePlayer } from "../../../../shared/context/PlayerContext";
 
-interface SongLibraryProps {
-  songs: Song[];
-  currentSongId?: number;
-  onSongClick: (song: Song) => void;
-  onSongsChanged?: () => void;
-}
+const SongRow = memo(({
+  song,
+  isActive,
+  onPlay,
+  onEdit,
+  onDelete
+}: {
+  song: Song;
+  isActive: boolean;
+  onPlay: (song: Song) => void;
+  onEdit: (song: Song) => void;
+  onDelete: (id: number) => void;
+}) => {
+  return (
+    <li
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('.dropdown-container')) return;
+        onPlay(song);
+      }}
+      className={isActive ? styles.songItemActive : styles.songItem}
+    >
+      <div className={styles.songMeta}>
+        <strong className={styles.songTitle}>{song.title}</strong>
+        <br />
+        <span className={styles.songArtist}>{song.artist}</span>
+      </div>
+      <span className={styles.duration}>{formatTime(song.duration)}</span>
 
-export const SongLibrary = ({
-  songs,
-  currentSongId,
-  onSongClick,
-  onSongsChanged,
-}: SongLibraryProps): JSX.Element => {
+      <div className="dropdown-container">
+        <SongManagementDropdown
+          dropdownItems={[
+            { label: "Edit", onSelect: () => onEdit(song) },
+            { label: "Delete", onSelect: () => onDelete(song.id) },
+          ]}
+        />
+      </div>
+    </li>
+  );
+});
+
+
+SongRow.displayName = "SongRow";
+
+
+export const SongLibrary = (): JSX.Element => {
+  const { songs, currentSong, playSong, refreshSongs } = usePlayer();
+
   const [editSong, setEditSong] = useState<Song | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
-  const handleEdit = (song: Song) => {
+  const handlePlay = useCallback((song: Song) => {
+    void playSong(song);
+  }, [playSong]);
+
+  const handleEdit = useCallback((song: Song) => {
     setEditSong(song);
-    setModalOpen(true);
-  };
+  }, []);
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
-
-  const handleSongUpdated = () => {
-    if (onSongsChanged) onSongsChanged();
-  };
-
-  const handleDelete = async (songId: number) => {
+  const handleDelete = useCallback(async (songId: number) => {
     try {
       await deleteSong(songId);
-      onSongsChanged?.();
+      void refreshSongs();
     } catch (error) {
       console.error("Error deleting song:", error);
       alert("Failed to delete song. Please try again.");
     }
-  };
+  }, [refreshSongs]);
 
   return (
     <div className={styles.songList}>
       <h3 className={styles.libraryTitle}>Library ({songs.length} tracks)</h3>
       <ul className={styles.list}>
         {songs.map((song) => (
-          <li
+          <SongRow
             key={song.id}
-            onClick={() => onSongClick(song)}
-            className={
-              currentSongId === song.id
-                ? styles.songItemActive
-                : styles.songItem
-            }
-          >
-            <div className={styles.songMeta}>
-              <strong className={styles.songTitle}>{song.title}</strong>
-              <br />
-              <span className={styles.songArtist}>{song.artist}</span>
-            </div>
-            <span className={styles.duration}>{formatTime(song.duration)}</span>
-            <SongManagementDropdown
-              dropdownItems={[
-                { label: "Edit", onSelect: () => handleEdit(song) },
-                { label: "Delete", onSelect: () => handleDelete(song.id) },
-              ]}
-            />
-          </li>
+            song={song}
+            isActive={currentSong?.id === song.id}
+            onPlay={handlePlay}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         ))}
       </ul>
-      <EditSongModal
-        key={editSong?.id || "empty-modal"}
-        song={editSong}
-        isOpen={modalOpen}
-        onClose={handleModalClose}
-        onSongUpdated={handleSongUpdated}
-      />
+
+      {editSong && (
+        <EditSongModal
+          song={editSong}
+          isOpen={true}
+          onClose={() => setEditSong(null)}
+          onSongUpdated={refreshSongs}
+        />
+      )}
     </div>
   );
 };
