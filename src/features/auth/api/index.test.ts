@@ -76,12 +76,12 @@ describe("Auth API", () => {
   });
 
   describe("register", () => {
-    it("POSTs to /auth/register/ with all four fields", async () => {
+    it("POSTs to /auth/registration/ with all four fields", async () => {
       mockRequest.mockResolvedValueOnce(undefined);
 
       await register("testuser", "user@example.com", "pass1234", "pass1234");
 
-      expect(mockRequest).toHaveBeenCalledWith("/auth/register/", {
+      expect(mockRequest).toHaveBeenCalledWith("/auth/registration/", {
         method: "POST",
         body: JSON.stringify({
           username: "testuser",
