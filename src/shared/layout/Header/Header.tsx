@@ -25,7 +25,9 @@ export const Header = (): JSX.Element => {
 
   return (
     <div className={styles.header}>
-      <h1 className={styles.title}>Music Player</h1>
+      <h1 className={styles.title} onClick={() => navigate("/")}>
+        Music Player
+      </h1>
       <MiniPlayer />
       <div className={styles.actions}>
         <Button
