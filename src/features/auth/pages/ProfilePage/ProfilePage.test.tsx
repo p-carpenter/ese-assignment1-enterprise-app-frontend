@@ -108,9 +108,13 @@ describe("ProfilePage", () => {
   describe("profile editing", () => {
     it("renders editable username field and save/cancel buttons", () => {
       renderProfile(undefined, true);
-      expect(screen.getByPlaceholderText(mockUser.username)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(mockUser.username),
+      ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /cancel/i }),
+      ).toBeInTheDocument();
     });
 
     it("submits profile updates", async () => {

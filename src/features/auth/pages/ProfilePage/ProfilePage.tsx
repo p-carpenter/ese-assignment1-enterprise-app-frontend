@@ -8,7 +8,11 @@ import { useCloudinaryUpload } from "@/shared/hooks";
 import { updateProfile } from "../../api";
 import { useAuth } from "@/shared/context/AuthContext";
 
-export const ProfilePage = ({ isEditing = false }: { isEditing?: boolean }): JSX.Element => {
+export const ProfilePage = ({
+  isEditing = false,
+}: {
+  isEditing?: boolean;
+}): JSX.Element => {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
 
@@ -92,7 +96,11 @@ export const ProfilePage = ({ isEditing = false }: { isEditing?: boolean }): JSX
           </div>
           <h1 className={styles.displayName}>{user.username}</h1>
           {!isEditing && (
-            <Button variant="outlined" size="small" onClick={() => navigate("/profile/edit")}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => navigate("/profile/edit")}
+            >
               Edit Profile
             </Button>
           )}
@@ -121,7 +129,12 @@ export const ProfilePage = ({ isEditing = false }: { isEditing?: boolean }): JSX
 
         {isEditing ? (
           <div className={styles.editActions}>
-            <Button variant="outlined" size="large" onClick={handleSave} disabled={isUploading}>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={handleSave}
+              disabled={isUploading}
+            >
               Save
             </Button>
             <Button variant="outlined" size="large" onClick={handleCancel}>
@@ -133,7 +146,9 @@ export const ProfilePage = ({ isEditing = false }: { isEditing?: boolean }): JSX
             Back to Home
           </Button>
         )}
-        {uploadError && <div className={styles.error}>{String(uploadError)}</div>}
+        {uploadError && (
+          <div className={styles.error}>{String(uploadError)}</div>
+        )}
       </div>
     </div>
   );

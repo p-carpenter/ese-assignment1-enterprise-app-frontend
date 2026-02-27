@@ -290,10 +290,7 @@ describe("Reset Password Features", () => {
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
           <Routes>
-            <Route
-              path="/reset/:uid/:token"
-              element={<ResetPasswordForm />}
-            />
+            <Route path="/reset/:uid/:token" element={<ResetPasswordForm />} />
           </Routes>
         </MemoryRouter>,
       );
@@ -387,10 +384,7 @@ describe("Reset Password Features", () => {
       render(
         <MemoryRouter initialEntries={["/reset/abc123/token123"]}>
           <Routes>
-            <Route
-              path="/reset/:uid/:token"
-              element={<ResetPasswordPage />}
-            />
+            <Route path="/reset/:uid/:token" element={<ResetPasswordPage />} />
           </Routes>
         </MemoryRouter>,
       );
