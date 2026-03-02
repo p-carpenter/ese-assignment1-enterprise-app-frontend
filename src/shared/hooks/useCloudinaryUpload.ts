@@ -10,7 +10,13 @@ export const useCloudinaryUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const upload = async (file: File) => {
+  const upload = async (file: File | null) => {
+    if (!file) {
+      // If no file is selected (e.g., user cancels file dialog), do nothing.
+      // This prevents state changes when the user cancels.
+      return null;
+    }
+
     setIsUploading(true);
     setError(null);
 

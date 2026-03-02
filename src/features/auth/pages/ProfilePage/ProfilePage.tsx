@@ -35,7 +35,9 @@ export const ProfilePage = ({
     if (file) {
       try {
         const cloudinaryResponse = await upload(file);
-        setNewAvatarUrl(cloudinaryResponse.secure_url);
+        if (cloudinaryResponse) {
+          setNewAvatarUrl(cloudinaryResponse.secure_url);
+        }
       } catch (err) {
         console.error("New profile avatar upload failed:", err);
       }

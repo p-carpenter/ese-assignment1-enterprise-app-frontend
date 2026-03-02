@@ -3,6 +3,7 @@ import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { uploadSong } from "../../api";
 import { useNavigate } from "react-router-dom";
+import styles from "./SongUploadForm.module.css";
 
 export const SongUploadForm = () => {
   const navigate = useNavigate();
@@ -28,21 +29,27 @@ export const SongUploadForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const handleCoverArtUpload = async (file: File) => {
+  const handleCoverArtUpload = async (file: File | null) => {
+    if (!file) return;
     try {
       const cloudData = await uploadCover(file);
-      setCoverArtUrl(cloudData.secure_url);
+      if (cloudData) {
+        setCoverArtUrl(cloudData.secure_url);
+      }
     } catch (err) {
       console.error("Cover art upload failed:", err);
     }
   };
 
-  const handleMp3Upload = async (file: File) => {
+  const handleMp3Upload = async (file: File | null) => {
+    if (!file) return;
     try {
       const cloudData = await uploadMp3(file);
-      setSongUrl(cloudData.secure_url);
-      setSongDuration(Math.round(cloudData.duration || 0));
-      setSongFileName(file.name);
+      if (cloudData) {
+        setSongUrl(cloudData.secure_url);
+        setSongDuration(Math.round(cloudData.duration || 0));
+        setSongFileName(file.name);
+      }
     } catch (err) {
       console.error("MP3 upload failed:", err);
     }
@@ -91,20 +98,10 @@ export const SongUploadForm = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      {/* Centralized Error Display */}
-      {submitError && (
-        <div style={{ color: "red", fontWeight: "bold" }}>{submitError}</div>
-      )}
+    <div className={styles.errorContainer}>
+      {submitError && <div className={styles.error}>{submitError}</div>}
       {(mp3Error || coverError) && (
-        <div
-          style={{
-            color: "red",
-            padding: "10px",
-            backgroundColor: "#ffebee",
-            borderRadius: "4px",
-          }}
-        >
+        <div className={styles.error}>
           {mp3Error && <div>MP3 Upload Error: {mp3Error}</div>}
           {coverError && <div>Cover Art Error: {coverError}</div>}
         </div>
