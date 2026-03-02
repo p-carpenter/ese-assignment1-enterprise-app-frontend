@@ -66,3 +66,38 @@
   min-width: 48px;
   text-align: right;
 }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.pageButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 6px 14px;
+  transition: background-color 0.2s ease;
+}
+
+.pageButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pageButton:disabled {
+  color: var(--spotify-gray);
+  cursor: default;
+}
+
+.pageInfo {
+  color: var(--spotify-gray);
+  font-size: 0.875rem;
+  min-width: 56px;
+  text-align: center;
+}

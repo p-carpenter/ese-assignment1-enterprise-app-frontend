@@ -19,42 +19,47 @@ const mockSong: Song = {
   duration: 200,
   file_url: "http://example.com/history.mp3",
   cover_art_url: "http://example.com/history.jpg",
+  album: "History Album",
+  genre: "History Genre",
+  release_year: "2026",
 };
 
 describe("PlayHistory", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetPlayHistory.mockResolvedValue([]);
+    mockGetPlayHistory.mockResolvedValue({ count: 0, results: [] });
   });
 
   it("shows empty state when no history", async () => {
-    mockGetPlayHistory.mockResolvedValueOnce([]);
+    mockGetPlayHistory.mockResolvedValueOnce({ count: 0, results: [] });
 
-    render(<PlayHistory keyTrigger={1} />);
+    render(<PlayHistory keyTrigger={0} />);
 
     expect(await screen.findByText(/No play history yet/i)).toBeInTheDocument();
   });
 
   it("renders history entries from the API", async () => {
-    mockGetPlayHistory.mockResolvedValueOnce([
-      { song: mockSong, played_at: "2026-02-19T10:30:00.000Z" },
-    ]);
+    mockGetPlayHistory.mockResolvedValueOnce({
+      count: 1,
+      results: [{ song: mockSong, played_at: "2026-02-19T10:30:00.000Z" }],
+    });
 
-    render(<PlayHistory keyTrigger={2} />);
+    render(<PlayHistory keyTrigger={0} />);
 
     expect(await screen.findByText("History Song")).toBeInTheDocument();
     expect(screen.getByText("History Artist")).toBeInTheDocument();
   });
 
   it("re-fetches history when keyTrigger changes", async () => {
-    mockGetPlayHistory.mockResolvedValue([]);
+    mockGetPlayHistory.mockResolvedValue({ count: 0, results: [] });
 
     const { rerender } = render(<PlayHistory keyTrigger={0} />);
     await screen.findByText(/no play history yet/i);
 
-    mockGetPlayHistory.mockResolvedValueOnce([
-      { song: mockSong, played_at: "2026-02-19T10:30:00.000Z" },
-    ]);
+    mockGetPlayHistory.mockResolvedValueOnce({
+      count: 1,
+      results: [{ song: mockSong, played_at: "2026-02-19T10:30:00.000Z" }],
+    });
     rerender(<PlayHistory keyTrigger={1} />);
 
     expect(await screen.findByText("History Song")).toBeInTheDocument();
@@ -62,7 +67,7 @@ describe("PlayHistory", () => {
   });
 
   it("renders the 'Recently Played' heading", async () => {
-    mockGetPlayHistory.mockResolvedValueOnce([]);
+    mockGetPlayHistory.mockResolvedValueOnce({ count: 0, results: [] });
 
     render(<PlayHistory keyTrigger={0} />);
 
@@ -71,11 +76,12 @@ describe("PlayHistory", () => {
 
   it("renders the played_at timestamp for each entry", async () => {
     const playedAt = "2026-02-19T10:30:00.000Z";
-    mockGetPlayHistory.mockResolvedValueOnce([
-      { song: mockSong, played_at: playedAt },
-    ]);
+    mockGetPlayHistory.mockResolvedValueOnce({
+      count: 1,
+      results: [{ song: mockSong, played_at: playedAt }],
+    });
 
-    render(<PlayHistory keyTrigger={1} />);
+    render(<PlayHistory keyTrigger={0} />);
 
     await screen.findByText("History Song");
     // The component formats the date via toLocaleString()
@@ -86,9 +92,9 @@ describe("PlayHistory", () => {
 
   it("handles API errors gracefully (empty state shown)", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockGetPlayHistory.mockRejectedValueOnce(new Error("Server error"));
+    mockGetPlayHistory.mockRejectedValue(new Error("Server error"));
 
-    render(<PlayHistory keyTrigger={1} />);
+    render(<PlayHistory keyTrigger={0} />);
 
     // The component catches the error and leaves the list empty
     expect(await screen.findByText(/no play history yet/i)).toBeInTheDocument();

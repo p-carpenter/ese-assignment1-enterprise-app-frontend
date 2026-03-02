@@ -129,6 +129,9 @@ describe("SongDetailsForm", () => {
       expect(onSubmit).toHaveBeenCalledWith({
         title: "Test Song",
         artist: "Test Artist",
+        album: "",
+        genre: "",
+        releaseYear: "",
       });
     });
 

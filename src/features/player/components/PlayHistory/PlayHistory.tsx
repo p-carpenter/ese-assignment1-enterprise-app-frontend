@@ -1,25 +1,29 @@
 import { useEffect, useState, type JSX } from "react";
-import { type Song } from "@/features/songs/types";
+import { type PlayHistoryEntry } from "../../types";
 import styles from "./PlayHistory.module.css";
 import { getPlayHistory } from "../../api";
 
-interface PlayHistoryProps {
+const PAGE_SIZE = 10;
+
+export const PlayHistory = ({
+  keyTrigger,
+}: {
   keyTrigger: number;
-}
-
-interface PlayHistoryEntry {
-  song: Song;
-  played_at: string;
-}
-
-export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
+}): JSX.Element => {
   const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   useEffect(() => {
-    getPlayHistory()
-      .then((data) => setPlayHistory(data))
+    getPlayHistory(page, PAGE_SIZE)
+      .then((data) => {
+        setPlayHistory(data.results);
+        setTotalCount(data.count);
+      })
       .catch((err) => console.error(err));
-  }, [keyTrigger]);
+  }, [page, keyTrigger]);
 
   return (
     <div className={styles.container}>
@@ -43,6 +47,27 @@ export const PlayHistory = ({ keyTrigger }: PlayHistoryProps): JSX.Element => {
           ))
         )}
       </div>
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.pageButton}
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            &lsaquo; Prev
+          </button>
+          <span className={styles.pageInfo}>
+            {page} / {totalPages}
+          </span>
+          <button
+            className={styles.pageButton}
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next &rsaquo;
+          </button>
+        </div>
+      )}
     </div>
   );
 };

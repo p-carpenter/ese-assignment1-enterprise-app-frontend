@@ -8,28 +8,31 @@ vi.mock("@/shared/api/client", () => ({
 import { request } from "@/shared/api/client";
 const mockRequest = vi.mocked(request);
 
-const mockHistory = [
-  {
-    song: {
-      id: 1,
-      title: "Song A",
-      artist: "Artist A",
-      duration: 120,
-      file_url: "http://example.com/a.mp3",
+const mockHistory = {
+  count: 2,
+  results: [
+    {
+      song: {
+        id: 1,
+        title: "Song A",
+        artist: "Artist A",
+        duration: 120,
+        file_url: "http://example.com/a.mp3",
+      },
+      played_at: "2026-01-01T00:00:00Z",
     },
-    played_at: "2026-01-01T00:00:00Z",
-  },
-  {
-    song: {
-      id: 2,
-      title: "Song B",
-      artist: "Artist B",
-      duration: 200,
-      file_url: "http://example.com/b.mp3",
+    {
+      song: {
+        id: 2,
+        title: "Song B",
+        artist: "Artist B",
+        duration: 200,
+        file_url: "http://example.com/b.mp3",
+      },
+      played_at: "2026-01-02T00:00:00Z",
     },
-    played_at: "2026-01-02T00:00:00Z",
-  },
-];
+  ],
+};
 
 describe("Player API", () => {
   beforeEach(() => {
@@ -37,21 +40,30 @@ describe("Player API", () => {
   });
 
   describe("getPlayHistory", () => {
-    it("GETs /history/ and returns the play history array", async () => {
+    it("GETs /history/ with page params and returns the paginated result", async () => {
       mockRequest.mockResolvedValueOnce(mockHistory);
 
       const result = await getPlayHistory();
 
-      expect(mockRequest).toHaveBeenCalledWith("/history/");
+      expect(mockRequest).toHaveBeenCalledWith("/history/?page=1&page_size=10");
       expect(result).toEqual(mockHistory);
     });
 
-    it("returns an empty array when there is no history", async () => {
-      mockRequest.mockResolvedValueOnce([]);
+    it("accepts custom page and pageSize params", async () => {
+      mockRequest.mockResolvedValueOnce({ count: 0, results: [] });
+
+      const result = await getPlayHistory(2, 5);
+
+      expect(mockRequest).toHaveBeenCalledWith("/history/?page=2&page_size=5");
+      expect(result).toEqual({ count: 0, results: [] });
+    });
+
+    it("returns an empty results array when there is no history", async () => {
+      mockRequest.mockResolvedValueOnce({ count: 0, results: [] });
 
       const result = await getPlayHistory();
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ count: 0, results: [] });
     });
 
     it("propagates request errors to the caller", async () => {
