@@ -51,9 +51,15 @@ export const SongUploadForm = () => {
   const handleSubmit = async ({
     title,
     artist,
+    album,
+    genre,
+    releaseYear,
   }: {
     title: string;
     artist: string;
+    album: string;
+    genre: string;
+    releaseYear: string;
   }) => {
     if (!songUrl) {
       setSubmitError("Please select an MP3 file.");
@@ -70,6 +76,9 @@ export const SongUploadForm = () => {
         file_url: songUrl,
         cover_art_url: coverArtUrl,
         duration: songDuration,
+        album: album || "Unknown Album",
+        genre: genre || "Unknown Genre",
+        release_year: releaseYear || "Unknown Year",
       });
 
       navigate("/");
@@ -102,7 +111,13 @@ export const SongUploadForm = () => {
       )}
 
       <SongDetailsForm
-        initialValues={{ title: "", artist: "" }}
+        initialValues={{
+          title: "",
+          artist: "",
+          album: "",
+          genre: "",
+          releaseYear: "",
+        }}
         onSubmit={handleSubmit}
         isSubmitting={isSaving}
         error={submitError}
