@@ -29,7 +29,9 @@ export const EditSongModal = ({
   const handleCoverArtUpload = async (file: File) => {
     try {
       const cloudData = await upload(file);
-      setCoverArtUrl(cloudData.secure_url);
+      if (cloudData) {
+        setCoverArtUrl(cloudData.secure_url);
+      }
     } catch (err) {
       console.error("Cover art upload failed:", err);
     }

@@ -99,13 +99,9 @@ export const SongUploadForm = () => {
 
   return (
     <div className={styles.errorContainer}>
-      {submitError && (
-        <div className={styles.error}>{submitError}</div>
-      )}
+      {submitError && <div className={styles.error}>{submitError}</div>}
       {(mp3Error || coverError) && (
-        <div
-          className={styles.error}
-        >
+        <div className={styles.error}>
           {mp3Error && <div>MP3 Upload Error: {mp3Error}</div>}
           {coverError && <div>Cover Art Error: {coverError}</div>}
         </div>
