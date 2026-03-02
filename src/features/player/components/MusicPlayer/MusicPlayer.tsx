@@ -48,6 +48,9 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
               className={styles.albumArt}
             />
             <h3 className={styles.title}>{currentSong.title}</h3>
+            <h3 className={styles.artist}>
+              {currentSong.album} • {currentSong.release_year}
+            </h3>
             <p className={styles.artist}>{currentSong.artist}</p>
 
             <PlaybackControls

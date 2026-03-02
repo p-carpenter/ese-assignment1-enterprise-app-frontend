@@ -55,6 +55,9 @@ const mockSongs: Song[] = [
     duration: 120,
     file_url: "http://example.com/song1.mp3",
     cover_art_url: "http://example.com/cover1.jpg",
+    album: "Album 1",
+    genre: "Genre 1",
+    release_year: "2023",
   },
   {
     id: 2,
@@ -63,6 +66,9 @@ const mockSongs: Song[] = [
     duration: 150,
     file_url: "http://example.com/song2.mp3",
     cover_art_url: "http://example.com/cover2.jpg",
+    album: "Album 2",
+    genre: "Genre 2",
+    release_year: "2024",
   },
 ];
 
@@ -129,6 +135,9 @@ describe("Song management", () => {
           cover_art_url: "",
           file_url: "http://audio.url/song.mp3",
           duration: 123,
+          album: "Unknown Album",
+          genre: "Unknown Genre",
+          release_year: "Unknown Year",
         });
       });
     });

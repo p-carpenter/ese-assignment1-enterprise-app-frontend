@@ -2,8 +2,20 @@ import { useState } from "react";
 import styles from "../SongUploadForm/SongUploadForm.module.css";
 
 interface SongDetailsFormProps {
-  initialValues?: { title?: string; artist?: string };
-  onSubmit: (values: { title: string; artist: string }) => void;
+  initialValues?: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    genre?: string;
+    releaseYear?: string;
+  };
+  onSubmit: (values: {
+    title: string;
+    artist: string;
+    album: string;
+    genre: string;
+    releaseYear: string;
+  }) => void;
   isSubmitting?: boolean;
   error?: string | null;
   showMp3Upload?: boolean;
@@ -31,16 +43,34 @@ export const SongDetailsForm = ({
   // Only track the text inputs that the user actually types into
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
+  const [album, setAlbum] = useState(initialValues.album || "");
+  const [genre, setGenre] = useState(initialValues.genre || "");
+  const [releaseYear, setReleaseYear] = useState(
+    initialValues.releaseYear || "",
+  );
 
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Stop passing the URLs back. The parent already has them.
-    onSubmit({ title, artist });
+    onSubmit({ title, artist, album, genre, releaseYear });
   };
 
   return (
     <form className={styles.container} onSubmit={handleSubmit}>
       <h3 className={styles.title}>Song Details</h3>
+
+      {/* MP3 Upload */}
+      {showMp3Upload && onMp3Upload && (
+        <div className={styles.fileUploadWrapper}>
+          <label className={styles.uploadLabel}>{mp3Label}</label>
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => e.target.files && onMp3Upload(e.target.files[0])}
+            disabled={mp3Uploading}
+          />
+        </div>
+      )}
 
       <input
         placeholder="Title"
@@ -50,9 +80,30 @@ export const SongDetailsForm = ({
       />
 
       <input
+        placeholder="Album"
+        value={album}
+        onChange={(e) => setAlbum(e.target.value)}
+        className={styles.inputField}
+      />
+
+      <input
         placeholder="Artist"
         value={artist}
         onChange={(e) => setArtist(e.target.value)}
+        className={styles.inputField}
+      />
+
+      <input
+        placeholder="Genre"
+        value={genre}
+        onChange={(e) => setGenre(e.target.value)}
+        className={styles.inputField}
+      />
+
+      <input
+        placeholder="Release Year"
+        value={releaseYear}
+        onChange={(e) => setReleaseYear(e.target.value)}
         className={styles.inputField}
       />
 
@@ -69,19 +120,6 @@ export const SongDetailsForm = ({
               e.target.files && onCoverArtUpload(e.target.files[0])
             }
             disabled={coverArtUploading}
-          />
-        </div>
-      )}
-
-      {/* MP3 Upload */}
-      {showMp3Upload && onMp3Upload && (
-        <div className={styles.fileUploadWrapper}>
-          <label className={styles.uploadLabel}>{mp3Label}</label>
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => e.target.files && onMp3Upload(e.target.files[0])}
-            disabled={mp3Uploading}
           />
         </div>
       )}

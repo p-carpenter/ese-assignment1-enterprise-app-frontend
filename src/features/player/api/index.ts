@@ -1,8 +1,15 @@
 import { request } from "@/shared/api/client";
-import { type PlayHistoryEntry } from "../types";
+import { type PagedPlayHistory } from "../types";
 
-export const getPlayHistory = async (): Promise<PlayHistoryEntry[]> =>
-  await request<PlayHistoryEntry[]>("/history/");
+const HISTORY_PAGE_SIZE = 10;
+
+export const getPlayHistory = async (
+  page = 1,
+  pageSize = HISTORY_PAGE_SIZE,
+): Promise<PagedPlayHistory> =>
+  await request<PagedPlayHistory>(
+    `/history/?page=${page}&page_size=${pageSize}`,
+  );
 
 export const logPlay = async (songId: number) => {
   try {

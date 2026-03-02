@@ -5,7 +5,7 @@ import { Button } from "@/shared/components";
 import styles from "./ProfilePage.module.css";
 import { PencilSolid } from "@/shared/icons";
 import { useCloudinaryUpload } from "@/shared/hooks";
-import { updateProfile } from "../../api";
+import { changePassword, updateProfile } from "../../api";
 import { useAuth } from "@/shared/context/AuthContext";
 import { Header } from "@/shared/layout";
 
@@ -19,6 +19,13 @@ export const ProfilePage = ({
 
   const [newUsername, setNewUsername] = useState(user?.username ?? "");
   const [newAvatarUrl, setNewAvatarUrl] = useState(user?.avatar_url ?? "");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordChangeError, setPasswordChangeError] = useState<string | null>(
+    null,
+  );
 
   const { upload, isUploading, error: uploadError } = useCloudinaryUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +57,28 @@ export const ProfilePage = ({
     setNewUsername(user?.username ?? "");
     setNewAvatarUrl(user?.avatar_url ?? "");
     navigate("/profile");
+  };
+
+  const handleChangePassword = async () => {
+    if (!user) return;
+    if (newPassword !== confirmNewPassword) {
+      setPasswordChangeError("New passwords do not match.");
+      return;
+    }
+    try {
+      await changePassword(currentPassword, newPassword, confirmNewPassword);
+      setIsChangingPassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setPasswordChangeError(null);
+      alert("Password changed successfully!");
+    } catch (err) {
+      console.error("Failed to change password:", err);
+      setPasswordChangeError(
+        "Failed to change password. Check console for details.",
+      );
+    }
   };
 
   if (!user) {
@@ -112,6 +141,8 @@ export const ProfilePage = ({
           <div className={styles.divider}></div>
 
           <div className={styles.infoSection}>
+            <div className={styles.infoLabel}>User ID</div>
+            <div className={styles.infoValue}>#{user.id}</div>
             <div className={styles.infoLabel}>Username</div>
             {isEditing ? (
               <input
@@ -126,8 +157,63 @@ export const ProfilePage = ({
             <div className={styles.infoLabel}>Email</div>
             <div className={styles.infoValue}>{user.email}</div>
 
-            <div className={styles.infoLabel}>User ID</div>
-            <div className={styles.infoValue}>#{user.id}</div>
+            <div className={styles.infoLabel}>Password</div>
+            <div className={styles.changePasswordContainer}>
+              <div className={styles.infoValue}>********</div>
+              {isEditing && (
+                <PencilSolid
+                  className={styles.editPasswordIcon}
+                  onClick={() => setIsChangingPassword(true)}
+                />
+              )}
+              {isChangingPassword && (
+                <div className={styles.changePasswordForm}>
+                  <input
+                    type="password"
+                    placeholder="Current Password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className={styles.passwordInput}
+                  />
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className={styles.passwordInput}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm New Password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className={styles.passwordInput}
+                  />
+                  <div className={styles.passwordActions}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={handleChangePassword}
+                      disabled={!isChangingPassword}
+                    >
+                      Change Password
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setIsChangingPassword(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  {passwordChangeError && (
+                    <div className={styles.error}>
+                      {String(passwordChangeError)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {isEditing ? (
