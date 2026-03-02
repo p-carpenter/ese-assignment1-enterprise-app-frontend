@@ -68,6 +68,21 @@ export const confirmPasswordReset = async (
   });
 };
 
+export const changePassword = async (
+  old_password: string,
+  new_password1: string,
+  new_password2: string,
+): Promise<void> => {
+  await request("/auth/password/change/", {
+    method: "POST",
+    body: JSON.stringify({
+      old_password,
+      new_password1,
+      new_password2,
+    }),
+  });
+};
+
 export const updateProfile = async (
   username: string,
   avatar_url?: string,

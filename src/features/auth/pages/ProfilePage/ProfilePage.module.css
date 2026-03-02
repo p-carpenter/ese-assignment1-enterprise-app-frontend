@@ -95,6 +95,20 @@
   border-radius: 4px;
 }
 
+.changePasswordContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.editPasswordIcon {
+  color: var(--spotify-gray);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.editPasswordIcon:hover {
+  color: var(--spotify-white);
+}
+
 .loading {
   text-align: center;
   padding: 60px;
