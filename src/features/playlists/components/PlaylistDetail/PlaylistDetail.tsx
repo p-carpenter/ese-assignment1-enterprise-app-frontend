@@ -23,6 +23,7 @@ export const PlaylistDetail = () => {
   const fetchPlaylist = useCallback(async () => {
     if (!playlistId) return;
     try {
+      setError(null); // Clear errors on fresh fetch
       setLoading(true);
       const data = await getPlaylistDetails(parseInt(playlistId, 10));
       setPlaylist(data);
@@ -34,55 +35,67 @@ export const PlaylistDetail = () => {
     }
   }, [playlistId]);
 
+  useEffect(() => {
+    void fetchPlaylist();
+  }, [fetchPlaylist]);
+
   const handleDeletePlaylist = useCallback(async () => {
-    if (!playlistId || !playlist) return;
+    if (!playlist) return;
     try {
+      setError(null);
       await deletePlaylist(playlist.id);
-      setPlaylist(null);
       navigate("/");
     } catch (err) {
       setError("Failed to delete playlist.");
       console.error(err);
     }
-  }, [playlistId, playlist, navigate]);
+  }, [playlist, navigate]);
 
   const handleRemoveSongFromPlaylist = useCallback(
     async (songId: number) => {
       if (!playlist) return;
       try {
+        setError(null);
         await removeSongFromPlaylist(playlist.id, songId);
-        await fetchPlaylist(); // Refetch to update the song list
+
+        setPlaylist((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            songs: prev.songs.filter((item) => item.song.id !== songId),
+          };
+        });
       } catch (err) {
         setError("Failed to remove song from playlist.");
         console.error(err);
       }
     },
-    [playlist, fetchPlaylist],
+    [playlist],
   );
 
-  useEffect(() => {
-    void fetchPlaylist();
-  }, [fetchPlaylist]);
+  const handleGlobalSongDeleted = useCallback((deletedSongId: number) => {
+    setPlaylist((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        songs: prev.songs.filter((item) => item.song.id !== deletedSongId),
+      };
+    });
+  }, []);
 
-  const getPlaylistSongDropdownItems = (song: Song): DropdownItem[] => [
-    // No Edit or global Delete for now to keep it simple.
-    {
-      label: "Remove from Playlist",
-      onSelect: () => handleRemoveSongFromPlaylist(song.id),
-    },
-  ];
+  const getPlaylistSongDropdownItems = useCallback(
+    (song: Song): DropdownItem[] => [
+      {
+        label: "Remove from Playlist",
+        onSelect: () => handleRemoveSongFromPlaylist(song.id),
+      },
+    ],
+    [handleRemoveSongFromPlaylist],
+  );
 
-  if (loading) {
-    return <div>Loading playlist...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!playlist) {
-    return <div>Playlist not found.</div>;
-  }
+  if (loading) return <div>Loading playlist...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!playlist) return <div>Playlist not found.</div>;
 
   const songs = playlist.songs.map((item) => item.song);
 
@@ -100,7 +113,7 @@ export const PlaylistDetail = () => {
         <h2 className={styles.songsTitle}>Songs</h2>
         <SongList
           songs={songs}
-          onSongDeleted={fetchPlaylist}
+          onSongDeleted={handleGlobalSongDeleted}
           getDropdownItems={getPlaylistSongDropdownItems}
         />
       </section>
