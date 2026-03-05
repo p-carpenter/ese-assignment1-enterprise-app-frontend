@@ -1,10 +1,28 @@
 import { request } from "@/shared/api/client";
-import type { Song, SongUploadPayload } from "../types";
+import type { PaginatedResponse, Song, SongUploadPayload } from "../types";
 
 /**
  * GET all songs
  */
-export const listSongs = (): Promise<Song[]> => request<Song[]>("/songs/");
+export const listAllSongs = (): Promise<Song[]> =>
+  request<Song[]>("/songs/?page_size=1000"); // or create a dedicated endpoint
+
+/**
+ * GET songs with pagination, sorting, and optional search.
+ */
+export const listSongsPaginated = (
+  page: number,
+  ordering: string,
+  search?: string,
+): Promise<PaginatedResponse<Song>> => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    ordering,
+  });
+  if (search) params.append("search", search);
+
+  return request(`/songs/?${params.toString()}`);
+};
 
 /**
  * POST a new song.

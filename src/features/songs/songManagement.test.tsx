@@ -257,7 +257,7 @@ describe("Song management", () => {
         expect(mockDeleteSong).toHaveBeenCalledWith(mockSongs[0].id);
       });
 
-      // Song A should be absent; Song B should remain
+      // Song A should be absent. Song B should remain
       await waitFor(() => {
         expect(screen.queryByText("Song A")).not.toBeInTheDocument();
       });
@@ -450,7 +450,6 @@ describe("Song management", () => {
         target: { value: "x" },
       });
 
-      // Only 100 ms have passed – debounce has NOT fired yet
       await act(async () => {
         vi.advanceTimersByTime(100);
       });

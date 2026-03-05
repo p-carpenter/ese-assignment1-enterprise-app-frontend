@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  listSongs,
+  listAllSongs,
+  listSongsPaginated,
   uploadSong,
   deleteSong,
   updateSong,
@@ -31,19 +32,93 @@ describe("Songs API", () => {
   });
 
   describe("listSongs", () => {
-    it("GETs /songs/ and returns an array of songs", async () => {
+    it("GETs /songs/?page_size=1000 and returns an array of songs", async () => {
       mockRequest.mockResolvedValueOnce([mockSong]);
 
-      const result = await listSongs();
+      const result = await listAllSongs();
 
-      expect(mockRequest).toHaveBeenCalledWith("/songs/");
+      expect(mockRequest).toHaveBeenCalledWith("/songs/?page_size=1000");
       expect(result).toEqual([mockSong]);
     });
 
     it("returns an empty array when there are no songs", async () => {
       mockRequest.mockResolvedValueOnce([]);
 
-      expect(await listSongs()).toEqual([]);
+      expect(await listAllSongs()).toEqual([]);
+    });
+  });
+
+  describe("listSongsPaginated", () => {
+    it("GETs /songs/ with page and ordering params", async () => {
+      const paginated = {
+        count: 1,
+        results: [mockSong],
+        next: null,
+        previous: null,
+      };
+      mockRequest.mockResolvedValueOnce(paginated);
+
+      const result = await listSongsPaginated(1, "title");
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.stringContaining("page=1"),
+      );
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.stringContaining("ordering=title"),
+      );
+      expect(result).toEqual(paginated);
+    });
+
+    it("appends a search param when a query is provided", async () => {
+      mockRequest.mockResolvedValueOnce({
+        count: 1,
+        results: [mockSong],
+        next: null,
+        previous: null,
+      });
+
+      await listSongsPaginated(1, "title", "Song A");
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.stringContaining("search=Song+A"),
+      );
+    });
+
+    it("does not append a search param when query is empty", async () => {
+      mockRequest.mockResolvedValueOnce({
+        count: 0,
+        results: [],
+        next: null,
+        previous: null,
+      });
+
+      await listSongsPaginated(1, "-uploaded_at", "");
+
+      const calledUrl = mockRequest.mock.calls[0][0] as string;
+      expect(calledUrl).not.toContain("search=");
+    });
+
+    it("requests page 2 when page number is 2", async () => {
+      mockRequest.mockResolvedValueOnce({
+        count: 5,
+        results: [mockSong],
+        next: null,
+        previous: "...",
+      });
+
+      await listSongsPaginated(2, "title");
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.stringContaining("page=2"),
+      );
+    });
+
+    it("propagates errors from the request", async () => {
+      mockRequest.mockRejectedValueOnce(new Error("Network error"));
+
+      await expect(listSongsPaginated(1, "title")).rejects.toThrow(
+        "Network error",
+      );
     });
   });
 
