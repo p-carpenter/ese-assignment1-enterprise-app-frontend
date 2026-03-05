@@ -9,4 +9,5 @@ export { RegisterPage } from "./pages/RegisterPage/RegisterPage";
 export { ResetPasswordPage } from "./pages/ResetPasswordPage/ResetPasswordPage";
 export { RequestResetPasswordPage } from "./pages/RequestResetPasswordPage/RequestResetPasswordPage";
 export { ProfilePage } from "./pages/ProfilePage/ProfilePage";
+export { EmailVerificationPage } from "./pages/EmailVerificationPage/EmailVerificationPage";
 export { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";

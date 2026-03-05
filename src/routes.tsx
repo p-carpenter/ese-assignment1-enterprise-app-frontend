@@ -7,11 +7,11 @@ import {
   ResetPasswordPage,
   RequestResetPasswordPage,
   ProfilePage,
+  EmailVerificationPage,
 } from "@/features/auth";
 import { UploadPage } from "@/features/songs";
 import { HomePage } from "@/shared/HomePage/HomePage";
 import { useAuth } from "@/shared/context/AuthContext";
-import { EmailVerificationPage } from "./features/auth/pages/EmailVerificationPage/EmailVerificationPage";
 import { PlaylistDetailPage } from "./features/playlists/pages/PlaylistDetailPage";
 import { PlaylistsPage } from "./features/playlists/pages/PlaylistsPage";
 
