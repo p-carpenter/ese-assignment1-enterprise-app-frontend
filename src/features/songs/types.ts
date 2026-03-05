@@ -14,9 +14,15 @@ export interface SongUploadPayload {
   title: string;
   artist: string;
   album?: string;
-  genre?: string;
   release_year?: string;
   file_url: string;
   cover_art_url?: string;
   duration: number;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
