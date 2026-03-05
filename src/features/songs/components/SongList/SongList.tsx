@@ -11,16 +11,19 @@ import { type DropdownItem } from "../SongManagementDropdown/SongManagementDropd
 
 interface SongListProps {
   songs: Song[];
-  onSongDeleted?: () => void;
+  onSongDeleted?: (id: number) => void;
+  onSongUpdated?: (song: Song) => void;
   getDropdownItems?: (song: Song) => DropdownItem[];
 }
 
 export const SongList = ({
   songs,
   onSongDeleted,
+  onSongUpdated,
   getDropdownItems,
 }: SongListProps) => {
-  const { currentSong, playSong, refreshSongs } = usePlayer();
+  const { currentSong, playSong } = usePlayer();
+
   const [editSong, setEditSong] = useState<Song | null>(null);
   const [songToAddToPlaylist, setSongToAddToPlaylist] = useState<Song | null>(
     null,
@@ -28,9 +31,9 @@ export const SongList = ({
 
   const handlePlay = useCallback(
     (song: Song) => {
-      void playSong(song);
+      void playSong(song, songs);
     },
-    [playSong],
+    [playSong, songs],
   );
 
   const handleEdit = useCallback((song: Song) => {
@@ -41,49 +44,30 @@ export const SongList = ({
     async (songId: number) => {
       try {
         await deleteSong(songId);
-        if (onSongDeleted) {
-          onSongDeleted();
-        } else {
-          void refreshSongs();
-        }
+        onSongDeleted?.(songId);
       } catch (error) {
         console.error("Error deleting song:", error);
         alert("Failed to delete song. Please try again.");
       }
     },
-    [refreshSongs, onSongDeleted],
+    [onSongDeleted],
   );
 
   const handleOpenAddToPlaylistModal = useCallback((song: Song) => {
     setSongToAddToPlaylist(song);
   }, []);
 
-  const handleCloseAddToPlaylistModal = useCallback(() => {
-    setSongToAddToPlaylist(null);
-  }, []);
-
-  const handleSongAddedToPlaylist = useCallback(
-    async (playlistId: number) => {
-      if (!songToAddToPlaylist) return;
-      try {
-        await addSongToPlaylist(playlistId, songToAddToPlaylist.id);
-        // Maybe show a success notification later
-      } catch (error) {
-        console.error("Error adding song to playlist:", error);
-        alert("Failed to add song to playlist. Please try again.");
-      }
-    },
-    [songToAddToPlaylist],
+  const generateDropdownItems = useCallback(
+    (song: Song): DropdownItem[] => [
+      { label: "Edit", onSelect: () => handleEdit(song) },
+      { label: "Delete", onSelect: () => handleDelete(song.id) },
+      {
+        label: "Add to Playlist",
+        onSelect: () => handleOpenAddToPlaylistModal(song),
+      },
+    ],
+    [handleEdit, handleDelete, handleOpenAddToPlaylistModal],
   );
-
-  const defaultGetDropdownItems = (song: Song): DropdownItem[] => [
-    { label: "Edit", onSelect: () => handleEdit(song) },
-    { label: "Delete", onSelect: () => handleDelete(song.id) },
-    {
-      label: "Add to Playlist",
-      onSelect: () => handleOpenAddToPlaylistModal(song),
-    },
-  ];
 
   if (!songs || songs.length === 0) {
     return <p>No songs found.</p>;
@@ -101,7 +85,7 @@ export const SongList = ({
             dropdownItems={
               getDropdownItems
                 ? getDropdownItems(song)
-                : defaultGetDropdownItems(song)
+                : generateDropdownItems(song)
             }
           />
         ))}
@@ -112,15 +96,27 @@ export const SongList = ({
           song={editSong}
           isOpen={true}
           onClose={() => setEditSong(null)}
-          onSongUpdated={onSongDeleted ?? refreshSongs}
+          onSongUpdated={(updatedSong) => {
+            setEditSong(null);
+            onSongUpdated?.(updatedSong);
+          }}
         />
       )}
+
       {songToAddToPlaylist && (
         <AddToPlaylistModal
           song={songToAddToPlaylist}
           isOpen={true}
-          onClose={handleCloseAddToPlaylistModal}
-          onSongAdded={handleSongAddedToPlaylist}
+          onClose={() => setSongToAddToPlaylist(null)}
+          onSongAdded={async (playlistId) => {
+            try {
+              await addSongToPlaylist(playlistId, songToAddToPlaylist.id);
+              setSongToAddToPlaylist(null);
+            } catch (error) {
+              console.error("Error adding song:", error);
+              alert("Failed to add song. Please try again.");
+            }
+          }}
         />
       )}
     </>

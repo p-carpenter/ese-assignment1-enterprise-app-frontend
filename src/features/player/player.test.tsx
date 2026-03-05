@@ -9,15 +9,15 @@ import {
 import { MusicPlayer } from "@/features/player";
 import { PlayerProvider } from "@/features/player";
 import { SongLibrary } from "@/features/songs";
-import { listSongs, logPlay } from "@/features/songs/api";
+import { listSongsPaginated, logPlay } from "@/features/songs/api";
 import type { Song } from "@/features/songs/types";
 
 vi.mock("@/features/songs/api", () => ({
-  listSongs: vi.fn(),
+  listSongsPaginated: vi.fn(),
   logPlay: vi.fn(),
 }));
 
-const mockListSongs = vi.mocked(listSongs) as unknown as ReturnType<
+const mockListSongs = vi.mocked(listSongsPaginated) as unknown as ReturnType<
   typeof vi.fn
 >;
 const mockLogPlay = vi.mocked(logPlay) as unknown as ReturnType<typeof vi.fn>;
@@ -69,7 +69,12 @@ describe("MusicPlayer", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockListSongs.mockResolvedValue(mockSongs);
+    mockListSongs.mockResolvedValue({
+      count: mockSongs.length,
+      results: mockSongs,
+      next: null,
+      previous: null,
+    });
     mockLogPlay.mockResolvedValue(undefined);
   });
 
@@ -81,7 +86,7 @@ describe("MusicPlayer", () => {
     expect(screen.getByText(/Library \(2 tracks\)/i)).toBeInTheDocument();
   });
 
-  it("plays a song when selected and logs play", async () => {
+  it("plays a song when selected", async () => {
     renderWithProvider();
 
     const songTitle = await screen.findByText("Song A");
@@ -93,6 +98,28 @@ describe("MusicPlayer", () => {
         "http://example.com/song1.mp3",
         expect.objectContaining({ autoplay: true }),
       );
+    });
+  });
+
+  it("calls logPlay via the onplay callback when a song starts", async () => {
+    renderWithProvider();
+
+    fireEvent.click(await screen.findByText("Song A"));
+
+    await waitFor(() => {
+      expect(audioPlayerMocks.load).toHaveBeenCalled();
+    });
+
+    // Retrieve the onplay callback passed to load and invoke it
+    const loadCall = audioPlayerMocks.load.mock.calls[0];
+    const loadOptions = loadCall?.[1] as { onplay?: () => void };
+    expect(loadOptions?.onplay).toBeTypeOf("function");
+
+    await act(async () => {
+      loadOptions.onplay?.();
+    });
+
+    await waitFor(() => {
       expect(mockLogPlay).toHaveBeenCalledWith(1);
     });
   });
