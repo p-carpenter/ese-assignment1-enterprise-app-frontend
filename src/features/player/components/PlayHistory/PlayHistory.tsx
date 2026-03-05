@@ -2,14 +2,12 @@ import { useEffect, useState, type JSX } from "react";
 import { type PlayHistoryEntry } from "../../types";
 import styles from "./PlayHistory.module.css";
 import { getPlayHistory } from "../../api";
+import { usePlayer } from "../..";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
-export const PlayHistory = ({
-  keyTrigger,
-}: {
-  keyTrigger: number;
-}): JSX.Element => {
+export const PlayHistory = (): JSX.Element => {
+  const { historyTick } = usePlayer();
   const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -23,7 +21,7 @@ export const PlayHistory = ({
         setTotalCount(data.count);
       })
       .catch((err) => console.error(err));
-  }, [page, keyTrigger]);
+  }, [page, historyTick]);
 
   return (
     <div className={styles.container}>
@@ -32,8 +30,8 @@ export const PlayHistory = ({
         {playHistory.length === 0 ? (
           <p className={styles.text}>No play history yet</p>
         ) : (
-          playHistory.map((entry, index) => (
-            <div key={index} className={styles.historyCard}>
+          playHistory.map((entry) => (
+            <div key={entry.id} className={styles.historyCard}>
               <div className={styles.songTitle}>
                 {entry.song?.title || "Unknown Track"}
               </div>
