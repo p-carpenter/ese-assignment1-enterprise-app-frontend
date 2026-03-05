@@ -1,17 +1,12 @@
-import { useEffect, useCallback, type JSX } from "react";
+import { type JSX } from "react";
 import styles from "./MusicPlayer.module.css";
-import { type Song } from "@/features/songs/types";
 import { ProgressBar } from "../ProgressBar/ProgressBar";
 import { PlaybackControls } from "../PlaybackControls/PlaybackControls";
 import { usePlayer } from "../../../../shared/context/PlayerContext";
 
-interface MusicPlayerProps {
-  onSongPlay?: () => void;
-}
-
-export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
+export const MusicPlayer = (): JSX.Element => {
   const {
-    songs,
+    playlist,
     currentSong,
     isPlaying,
     isLoading,
@@ -20,22 +15,11 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
     pause,
     seek,
     getPosition,
-    refreshSongs,
-    playSong,
     playPrev,
     playNext,
   } = usePlayer();
 
-  useEffect(() => {
-    void refreshSongs();
-  }, [refreshSongs]);
-
-  useCallback(
-    (song: Song) => {
-      void playSong(song, { onSongPlay });
-    },
-    [playSong, onSongPlay],
-  );
+  const disableControls = playlist.length === 0;
 
   return (
     <div className={styles.container}>
@@ -47,10 +31,13 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
               alt="Album Art"
               className={styles.albumArt}
             />
+
             <h3 className={styles.title}>{currentSong.title}</h3>
+
             <h3 className={styles.artist}>
               {currentSong.album} • {currentSong.release_year}
             </h3>
+
             <p className={styles.artist}>{currentSong.artist}</p>
 
             <PlaybackControls
@@ -60,8 +47,8 @@ export const MusicPlayer = ({ onSongPlay }: MusicPlayerProps): JSX.Element => {
               onPause={pause}
               onPrev={playPrev}
               onNext={playNext}
-              disablePrev={songs.length === 0}
-              disableNext={songs.length === 0}
+              disablePrev={disableControls}
+              disableNext={disableControls}
             />
 
             <ProgressBar
