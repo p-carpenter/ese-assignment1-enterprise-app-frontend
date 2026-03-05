@@ -4,22 +4,18 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
-import { listSongs, logPlay } from "@/features/songs/api";
+import { logPlay } from "@/features/songs/api";
 import { type Song } from "@/features/songs/types";
 
-interface PlaySongOptions {
-  onSongPlay?: () => void;
-}
-
-interface PlayerContextType {
-  songs: Song[];
+export interface PlayerContextType {
   currentSong: Song | null;
+  playlist: Song[];
   isPlaying: boolean;
   isLoading: boolean;
   duration: number;
@@ -27,10 +23,11 @@ interface PlayerContextType {
   pause: () => void;
   seek: (position: number) => void;
   getPosition: () => number;
-  refreshSongs: () => Promise<void>;
-  playSong: (song: Song, options?: PlaySongOptions) => Promise<void>;
+  setPlaylist: (songs: Song[]) => void;
+  playSong: (song: Song, playlist?: Song[]) => Promise<void>;
   playPrev: () => Promise<void>;
   playNext: () => Promise<void>;
+  historyTick: number;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -48,33 +45,22 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     duration,
   } = useAudioPlayer();
 
-  const [songs, setSongs] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
-
-  const currentIndex = useMemo((): number => {
-    if (!currentSong) return -1;
-    return songs.findIndex((song) => song.id === currentSong.id);
-  }, [currentSong, songs]);
+  const [playlist, setPlaylist] = useState<Song[]>([]);
+  const [historyTick, setHistoryTick] = useState(0);
 
   const playNextRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
-  const refreshSongs = useCallback(async () => {
-    try {
-      const data = await listSongs();
-      setSongs(data);
-
-      setCurrentSong((previousSong) => {
-        if (!previousSong) return null;
-        const updatedSong = data.find((song) => song.id === previousSong.id);
-        return updatedSong ?? null;
-      });
-    } catch (err) {
-      console.error("Failed to load songs:", err);
-    }
-  }, []);
+  const currentIndex = useMemo(() => {
+    return playlist.findIndex((song) => song.id === currentSong?.id);
+  }, [playlist, currentSong?.id]);
 
   const playSong = useCallback(
-    async (song: Song, options?: PlaySongOptions): Promise<void> => {
+    async (song: Song, newPlaylist?: Song[]): Promise<void> => {
+      if (newPlaylist) {
+        setPlaylist(newPlaylist);
+      }
+
       if (currentSong?.id === song.id) {
         if (isPlaying) {
           pause();
@@ -94,55 +80,74 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         onend: () => {
           void playNextRef.current?.();
         },
+        onplay: () => {
+          try {
+            void logPlay(song.id);
+            setHistoryTick((prev) => prev + 1);
+          } catch (err) {
+            console.error("Failed to log play:", err);
+          }
+        },
       });
-
-      try {
-        await logPlay(song.id);
-        options?.onSongPlay?.();
-      } catch (err) {
-        console.error("Failed to log play:", err);
-      }
     },
     [currentSong?.id, isPlaying, load, pause, play, stop],
   );
 
   const playPrev = useCallback(async (): Promise<void> => {
-    if (songs.length === 0) return;
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : songs.length - 1;
-    await playSong(songs[prevIndex]);
-  }, [currentIndex, playSong, songs]);
+    if (!playlist.length) return;
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
+    await playSong(playlist[prevIndex]);
+  }, [currentIndex, playlist, playSong]);
 
   const playNext = useCallback(async (): Promise<void> => {
-    if (songs.length === 0) return;
+    if (!playlist.length) return;
     const nextIndex =
-      currentIndex >= 0 && currentIndex < songs.length - 1
+      currentIndex >= 0 && currentIndex < playlist.length - 1
         ? currentIndex + 1
         : 0;
-    await playSong(songs[nextIndex]);
-  }, [currentIndex, playSong, songs]);
+    await playSong(playlist[nextIndex]);
+  }, [currentIndex, playlist, playSong]);
 
   useEffect(() => {
     playNextRef.current = playNext;
   }, [playNext]);
 
+  const contextValue = useMemo(
+    () => ({
+      currentSong,
+      playlist,
+      isPlaying,
+      isLoading,
+      duration,
+      play,
+      pause,
+      seek,
+      getPosition,
+      setPlaylist,
+      playSong,
+      playPrev,
+      playNext,
+      historyTick,
+    }),
+    [
+      currentSong,
+      playlist,
+      isPlaying,
+      isLoading,
+      duration,
+      play,
+      pause,
+      seek,
+      getPosition,
+      playSong,
+      playPrev,
+      playNext,
+      historyTick,
+    ],
+  );
+
   return (
-    <PlayerContext.Provider
-      value={{
-        songs,
-        currentSong,
-        isPlaying,
-        isLoading,
-        duration,
-        play,
-        pause,
-        seek,
-        getPosition,
-        refreshSongs,
-        playSong,
-        playPrev,
-        playNext,
-      }}
-    >
+    <PlayerContext.Provider value={contextValue}>
       {children}
     </PlayerContext.Provider>
   );

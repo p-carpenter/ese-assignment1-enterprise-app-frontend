@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
 import { AuthProvider } from "@/shared/context/AuthContext";
@@ -61,38 +61,5 @@ describe("HomePage", () => {
       </MemoryRouter>,
     );
     expect(screen.getByTestId("play-history")).toBeInTheDocument();
-  });
-
-  it("initialises PlayHistory with keyTrigger=0", () => {
-    render(
-      <MemoryRouter>
-        <AuthProvider>
-          <HomePage />
-        </AuthProvider>
-      </MemoryRouter>,
-    );
-    expect(screen.getByTestId("play-history")).toHaveTextContent("trigger:0");
-  });
-
-  it("increments the PlayHistory keyTrigger when a song is played", async () => {
-    render(
-      <MemoryRouter>
-        <AuthProvider>
-          <HomePage />
-        </AuthProvider>
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /trigger song play/i }));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("play-history")).toHaveTextContent("trigger:1");
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /trigger song play/i }));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("play-history")).toHaveTextContent("trigger:2");
-    });
   });
 });

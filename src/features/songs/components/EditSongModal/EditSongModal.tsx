@@ -9,7 +9,7 @@ interface EditSongModalProps {
   song: Song | null;
   isOpen: boolean;
   onClose: () => void;
-  onSongUpdated: () => void;
+  onSongUpdated: (updatedSong: Song) => void;
 }
 
 export const EditSongModal = ({
@@ -45,14 +45,15 @@ export const EditSongModal = ({
     artist: string;
   }) => {
     try {
-      await updateSong(song.id, {
+      const updatedSong = await updateSong(song.id, {
         title,
         artist,
-        file_url: song.file_url, // Keep existing file URL
-        duration: song.duration, // Keep existing duration
+        file_url: song.file_url,
+        duration: song.duration,
         cover_art_url: coverArtUrl,
       });
-      onSongUpdated();
+
+      onSongUpdated(updatedSong);
       onClose();
     } catch (err) {
       console.error("Failed to update song:", err);
@@ -63,6 +64,7 @@ export const EditSongModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Song">
       <SongDetailsForm
+        key={song.id}
         initialValues={{
           title: song.title,
           artist: song.artist,

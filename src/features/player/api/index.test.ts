@@ -45,7 +45,7 @@ describe("Player API", () => {
 
       const result = await getPlayHistory();
 
-      expect(mockRequest).toHaveBeenCalledWith("/history/?page=1&page_size=10");
+      expect(mockRequest).toHaveBeenCalledWith("/history/?page=1&page_size=5");
       expect(result).toEqual(mockHistory);
     });
 
