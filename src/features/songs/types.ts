@@ -3,7 +3,6 @@ export interface Song {
   title: string;
   artist: string;
   album?: string;
-  genre?: string;
   release_year?: string;
   file_url: string; // The MP3 URL from Cloudinary
   cover_art_url?: string;
