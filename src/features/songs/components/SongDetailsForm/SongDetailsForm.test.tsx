@@ -130,7 +130,6 @@ describe("SongDetailsForm", () => {
         title: "Test Song",
         artist: "Test Artist",
         album: "",
-        genre: "",
         releaseYear: "",
       });
     });

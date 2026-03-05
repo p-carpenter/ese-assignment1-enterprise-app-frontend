@@ -6,14 +6,12 @@ interface SongDetailsFormProps {
     title?: string;
     artist?: string;
     album?: string;
-    genre?: string;
     releaseYear?: string;
   };
   onSubmit: (values: {
     title: string;
     artist: string;
     album: string;
-    genre: string;
     releaseYear: string;
   }) => void;
   isSubmitting?: boolean;
@@ -40,26 +38,22 @@ export const SongDetailsForm = ({
   coverArtUploading = false,
   onCoverArtUpload,
 }: SongDetailsFormProps) => {
-  // Only track the text inputs that the user actually types into
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
   const [album, setAlbum] = useState(initialValues.album || "");
-  const [genre, setGenre] = useState(initialValues.genre || "");
   const [releaseYear, setReleaseYear] = useState(
     initialValues.releaseYear || "",
   );
 
-  const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Stop passing the URLs back. The parent already has them.
-    onSubmit({ title, artist, album, genre, releaseYear });
+    onSubmit({ title, artist, album, releaseYear });
   };
 
   return (
     <form className={styles.container} onSubmit={handleSubmit}>
       <h3 className={styles.title}>Song Details</h3>
 
-      {/* MP3 Upload */}
       {showMp3Upload && onMp3Upload && (
         <div className={styles.fileUploadWrapper}>
           <label className={styles.uploadLabel}>{mp3Label}</label>
@@ -94,20 +88,12 @@ export const SongDetailsForm = ({
       />
 
       <input
-        placeholder="Genre"
-        value={genre}
-        onChange={(e) => setGenre(e.target.value)}
-        className={styles.inputField}
-      />
-
-      <input
         placeholder="Release Year"
         value={releaseYear}
         onChange={(e) => setReleaseYear(e.target.value)}
         className={styles.inputField}
       />
 
-      {/* Cover Art Upload */}
       {onCoverArtUpload && (
         <div className={styles.fileUploadWrapper}>
           <label className={styles.uploadLabel}>

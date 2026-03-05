@@ -59,13 +59,11 @@ export const SongUploadForm = () => {
     title,
     artist,
     album,
-    genre,
     releaseYear,
   }: {
     title: string;
     artist: string;
     album: string;
-    genre: string;
     releaseYear: string;
   }) => {
     if (!songUrl) {
@@ -84,7 +82,6 @@ export const SongUploadForm = () => {
         cover_art_url: coverArtUrl,
         duration: songDuration,
         album: album || "Unknown Album",
-        genre: genre || "Unknown Genre",
         release_year: releaseYear || "Unknown Year",
       });
 
@@ -112,7 +109,6 @@ export const SongUploadForm = () => {
           title: "",
           artist: "",
           album: "",
-          genre: "",
           releaseYear: "",
         }}
         onSubmit={handleSubmit}
