@@ -28,6 +28,8 @@ export interface PlayerContextType {
   playPrev: () => Promise<void>;
   playNext: () => Promise<void>;
   historyTick: number;
+  playlistTick: number;
+  incrementPlaylistTick: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -48,6 +50,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [historyTick, setHistoryTick] = useState(0);
+  const [playlistTick, setPlaylistTick] = useState(0);
+  const incrementPlaylistTick = useCallback(
+    () => setPlaylistTick((n) => n + 1),
+    [],
+  );
 
   const playNextRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
@@ -73,6 +80,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       stop();
       setCurrentSong(song);
 
+      // Briefly patch the Audio constructor so Howler creates the <audio> element
+      // with crossOrigin="anonymous" already set. Web Audio API's
+      // createMediaElementSource (used by @audiowave/react) requires this to be
+      // present before the src is loaded, otherwise the analyser sees only zeros.
+      const OrigAudio = window.Audio;
+      (window as any).Audio = function (...args: unknown[]) {
+        const el = new OrigAudio(
+          ...(args as ConstructorParameters<typeof Audio>),
+        );
+        el.crossOrigin = "anonymous";
+        return el;
+      };
+
       load(song.file_url, {
         autoplay: true,
         format: "mp3",
@@ -89,6 +109,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
           }
         },
       });
+
+      // Restore immediately - Howler creates the element synchronously above
+      (window as any).Audio = OrigAudio;
     },
     [currentSong?.id, isPlaying, load, pause, play, stop],
   );
@@ -128,6 +151,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playPrev,
       playNext,
       historyTick,
+      playlistTick,
+      incrementPlaylistTick,
     }),
     [
       currentSong,
@@ -143,6 +168,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playPrev,
       playNext,
       historyTick,
+      playlistTick,
+      incrementPlaylistTick,
     ],
   );
 
