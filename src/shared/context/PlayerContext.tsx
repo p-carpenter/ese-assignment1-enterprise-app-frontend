@@ -85,7 +85,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       // createMediaElementSource (used by @audiowave/react) requires this to be
       // present before the src is loaded, otherwise the analyser sees only zeros.
       const OrigAudio = window.Audio;
-      (window as any).Audio = function (...args: unknown[]) {
+      (window as unknown as Record<string, unknown>).Audio = function (
+        ...args: unknown[]
+      ) {
         const el = new OrigAudio(
           ...(args as ConstructorParameters<typeof Audio>),
         );
@@ -111,7 +113,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       });
 
       // Restore immediately - Howler creates the element synchronously above
-      (window as any).Audio = OrigAudio;
+      (window as unknown as { Audio: typeof Audio }).Audio = OrigAudio;
     },
     [currentSong?.id, isPlaying, load, pause, play, stop],
   );
