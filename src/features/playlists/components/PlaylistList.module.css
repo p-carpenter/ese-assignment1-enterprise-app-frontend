@@ -23,7 +23,8 @@
 }
 
 .title {
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: var(--spotify-gray);
 }
 
 .playlist {
@@ -33,7 +34,7 @@
 }
 
 .playlist li {
-  padding: 0.5rem;
+  padding: 0.2rem 0.5rem;
   border-bottom: 1px solid #333;
 }
 
@@ -45,6 +46,19 @@
   text-decoration: none;
   color: inherit;
   display: block;
+  font-size: 0.8rem;
+}
+
+.playlist a h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.playlist a p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--spotify-gray);
 }
 
 .playlist a:hover {

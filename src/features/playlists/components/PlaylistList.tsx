@@ -52,18 +52,18 @@ export const PlaylistList = () => {
   return (
     <>
       <div className={styles.container}>
+        <span className={styles.title}>Playlists</span>
         <div className={styles.header}>
-          <h2 className={styles.title}>Playlists</h2>
+          <p>Create Playlist</p>
           <div
             className={styles.addButton}
             onClick={() => setIsModalOpen(true)}
             role="button"
             aria-label="add playlist"
           >
-            <IoAddCircleOutline size={24} />
+            <IoAddCircleOutline size={16} />
           </div>
         </div>
-
         <ul className={styles.playlist}>
           {playlists.map((playlist) => (
             <li key={playlist.id}>
