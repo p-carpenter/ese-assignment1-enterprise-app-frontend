@@ -104,13 +104,15 @@ type AnyFn = (...args: unknown[]) => unknown;
 const renderLibrary = (searchQuery = "") =>
   render(
     <MemoryRouter
-      initialEntries={[searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/"]}
+      initialEntries={[
+        searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
+      ]}
     >
       <SongLibrary />
     </MemoryRouter>,
   );
 
-/** Shared player context mock matching the current PlayerContextType shape. */
+/** Shared player context mock matching PlayerContextType. */
 const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
   ({
     playlist: mockSongs,
