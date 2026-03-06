@@ -51,3 +51,37 @@
   background: var(--spotify-gray-dark);
   transform: scale(1.1);
 }
+
+/* Search bar */
+.searchWrapper {
+  flex: 1;
+  max-width: 420px;
+  margin: 0 24px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--spotify-dark-elevated);
+  border: 1px solid transparent;
+  border-radius: 500px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background: #282828;
+}
+
+.searchInput::placeholder {
+  color: var(--spotify-gray);
+}
+
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}

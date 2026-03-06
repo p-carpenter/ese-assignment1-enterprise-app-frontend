@@ -1,22 +1,19 @@
 import { useEffect, useState, useRef, useCallback, type JSX } from "react";
-import { useDebounce } from "use-debounce";
+import { useSearchParams } from "react-router-dom";
 import { SongList } from "../SongList/SongList";
 import styles from "./SongLibrary.module.css";
 import { listSongsPaginated } from "../../api";
 import type { Song } from "../..";
 
 export const SongLibrary = (): JSX.Element => {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") ?? "";
+
   const [songs, setSongs] = useState<Song[]>([]);
   const [page, setPage] = useState(1);
   const [ordering, setOrdering] = useState("title");
   const [totalCount, setTotalCount] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
-
-  // 1. Raw search state for the input UI
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // 2. Debounced search state for the API
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -36,18 +33,17 @@ export const SongLibrary = (): JSX.Element => {
     [],
   );
 
-  // 3. Watch the DEBOUNCED query, not the raw one
   useEffect(() => {
     setPage(1);
-    fetchSongs(1, debouncedSearchQuery, ordering, true);
-  }, [debouncedSearchQuery, ordering, fetchSongs]);
+    fetchSongs(1, searchQuery, ordering, true);
+  }, [searchQuery, ordering, fetchSongs]);
 
   // Handle pagination (only runs when page > 1)
   useEffect(() => {
     if (page > 1) {
-      fetchSongs(page, debouncedSearchQuery, ordering, false);
+      fetchSongs(page, searchQuery, ordering, false);
     }
-  }, [page, debouncedSearchQuery, ordering, fetchSongs]);
+  }, [page, searchQuery, ordering, fetchSongs]);
 
   const handleScroll = () => {
     const container = containerRef.current;
@@ -88,14 +84,6 @@ export const SongLibrary = (): JSX.Element => {
         <option value="duration">Duration (Shortest)</option>
         <option value="-duration">Duration (Longest)</option>
       </select>
-
-      <input
-        type="text"
-        placeholder="Search songs..."
-        value={searchQuery} // Binds to raw state
-        onChange={(e) => setSearchQuery(e.target.value)} // Updates raw state instantly
-        className={styles.searchInput}
-      />
 
       <div
         ref={containerRef}
