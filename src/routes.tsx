@@ -14,16 +14,15 @@ import { HomePage } from "@/shared/HomePage/HomePage";
 import { useAuth } from "@/shared/context/AuthContext";
 import { PlaylistDetailPage } from "./features/playlists/pages/PlaylistDetailPage";
 import { PlaylistsPage } from "./features/playlists/pages/PlaylistsPage";
+import { AppLayout } from "@/shared/layout";
 
 export const AppRoutes = (): JSX.Element => {
   const { user } = useAuth();
-
-  // If user exists, they are authenticated
   const isAuthenticated = !!user;
 
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Routes — no persistent shell */}
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
@@ -44,45 +43,26 @@ export const AppRoutes = (): JSX.Element => {
         element={<ResetPasswordPage />}
       />
 
-      {/* Protected Routes */}
+      {/* Protected Routes - all share the persistent AppLayout shell */}
       <Route
-        path="/"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <HomePage />
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/upload"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <UploadPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile/edit"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ProfilePage isEditing={true} />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="/" element={<HomePage />} />
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/profile/edit"
+          element={<ProfilePage isEditing={true} />}
+        />
+        <Route path="/playlists" element={<PlaylistsPage />} />
+        <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
+      </Route>
 
-      {/* Playlist Routes */}
-      <Route path="/playlists" element={<PlaylistsPage />} />
-      <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
-
-      {/* Fallback Route - Navigate to Home */}
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

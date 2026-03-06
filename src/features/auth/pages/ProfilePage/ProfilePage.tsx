@@ -100,7 +100,6 @@ export const ProfilePage = ({
 
   return (
     <>
-      <Header />
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.avatarSection}>
