@@ -64,10 +64,6 @@ export const MiniPlayer = () => {
   }, [isHistoryOpen]);
 
   useEffect(() => {
-    if (!currentSong) {
-      setPosition(0);
-      return;
-    }
     const tick = () => {
       setPosition(getPosition());
       frameRef.current = requestAnimationFrame(tick);
@@ -80,6 +76,7 @@ export const MiniPlayer = () => {
 
   const maxDuration = Math.max(duration ?? 0, currentSong?.duration ?? 0);
   const disableControls = 0 >= maxDuration || isLoading;
+  const displayPosition = currentSong ? position : 0;
 
   return (
     <>
@@ -156,7 +153,7 @@ export const MiniPlayer = () => {
 
         {/* Time elapsed / duration */}
         <span className={styles.timeDisplay}>
-          {formatTime(position)}&nbsp;/&nbsp;{formatTime(maxDuration)}
+          {formatTime(displayPosition)}&nbsp;/&nbsp;{formatTime(maxDuration)}
         </span>
 
         {/* Volume */}
