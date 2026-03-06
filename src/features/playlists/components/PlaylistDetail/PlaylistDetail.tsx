@@ -52,7 +52,7 @@ export const PlaylistDetail = () => {
       setError("Failed to delete playlist.");
       console.error(err);
     }
-  }, [playlist, navigate]);
+  }, [playlist, navigate, incrementPlaylistTick]);
 
   const handleRemoveSongFromPlaylist = useCallback(
     async (songId: number) => {

@@ -7,7 +7,6 @@ import { PencilSolid } from "@/shared/icons";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import { changePassword, updateProfile } from "../../api";
 import { useAuth } from "@/shared/context/AuthContext";
-import { Header } from "@/shared/layout";
 
 export const ProfilePage = ({
   isEditing = false,
