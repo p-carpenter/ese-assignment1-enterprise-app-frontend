@@ -42,10 +42,16 @@ a:hover {
   color: var(--spotify-green);
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   background-color: var(--spotify-black);
   color: var(--spotify-white);
 }
