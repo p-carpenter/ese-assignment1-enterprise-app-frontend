@@ -6,6 +6,7 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { MusicPlayer } from "@/features/player";
 import { PlayerProvider } from "@/features/player";
 import { SongLibrary } from "@/features/songs";
@@ -61,10 +62,12 @@ const mockSongs: Song[] = [
 describe("MusicPlayer", () => {
   const renderWithProvider = () =>
     render(
-      <PlayerProvider>
-        <MusicPlayer />
-        <SongLibrary />
-      </PlayerProvider>,
+      <MemoryRouter>
+        <PlayerProvider>
+          <MusicPlayer />
+          <SongLibrary />
+        </PlayerProvider>
+      </MemoryRouter>,
     );
 
   beforeEach(() => {
