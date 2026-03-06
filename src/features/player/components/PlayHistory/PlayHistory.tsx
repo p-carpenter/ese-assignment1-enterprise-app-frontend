@@ -6,7 +6,13 @@ import { usePlayer } from "../..";
 
 const PAGE_SIZE = 5;
 
-export const PlayHistory = (): JSX.Element => {
+interface PlayHistoryProps {
+  hideTitle?: boolean;
+}
+
+export const PlayHistory = ({
+  hideTitle = false,
+}: PlayHistoryProps): JSX.Element => {
   const { historyTick } = usePlayer();
   const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
   const [page, setPage] = useState(1);
@@ -25,7 +31,7 @@ export const PlayHistory = (): JSX.Element => {
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.title}>Recently Played</h3>
+      {!hideTitle && <h3 className={styles.title}>Recently Played</h3>}
       <div className={styles.grid}>
         {playHistory.length === 0 ? (
           <p className={styles.text}>No play history yet</p>
