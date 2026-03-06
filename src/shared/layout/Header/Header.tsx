@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
@@ -11,19 +11,16 @@ export const Header = (): JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser } = useAuth();
-  const [searchInput, setSearchInput] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(
+    () => searchParams.get("q") ?? "",
+  );
   const [debouncedSearch] = useDebounce(searchInput, 300);
-  const isFirstRender = useRef(true);
 
-  // Sync debounced search value to URL after initial mount
+  // Sync debounced search value to URL
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
     if (location.pathname === "/") {
-      const params = new URLSearchParams(window.location.search);
-      const current = params.get("q") ?? "";
+      const current = searchParams.get("q") ?? "";
       if (debouncedSearch !== current) {
         navigate(
           debouncedSearch ? `/?q=${encodeURIComponent(debouncedSearch)}` : "/",
@@ -33,14 +30,7 @@ export const Header = (): JSX.Element => {
     } else if (debouncedSearch) {
       navigate(`/?q=${encodeURIComponent(debouncedSearch)}`);
     }
-  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Clear search input when navigating away from home
-  useEffect(() => {
-    if (location.pathname !== "/") {
-      setSearchInput("");
-    }
-  }, [location.pathname]);
+  }, [debouncedSearch, location.pathname, searchParams, navigate]);
 
   const handleLogout = async (): Promise<void> => {
     try {
