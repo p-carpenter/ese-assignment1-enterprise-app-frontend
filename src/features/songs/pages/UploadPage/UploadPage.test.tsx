@@ -20,22 +20,9 @@ vi.mock("@/features/songs", () => ({
   ),
 }));
 
-vi.mock("@/shared/layout", () => ({
-  Header: () => <div data-testid="header">Header</div>,
-}));
-
 describe("UploadPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it("renders the Header", () => {
-    render(
-      <MemoryRouter>
-        <UploadPage />
-      </MemoryRouter>,
-    );
-    expect(screen.getByTestId("header")).toBeInTheDocument();
   });
 
   it("renders the SongUploadForm", () => {

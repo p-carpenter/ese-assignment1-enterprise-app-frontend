@@ -1,4 +1,5 @@
 import { useState, type JSX } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
@@ -9,7 +10,7 @@ interface EditSongModalProps {
   song: Song | null;
   isOpen: boolean;
   onClose: () => void;
-  onSongUpdated: (updatedSong: Song) => void;
+  onSongUpdated: () => void;
 }
 
 export const EditSongModal = ({
@@ -18,11 +19,37 @@ export const EditSongModal = ({
   onClose,
   onSongUpdated,
 }: EditSongModalProps): JSX.Element | null => {
-  const { upload, isUploading, error } = useCloudinaryUpload();
+  const queryClient = useQueryClient();
+  const { upload, isUploading, error: uploadError } = useCloudinaryUpload();
 
   const [coverArtUrl, setCoverArtUrl] = useState<string>(
     song?.cover_art_url || "",
   );
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      title,
+      artist,
+      url,
+    }: {
+      title: string;
+      artist: string;
+      url: string;
+    }) =>
+      updateSong(song!.id, {
+        title,
+        artist,
+        file_url: song!.file_url,
+        duration: song!.duration,
+        cover_art_url: url,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["songs"] });
+      void queryClient.invalidateQueries({ queryKey: ["playlist"] });
+      onSongUpdated();
+      onClose();
+    },
+  });
 
   if (!song) return null;
 
@@ -37,29 +64,19 @@ export const EditSongModal = ({
     }
   };
 
-  const handleSubmit = async ({
+  const handleSubmit = ({
     title,
     artist,
   }: {
     title: string;
     artist: string;
   }) => {
-    try {
-      const updatedSong = await updateSong(song.id, {
-        title,
-        artist,
-        file_url: song.file_url,
-        duration: song.duration,
-        cover_art_url: coverArtUrl,
-      });
-
-      onSongUpdated(updatedSong);
-      onClose();
-    } catch (err) {
-      console.error("Failed to update song:", err);
-      alert("Failed to update song. Check console.");
-    }
+    updateMutation.mutate({ title, artist, url: coverArtUrl });
   };
+
+  const submitError = updateMutation.isError
+    ? "Failed to update song. Please try again."
+    : (uploadError as string | null);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Song">
@@ -70,8 +87,8 @@ export const EditSongModal = ({
           artist: song.artist,
         }}
         onSubmit={handleSubmit}
-        isSubmitting={isUploading}
-        error={error as string}
+        isSubmitting={updateMutation.isPending || isUploading}
+        error={submitError}
         showMp3Upload={false}
         coverArtUploading={isUploading}
         onCoverArtUpload={handleCoverArtUpload}

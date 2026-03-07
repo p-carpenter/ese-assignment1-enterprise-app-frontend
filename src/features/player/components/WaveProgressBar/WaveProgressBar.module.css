@@ -1,0 +1,6 @@
+.wrapper {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  overflow: hidden;
+}

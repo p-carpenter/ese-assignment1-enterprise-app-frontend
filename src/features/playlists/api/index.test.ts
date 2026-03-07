@@ -29,7 +29,9 @@ describe("playlist API", () => {
         title: "My Playlist",
         description: "A cool playlist",
         is_public: false,
-        owner: 1,
+        is_collaborative: false,
+        cover_art_url: null,
+        owner: { id: 1, username: "testuser" },
         songs: [],
       },
     ];
@@ -48,7 +50,9 @@ describe("playlist API", () => {
       title: "New Playlist",
       description: "",
       is_public: false,
-      owner: 1,
+      is_collaborative: false,
+      cover_art_url: null,
+      owner: { id: 1, username: "testuser" },
       songs: [],
     };
     mockedRequest.mockResolvedValue(mockPlaylist);
@@ -79,7 +83,9 @@ describe("playlist API", () => {
       title: "Updated Playlist",
       description: "A cool playlist",
       is_public: false,
-      owner: 1,
+      is_collaborative: false,
+      cover_art_url: null,
+      owner: { id: 1, username: "testuser" },
       songs: [],
     };
     mockedRequest.mockResolvedValue(mockPlaylist);
@@ -99,7 +105,9 @@ describe("playlist API", () => {
       title: "My Playlist",
       description: "A cool playlist",
       is_public: false,
-      owner: 1,
+      is_collaborative: false,
+      cover_art_url: null,
+      owner: { id: 1, username: "testuser" },
       songs: [],
     };
     mockedRequest.mockResolvedValue(mockPlaylist);
@@ -116,7 +124,9 @@ describe("playlist API", () => {
       title: "My Playlist",
       description: "A cool playlist",
       is_public: false,
-      owner: 1,
+      is_collaborative: false,
+      cover_art_url: null,
+      owner: { id: 1, username: "testuser" },
       songs: [],
     };
     mockedRequest.mockResolvedValue(mockPlaylist);
@@ -136,7 +146,9 @@ describe("playlist API", () => {
       title: "My Playlist",
       description: "A cool playlist",
       is_public: false,
-      owner: 1,
+      is_collaborative: false,
+      cover_art_url: null,
+      owner: { id: 1, username: "testuser" },
       songs: [],
     };
     mockedRequest.mockResolvedValue(mockPlaylist);

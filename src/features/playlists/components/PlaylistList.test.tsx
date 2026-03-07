@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PlaylistList } from "./PlaylistList";
 import { AuthContext } from "@/shared/context/AuthContext";
 import { MemoryRouter } from "react-router-dom";
@@ -16,7 +17,9 @@ const mockPlaylists: Playlist[] = [
     description: "The best rock songs",
     songs: [],
     is_public: false,
-    owner: 1,
+    is_collaborative: false,
+    cover_art_url: null,
+    owner: { id: 1, username: "testuser" },
   },
   {
     id: 2,
@@ -24,7 +27,9 @@ const mockPlaylists: Playlist[] = [
     description: "Smooth jazz for relaxing",
     songs: [],
     is_public: false,
-    owner: 1,
+    is_collaborative: false,
+    cover_art_url: null,
+    owner: { id: 1, username: "testuser" },
   },
 ];
 
@@ -35,6 +40,11 @@ const mockUser: UserProfile = {
   avatar_url: "",
 };
 
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
 const renderWithProviders = (
   ui: React.ReactElement,
   { user, loading = false }: { user: UserProfile | null; loading?: boolean } = {
@@ -42,19 +52,22 @@ const renderWithProviders = (
     loading: false,
   },
 ) => {
+  const queryClient = createTestQueryClient();
   return render(
-    <MemoryRouter>
-      <AuthContext.Provider
-        value={{
-          user,
-          loading,
-          setUser: () => {},
-          refreshUser: async () => {},
-        }}
-      >
-        {ui}
-      </AuthContext.Provider>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <AuthContext.Provider
+          value={{
+            user,
+            loading,
+            setUser: () => {},
+            refreshUser: () => Promise.resolve(),
+          }}
+        >
+          {ui}
+        </AuthContext.Provider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 };
 
@@ -102,9 +115,9 @@ describe("PlaylistList", () => {
     renderWithProviders(<PlaylistList />);
 
     expect(await screen.findByText("Rock Classics")).toBeInTheDocument();
-    expect(screen.getByText("The best rock songs")).toBeInTheDocument();
     expect(screen.getByText("Jazz Vibes")).toBeInTheDocument();
-    expect(screen.getByText("Smooth jazz for relaxing")).toBeInTheDocument();
+    // Both playlists have 0 songs
+    expect(screen.getAllByText("0 songs")).toHaveLength(2);
   });
 
   it("should open the 'Create New Playlist' modal when the add button is clicked", async () => {
@@ -115,7 +128,7 @@ describe("PlaylistList", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     // Click the add button
-    fireEvent.click(screen.getByRole("button", { name: /add playlist/i }));
+    fireEvent.click(screen.getByRole("button", { name: /create playlist/i }));
 
     // Modal should now be visible
     await waitFor(() => expect(screen.getByRole("dialog")).toBeInTheDocument());

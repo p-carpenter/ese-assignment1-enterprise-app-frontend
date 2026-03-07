@@ -1,13 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe } from "@/features/auth/api";
 import { type UserProfile } from "@/features/auth/types";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -21,24 +17,24 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const refreshUser = async () => {
-    try {
-      const data = await getMe();
-      setUser(data);
-    } catch (err) {
-      console.error("Failed to fetch user profile:", err);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+  const { data: user = null, isLoading: loading } = useQuery({
+    queryKey: queryKeys.me,
+    queryFn: getMe,
+    // Don't throw on 401 (not logged in) – just return null
+    throwOnError: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  /** Immediately write a user object into the cache (e.g. after profile update). */
+  const setUser = (newUser: UserProfile | null) => {
+    queryClient.setQueryData(queryKeys.me, newUser);
   };
 
-  useEffect(() => {
-    refreshUser();
-  }, []);
+  /** Refetch the current user from the server. */
+  const refreshUser = () =>
+    queryClient.refetchQueries({ queryKey: queryKeys.me });
 
   return (
     <AuthContext.Provider value={{ user, loading, setUser, refreshUser }}>

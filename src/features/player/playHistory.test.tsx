@@ -1,22 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PlayHistory } from "./components/PlayHistory/PlayHistory";
 import { getPlayHistory } from "./api";
-import { usePlayer } from "@/shared/context/PlayerContext";
 import type { Song } from "@/features/songs/types";
 
 vi.mock("./api", () => ({
   getPlayHistory: vi.fn(),
 }));
 
-vi.mock("@/shared/context/PlayerContext", () => ({
-  usePlayer: vi.fn(),
-}));
-
 const mockGetPlayHistory = vi.mocked(getPlayHistory) as unknown as ReturnType<
   typeof vi.fn
 >;
-const mockedUsePlayer = usePlayer as unknown as ReturnType<typeof vi.fn>;
 
 const mockSong: Song = {
   id: 10,
@@ -26,6 +21,7 @@ const mockSong: Song = {
   file_url: "http://example.com/history.mp3",
   cover_art_url: "http://example.com/history.jpg",
   album: "History Album",
+  uploaded_at: "2026-02-19T10:30:00.000Z",
   release_year: "2026",
 };
 
@@ -35,17 +31,32 @@ const mockEntry = {
   played_at: "2026-02-19T10:30:00.000Z",
 };
 
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+const renderHistory = (
+  props: React.ComponentProps<typeof PlayHistory> = {},
+) => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <PlayHistory {...props} />
+    </QueryClientProvider>,
+  );
+};
+
 describe("PlayHistory", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUsePlayer.mockReturnValue({ historyTick: 0 });
     mockGetPlayHistory.mockResolvedValue({ count: 0, results: [] });
   });
 
   it("shows empty state when no history", async () => {
     mockGetPlayHistory.mockResolvedValueOnce({ count: 0, results: [] });
 
-    render(<PlayHistory />);
+    renderHistory();
 
     expect(await screen.findByText(/No play history yet/i)).toBeInTheDocument();
   });
@@ -56,38 +67,58 @@ describe("PlayHistory", () => {
       results: [mockEntry],
     });
 
-    render(<PlayHistory />);
+    renderHistory();
 
     expect(await screen.findByText("History Song")).toBeInTheDocument();
     expect(screen.getByText("History Artist")).toBeInTheDocument();
   });
 
-  it("re-fetches history when historyTick increments", async () => {
-    mockGetPlayHistory.mockResolvedValue({ count: 0, results: [] });
+  it("re-fetches history when the page changes (Next clicked)", async () => {
+    const PAGE_SIZE = 5;
+    const makeEntries = (n: number, prefix: string) =>
+      Array.from({ length: n }, (_, i) => ({
+        id: i + 1,
+        song: { ...mockSong, id: i + 1, title: `${prefix} ${i + 1}` },
+        played_at: mockEntry.played_at,
+      }));
 
-    // First render with historyTick=0
-    mockedUsePlayer.mockReturnValue({ historyTick: 0 });
-    const { rerender } = render(<PlayHistory />);
-    await screen.findByText(/no play history yet/i);
+    mockGetPlayHistory
+      .mockResolvedValueOnce({
+        count: 10,
+        results: makeEntries(PAGE_SIZE, "Track"),
+      })
+      .mockResolvedValueOnce({
+        count: 10,
+        results: makeEntries(PAGE_SIZE, "Other"),
+      });
 
-    // Simulate a new song being played (historyTick increments)
-    mockGetPlayHistory.mockResolvedValueOnce({
-      count: 1,
-      results: [mockEntry],
+    renderHistory();
+    await screen.findByText("Track 1");
+
+    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+
+    await waitFor(() => {
+      expect(mockGetPlayHistory).toHaveBeenCalledTimes(2);
+      expect(mockGetPlayHistory).toHaveBeenCalledWith(2, PAGE_SIZE);
     });
-    mockedUsePlayer.mockReturnValue({ historyTick: 1 });
-    rerender(<PlayHistory />);
-
-    expect(await screen.findByText("History Song")).toBeInTheDocument();
-    expect(mockGetPlayHistory).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText("Other 1")).toBeInTheDocument();
   });
 
   it("renders the 'Recently Played' heading", async () => {
     mockGetPlayHistory.mockResolvedValueOnce({ count: 0, results: [] });
 
-    render(<PlayHistory />);
+    renderHistory();
 
     expect(await screen.findByText("Recently Played")).toBeInTheDocument();
+  });
+
+  it("hides the title when hideTitle=true", async () => {
+    mockGetPlayHistory.mockResolvedValueOnce({ count: 0, results: [] });
+
+    renderHistory({ hideTitle: true });
+
+    await screen.findByText(/No play history yet/i);
+    expect(screen.queryByText("Recently Played")).not.toBeInTheDocument();
   });
 
   it("renders the played_at timestamp for each entry", async () => {
@@ -97,7 +128,7 @@ describe("PlayHistory", () => {
       results: [{ ...mockEntry, played_at: playedAt }],
     });
 
-    render(<PlayHistory />);
+    renderHistory();
 
     await screen.findByText("History Song");
     // The component formats the date via toLocaleString()
@@ -110,10 +141,12 @@ describe("PlayHistory", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockGetPlayHistory.mockRejectedValue(new Error("Server error"));
 
-    render(<PlayHistory />);
+    renderHistory();
 
     // The component catches the error and leaves the list empty
-    expect(await screen.findByText(/no play history yet/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("History Song")).not.toBeInTheDocument();
+    });
     consoleSpy.mockRestore();
   });
 
@@ -146,7 +179,7 @@ describe("PlayHistory", () => {
         results: [singleEntry],
       });
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Solo Track");
 
       expect(
@@ -160,7 +193,7 @@ describe("PlayHistory", () => {
     it("renders Prev/Next buttons when there are multiple pages", async () => {
       mockGetPlayHistory.mockResolvedValueOnce(makePage(1, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
 
       expect(screen.getByRole("button", { name: /prev/i })).toBeInTheDocument();
@@ -170,7 +203,7 @@ describe("PlayHistory", () => {
     it("Prev button is disabled on the first page", async () => {
       mockGetPlayHistory.mockResolvedValueOnce(makePage(1, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
 
       expect(screen.getByRole("button", { name: /prev/i })).toBeDisabled();
@@ -181,7 +214,7 @@ describe("PlayHistory", () => {
         .mockResolvedValueOnce(makePage(1, 10))
         .mockResolvedValueOnce(makePage(2, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
 
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
@@ -197,7 +230,7 @@ describe("PlayHistory", () => {
         .mockResolvedValueOnce(makePage(1, 10))
         .mockResolvedValueOnce(makePage(2, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
       await screen.findByText("Track 6");
@@ -211,7 +244,7 @@ describe("PlayHistory", () => {
         .mockResolvedValueOnce(makePage(2, 10))
         .mockResolvedValueOnce(makePage(1, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
       await screen.findByText("Track 6");
@@ -226,7 +259,7 @@ describe("PlayHistory", () => {
     it("displays the current page and total pages", async () => {
       mockGetPlayHistory.mockResolvedValueOnce(makePage(1, 10));
 
-      render(<PlayHistory />);
+      renderHistory();
       await screen.findByText("Track 1");
 
       expect(screen.getByText(/1\s*\/\s*2/)).toBeInTheDocument();

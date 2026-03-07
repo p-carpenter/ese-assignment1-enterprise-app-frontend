@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
+import { useQueryClient } from "@tanstack/react-query";
 import { logPlay } from "@/features/songs/api";
 import { type Song } from "@/features/songs/types";
 
@@ -18,6 +19,7 @@ export interface PlayerContextType {
   playlist: Song[];
   isPlaying: boolean;
   isLoading: boolean;
+  isLooping: boolean;
   duration: number;
   play: () => void;
   pause: () => void;
@@ -27,7 +29,7 @@ export interface PlayerContextType {
   playSong: (song: Song, playlist?: Song[]) => Promise<void>;
   playPrev: () => Promise<void>;
   playNext: () => Promise<void>;
-  historyTick: number;
+  toggleLoop: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -45,9 +47,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     duration,
   } = useAudioPlayer();
 
+  const queryClient = useQueryClient();
+
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [playlist, setPlaylist] = useState<Song[]>([]);
-  const [historyTick, setHistoryTick] = useState(0);
+  const [isLooping, setIsLooping] = useState(false);
+  const isLoopingRef = useRef(false);
+
+  const toggleLoop = useCallback(() => {
+    setIsLooping((prev) => {
+      isLoopingRef.current = !prev;
+      return !prev;
+    });
+  }, []);
 
   const playNextRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
@@ -73,24 +85,50 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       stop();
       setCurrentSong(song);
 
+      // Briefly patch the Audio constructor so Howler creates the <audio> element
+      // with crossOrigin="anonymous" already set. Web Audio API's
+      // createMediaElementSource (used by @audiowave/react) requires this to be
+      // present before the src is loaded, otherwise the analyser sees only zeros.
+      const OrigAudio = window.Audio;
+      (window as unknown as Record<string, unknown>).Audio = function (
+        ...args: unknown[]
+      ) {
+        const el = new OrigAudio(
+          ...(args as ConstructorParameters<typeof Audio>),
+        );
+        el.crossOrigin = "anonymous";
+        return el;
+      };
+
       load(song.file_url, {
         autoplay: true,
         format: "mp3",
         html5: true,
         onend: () => {
-          void playNextRef.current?.();
+          if (isLoopingRef.current) {
+            seek(0);
+            play();
+          } else {
+            void playNextRef.current?.();
+          }
         },
         onplay: () => {
           try {
             void logPlay(song.id);
-            setHistoryTick((prev) => prev + 1);
+            // Invalidate all play-history pages so PlayHistory refetches automatically
+            void queryClient.invalidateQueries({
+              queryKey: ["playHistory"],
+            });
           } catch (err) {
             console.error("Failed to log play:", err);
           }
         },
       });
+
+      // Restore immediately - Howler creates the element synchronously above
+      (window as unknown as { Audio: typeof Audio }).Audio = OrigAudio;
     },
-    [currentSong?.id, isPlaying, load, pause, play, stop],
+    [currentSong?.id, isPlaying, load, pause, play, queryClient, seek, stop],
   );
 
   const playPrev = useCallback(async (): Promise<void> => {
@@ -118,6 +156,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playlist,
       isPlaying,
       isLoading,
+      isLooping,
       duration,
       play,
       pause,
@@ -127,13 +166,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playSong,
       playPrev,
       playNext,
-      historyTick,
+      toggleLoop,
     }),
     [
       currentSong,
       playlist,
       isPlaying,
       isLoading,
+      isLooping,
       duration,
       play,
       pause,
@@ -142,7 +182,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playSong,
       playPrev,
       playNext,
-      historyTick,
+      toggleLoop,
     ],
   );
 

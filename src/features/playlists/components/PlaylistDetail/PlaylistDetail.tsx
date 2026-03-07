@@ -11,6 +11,7 @@ import { SongList } from "@/features/songs/components/SongList/SongList";
 import { Button } from "@/shared/components/Button/Button";
 import { type DropdownItem } from "@/features/songs/components/SongManagementDropdown/SongManagementDropdown";
 import { type Song } from "@/features/songs/types";
+import { usePlayer } from "@/shared/context/PlayerContext";
 
 export const PlaylistDetail = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
@@ -19,6 +20,7 @@ export const PlaylistDetail = () => {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+  const { incrementPlaylistTick } = usePlayer();
 
   const fetchPlaylist = useCallback(async () => {
     if (!playlistId) return;
@@ -44,12 +46,13 @@ export const PlaylistDetail = () => {
     try {
       setError(null);
       await deletePlaylist(playlist.id);
+      incrementPlaylistTick();
       navigate("/");
     } catch (err) {
       setError("Failed to delete playlist.");
       console.error(err);
     }
-  }, [playlist, navigate]);
+  }, [playlist, navigate, incrementPlaylistTick]);
 
   const handleRemoveSongFromPlaylist = useCallback(
     async (songId: number) => {

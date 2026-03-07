@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   render,
   screen,
@@ -6,6 +6,8 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditSongModal } from "./components/EditSongModal/EditSongModal";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import type { Song } from "@/features/songs/types";
@@ -69,6 +71,7 @@ const mockSongs: Song[] = [
     file_url: "http://example.com/song1.mp3",
     cover_art_url: "http://example.com/cover1.jpg",
     album: "Album 1",
+    uploaded_at: "2023-01-01T12:00:00.000Z",
     release_year: "2023",
   },
   {
@@ -78,7 +81,9 @@ const mockSongs: Song[] = [
     duration: 150,
     file_url: "http://example.com/song2.mp3",
     cover_art_url: "http://example.com/cover2.jpg",
+
     album: "Album 2",
+    uploaded_at: "2023-01-01T12:00:00.000Z",
     release_year: "2024",
   },
 ];
@@ -99,7 +104,28 @@ const emptyPaginatedSongs = {
 
 type AnyFn = (...args: unknown[]) => unknown;
 
-/** Shared player context mock matching the current PlayerContextType shape. */
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+/** Wraps SongLibrary in a MemoryRouter + QueryClientProvider so hooks work in tests. */
+const renderLibrary = (searchQuery = "") => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter
+        initialEntries={[
+          searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
+        ]}
+      >
+        <SongLibrary />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+};
+
+/** Shared player context mock matching PlayerContextType. */
 const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
   ({
     playlist: mockSongs,
@@ -120,8 +146,9 @@ const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
     setPlaylist: vi.fn() as unknown as PlayerContextType["setPlaylist"],
     isPlaying: false,
     isLoading: false,
+    isLooping: false,
+    toggleLoop: vi.fn() as unknown as AnyFn,
     duration: 0,
-    historyTick: 0,
     ...overrides,
   }) as PlayerContextType;
 
@@ -149,7 +176,7 @@ describe("Song management", () => {
   // ─── Read ────────────────────────────────────────────────────────────────
   describe("read", () => {
     it("renders the list of songs fetched from the API", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
 
       expect(await screen.findByText("Song A")).toBeInTheDocument();
       expect(screen.getByText("Song B")).toBeInTheDocument();
@@ -163,7 +190,11 @@ describe("Song management", () => {
     it("uploads a song and navigates home", async () => {
       mockUploadSong.mockResolvedValueOnce(mockSongs[0]);
 
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
 
       fireEvent.change(screen.getByPlaceholderText("Title"), {
         target: { value: "Test Song" },
@@ -208,12 +239,14 @@ describe("Song management", () => {
       });
 
       render(
-        <EditSongModal
-          song={mockSongs[0]}
-          isOpen={true}
-          onClose={onClose}
-          onSongUpdated={onSongUpdated}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={mockSongs[0]}
+            isOpen={true}
+            onClose={onClose}
+            onSongUpdated={onSongUpdated}
+          />
+        </QueryClientProvider>,
       );
 
       fireEvent.change(screen.getByPlaceholderText("Title"), {
@@ -242,8 +275,18 @@ describe("Song management", () => {
   // ─── Delete ──────────────────────────────────────────────────────────────
   describe("delete", () => {
     it("calls deleteSong and removes the song from the rendered list", async () => {
+      const songsAfterDelete = {
+        count: 1,
+        results: [mockSongs[1]],
+        next: null,
+        previous: null,
+      };
       mockDeleteSong.mockResolvedValueOnce({});
-      render(<SongLibrary />);
+      // First call: initial load. Second call: re-fetch after invalidation.
+      mockListSongsPaginated
+        .mockResolvedValueOnce(paginatedSongs)
+        .mockResolvedValueOnce(songsAfterDelete);
+      renderLibrary();
 
       await screen.findByText("Song A");
 
@@ -264,25 +307,23 @@ describe("Song management", () => {
       expect(screen.getByText("Song B")).toBeInTheDocument();
     });
 
-    it("shows an alert and keeps the song list intact when deleteSong fails", async () => {
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("keeps the song list intact when deleteSong fails", async () => {
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
       mockDeleteSong.mockRejectedValueOnce(new Error("Server error"));
-      render(<SongLibrary />);
+      renderLibrary();
 
       await screen.findByText("Song A");
       fireEvent.click(screen.getAllByRole("button")[0]); // open dropdown
       fireEvent.click(await screen.findByText("Delete"));
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalled();
       });
       // Song should still be in the DOM after the failed delete
       expect(screen.getByText("Song A")).toBeInTheDocument();
 
-      alertSpy.mockRestore();
       consoleSpy.mockRestore();
     });
   });
@@ -290,7 +331,7 @@ describe("Song management", () => {
   // ─── SongLibrary display ─────────────────────────────────────────────────
   describe("SongLibrary – display", () => {
     it("shows the correct track count from the API response", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
       expect(
         await screen.findByText(/library \(2 tracks\)/i),
       ).toBeInTheDocument();
@@ -298,7 +339,7 @@ describe("Song management", () => {
 
     it("renders an empty library with 0 tracks", async () => {
       mockListSongsPaginated.mockResolvedValueOnce(emptyPaginatedSongs);
-      render(<SongLibrary />);
+      renderLibrary();
       expect(
         await screen.findByText(/library \(0 tracks\)/i),
       ).toBeInTheDocument();
@@ -308,14 +349,14 @@ describe("Song management", () => {
       mockedUsePlayer.mockReturnValue(
         makePlayerMock({ playSong: mockPlaySong, currentSong: mockSongs[0] }),
       );
-      const { container } = render(<SongLibrary />);
+      const { container } = renderLibrary();
       await screen.findByText("Song A");
       const firstItem = container.querySelector("li");
       expect(firstItem?.className).toMatch(/songItemActive/);
     });
 
     it("calls playSong with the correct song when a list item is clicked", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
       fireEvent.click(await screen.findByText("Song B"));
       expect(mockPlaySong).toHaveBeenCalledWith(mockSongs[1], mockSongs);
     });
@@ -324,7 +365,7 @@ describe("Song management", () => {
   // ─── SongLibrary sorting ─────────────────────────────────────────────────
   describe("SongLibrary – sorting", () => {
     it("re-fetches with the new ordering when the sort dropdown changes", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
       await screen.findByText("Song A");
 
       fireEvent.change(screen.getByRole("combobox"), {
@@ -337,7 +378,7 @@ describe("Song management", () => {
     });
 
     it("resets to page 1 when the sort order changes", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
       await screen.findByText("Song A");
 
       fireEvent.change(screen.getByRole("combobox"), {
@@ -368,7 +409,7 @@ describe("Song management", () => {
       for (const value of sortOptions) {
         vi.clearAllMocks();
         mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-        const { unmount } = render(<SongLibrary />);
+        const { unmount } = renderLibrary();
         await screen.findByText("Song A");
 
         fireEvent.change(screen.getByRole("combobox"), { target: { value } });
@@ -383,25 +424,9 @@ describe("Song management", () => {
 
   // ─── SongLibrary searching ───────────────────────────────────────────────
   describe("SongLibrary – searching", () => {
-    beforeEach(() => {
-      vi.useFakeTimers({ shouldAdvanceTime: true });
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    it("calls listSongsPaginated with the search query after the debounce delay", async () => {
+    it("calls listSongsPaginated with the search query from the URL", async () => {
       mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-      render(<SongLibrary />);
-
-      const searchInput = screen.getByPlaceholderText("Search songs...");
-      fireEvent.change(searchInput, { target: { value: "Song A" } });
-
-      // Advance timers past the 300 ms debounce
-      await act(async () => {
-        vi.advanceTimersByTime(400);
-      });
+      renderLibrary("Song A");
 
       await waitFor(() => {
         expect(mockListSongsPaginated).toHaveBeenCalledWith(
@@ -412,22 +437,14 @@ describe("Song management", () => {
       });
     });
 
-    it("resets to page 1 when the search query changes", async () => {
+    it("fetches page 1 with the URL search query on mount", async () => {
       mockListSongsPaginated.mockResolvedValue({
         count: 1,
         results: [mockSongs[0]],
         next: null,
         previous: null,
       });
-      render(<SongLibrary />);
-
-      fireEvent.change(screen.getByPlaceholderText("Search songs..."), {
-        target: { value: "Artist" },
-      });
-
-      await act(async () => {
-        vi.advanceTimersByTime(400);
-      });
+      renderLibrary("Artist");
 
       await waitFor(() => {
         expect(mockListSongsPaginated).toHaveBeenCalledWith(
@@ -438,39 +455,22 @@ describe("Song management", () => {
       });
     });
 
-    it("does not fire an extra API call before the debounce window elapses", async () => {
-      render(<SongLibrary />);
-      // Let the initial fetch complete before timing tests
-      await act(async () => {
-        vi.advanceTimersByTime(0);
-      });
-      mockListSongsPaginated.mockClear();
+    it("makes exactly one API call on mount with a search query", async () => {
+      mockListSongsPaginated.mockResolvedValue(paginatedSongs);
+      renderLibrary("x");
 
-      fireEvent.change(screen.getByPlaceholderText("Search songs..."), {
-        target: { value: "x" },
+      await waitFor(() => {
+        expect(mockListSongsPaginated).toHaveBeenCalledTimes(1);
+        expect(mockListSongsPaginated).toHaveBeenCalledWith(1, "title", "x");
       });
-
-      await act(async () => {
-        vi.advanceTimersByTime(100);
-      });
-
-      expect(mockListSongsPaginated).not.toHaveBeenCalled();
     });
 
     it("handles an API error during search gracefully", async () => {
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      render(<SongLibrary />);
-
       mockListSongsPaginated.mockRejectedValueOnce(new Error("Search failed"));
-      fireEvent.change(screen.getByPlaceholderText("Search songs..."), {
-        target: { value: "bad" },
-      });
-
-      await act(async () => {
-        vi.advanceTimersByTime(400);
-      });
+      renderLibrary("bad");
 
       await waitFor(() => expect(consoleSpy).toHaveBeenCalled());
       consoleSpy.mockRestore();
@@ -480,7 +480,7 @@ describe("Song management", () => {
   // ─── SongLibrary pagination ──────────────────────────────────────────────
   describe("SongLibrary – pagination", () => {
     it("fetches page 1 with the default ordering on mount", async () => {
-      render(<SongLibrary />);
+      renderLibrary();
       await screen.findByText("Song A");
       expect(mockListSongsPaginated).toHaveBeenCalledWith(1, "title", "");
     });
@@ -502,7 +502,7 @@ describe("Song management", () => {
         .mockResolvedValueOnce(page1)
         .mockResolvedValueOnce(page2);
 
-      const { container } = render(<SongLibrary />);
+      const { container } = renderLibrary();
       expect(await screen.findByText("Song A")).toBeInTheDocument();
 
       // Simulate an infinite-scroll trigger by firing the scroll event
@@ -543,7 +543,7 @@ describe("Song management", () => {
       // count == results.length means no more pages
       mockListSongsPaginated.mockResolvedValue(paginatedSongs);
 
-      const { container } = render(<SongLibrary />);
+      const { container } = renderLibrary();
       await screen.findByText("Song A");
       mockListSongsPaginated.mockClear();
 
@@ -583,7 +583,7 @@ describe("Song management", () => {
         }),
       );
 
-      render(<SongLibrary />);
+      renderLibrary();
       expect(screen.getByText("Loading...")).toBeInTheDocument();
 
       await act(async () => {
@@ -601,7 +601,7 @@ describe("Song management", () => {
         .mockImplementation(() => {});
       mockListSongsPaginated.mockRejectedValueOnce(new Error("Network error"));
 
-      render(<SongLibrary />);
+      renderLibrary();
 
       await waitFor(() => expect(consoleSpy).toHaveBeenCalled());
       consoleSpy.mockRestore();
@@ -612,24 +612,28 @@ describe("Song management", () => {
   describe("EditSongModal – edge cases", () => {
     it("renders nothing when song prop is null", () => {
       const { container } = render(
-        <EditSongModal
-          song={null}
-          isOpen={true}
-          onClose={vi.fn()}
-          onSongUpdated={vi.fn()}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={null}
+            isOpen={true}
+            onClose={vi.fn()}
+            onSongUpdated={vi.fn()}
+          />
+        </QueryClientProvider>,
       );
-      expect(container).toBeEmptyDOMElement();
+      expect(container.firstChild).toBeNull();
     });
 
     it("renders nothing when isOpen is false", () => {
       render(
-        <EditSongModal
-          song={mockSongs[0]}
-          isOpen={false}
-          onClose={vi.fn()}
-          onSongUpdated={vi.fn()}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={mockSongs[0]}
+            isOpen={false}
+            onClose={vi.fn()}
+            onSongUpdated={vi.fn()}
+          />
+        </QueryClientProvider>,
       );
       expect(screen.queryByText("Edit Song")).not.toBeInTheDocument();
     });
@@ -638,13 +642,21 @@ describe("Song management", () => {
   // ─── SongUploadForm validation ───────────────────────────────────────────
   describe("SongUploadForm – validation", () => {
     it("submit button is disabled until an audio file is selected", () => {
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
     });
 
     it("disabled submit button prevents upload without an audio file", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
       alertSpy.mockRestore();
     });

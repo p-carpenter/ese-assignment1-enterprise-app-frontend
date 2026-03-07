@@ -1,77 +1,61 @@
-import { useEffect, useState, useRef, useCallback, type JSX } from "react";
-import { useDebounce } from "use-debounce";
+import { useState, useRef, useEffect, type JSX } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { SongList } from "../SongList/SongList";
 import styles from "./SongLibrary.module.css";
 import { listSongsPaginated } from "../../api";
-import type { Song } from "../..";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 export const SongLibrary = (): JSX.Element => {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [page, setPage] = useState(1);
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") ?? "";
   const [ordering, setOrdering] = useState("title");
-  const [totalCount, setTotalCount] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
-
-  // 1. Raw search state for the input UI
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // 2. Debounced search state for the API
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchSongs = useCallback(
-    async (pageNumber: number, query: string, order: string, reset = false) => {
-      setIsFetching(true);
-      try {
-        const data = await listSongsPaginated(pageNumber, order, query);
-        setTotalCount(data.count);
-        setSongs((prev) => (reset ? data.results : [...prev, ...data.results]));
-      } catch (err) {
-        console.error("Failed to fetch library:", err);
-      } finally {
-        setIsFetching(false);
-      }
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: queryKeys.songs({ ordering, search: searchQuery }),
+    queryFn: ({ pageParam }) =>
+      listSongsPaginated(pageParam as number, ordering, searchQuery),
+    initialPageParam: 1,
+    // Keep the previous results visible while new search/sort results load
+    placeholderData: (prev) => prev,
+    // Move to the next page number as long as there are more results
+    getNextPageParam: (lastPage, allPages) => {
+      const totalLoaded = allPages.reduce(
+        (sum, p) => sum + p.results.length,
+        0,
+      );
+      return totalLoaded < lastPage.count ? allPages.length + 1 : undefined;
     },
-    [],
-  );
+  });
 
-  // 3. Watch the DEBOUNCED query, not the raw one
-  useEffect(() => {
-    setPage(1);
-    fetchSongs(1, debouncedSearchQuery, ordering, true);
-  }, [debouncedSearchQuery, ordering, fetchSongs]);
+  const songs = data?.pages.flatMap((p) => p.results) ?? [];
+  // Total comes from the server count field on any page (it's consistent)
+  const totalCount = data?.pages[0]?.count ?? 0;
 
-  // Handle pagination (only runs when page > 1)
   useEffect(() => {
-    if (page > 1) {
-      fetchSongs(page, debouncedSearchQuery, ordering, false);
+    if (isError) {
+      console.error("Failed to fetch songs:", error);
     }
-  }, [page, debouncedSearchQuery, ordering, fetchSongs]);
+  }, [isError, error]);
 
   const handleScroll = () => {
     const container = containerRef.current;
-    if (!container || isFetching) return;
-
+    if (!container || isFetchingNextPage || !hasNextPage) return;
     if (
       container.scrollTop + container.clientHeight >=
       container.scrollHeight - 50
     ) {
-      if (songs.length < totalCount) {
-        setPage((prev) => prev + 1);
-      }
+      void fetchNextPage();
     }
-  };
-
-  const handleSongDeleted = (deletedSongId: number) => {
-    setSongs((prev) => prev.filter((s) => s.id !== deletedSongId));
-    setTotalCount((prev) => prev - 1);
-  };
-
-  const handleSongUpdated = (updatedSong: Song) => {
-    setSongs((prev) =>
-      prev.map((s) => (s.id === updatedSong.id ? updatedSong : s)),
-    );
   };
 
   return (
@@ -89,25 +73,14 @@ export const SongLibrary = (): JSX.Element => {
         <option value="-duration">Duration (Longest)</option>
       </select>
 
-      <input
-        type="text"
-        placeholder="Search songs..."
-        value={searchQuery} // Binds to raw state
-        onChange={(e) => setSearchQuery(e.target.value)} // Updates raw state instantly
-        className={styles.searchInput}
-      />
-
       <div
         ref={containerRef}
         onScroll={handleScroll}
         className={styles.scrollContainer}
       >
-        <SongList
-          songs={songs}
-          onSongDeleted={handleSongDeleted}
-          onSongUpdated={handleSongUpdated}
-        />
-        {isFetching && <p>Loading...</p>}
+        {isLoading && <p>Loading...</p>}
+        <SongList songs={songs} />
+        {isFetchingNextPage && <p>Loading...</p>}
       </div>
     </div>
   );

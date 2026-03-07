@@ -2,13 +2,21 @@ import { http, HttpResponse } from "msw";
 import type { Playlist } from "@/features/playlists/types";
 import type { UserProfile } from "@/features/auth/types";
 
+const mockUser: UserProfile = {
+  id: 1,
+  username: "testuser",
+  email: "test@test.com",
+};
+
 const INITIAL_PLAYLISTS: Playlist[] = [
   {
     id: 1,
     title: "Initial Playlist",
     description: "A default playlist.",
     is_public: true,
-    owner: 1,
+    is_collaborative: false,
+    cover_art_url: null,
+    owner: { id: 1, username: "testuser" },
     songs: [],
   },
 ];
@@ -21,12 +29,6 @@ let playlists: Playlist[] = [...INITIAL_PLAYLISTS];
  */
 export const resetHandlerState = () => {
   playlists = INITIAL_PLAYLISTS.map((p) => ({ ...p, songs: [] }));
-};
-
-const mockUser: UserProfile = {
-  id: 1,
-  username: "testuser",
-  email: "test@test.com",
 };
 
 export const handlers = [
@@ -48,7 +50,9 @@ export const handlers = [
       title: newPlaylistData.title || "New Playlist",
       description: newPlaylistData.description || "",
       is_public: newPlaylistData.is_public || false,
-      owner: 1, // Assuming a logged-in user with ID 1
+      is_collaborative: newPlaylistData.is_collaborative || false,
+      cover_art_url: null,
+      owner: mockUser,
       songs: [],
     };
     playlists.push(newPlaylist);
@@ -115,8 +119,8 @@ export const handlers = [
             file_url: `http://example.com/song${song_id}.mp3`,
             artist: "Mock Artist",
             album: "Mock Album",
-            genre: "Mock Genre",
             release_date: "2023-01-01",
+            uploaded_at: new Date().toISOString(),
             cover_image_url: null,
             play_count: 0,
           },

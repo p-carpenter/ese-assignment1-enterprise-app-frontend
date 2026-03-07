@@ -1,14 +1,36 @@
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { logout } from "@/features/auth/api";
 import { useAuth } from "@/shared/context/AuthContext";
-import { MiniPlayer } from "@/features/player/components/MiniPlayer/MiniPlayer";
+import { useDebounce } from "use-debounce";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, setUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(
+    () => searchParams.get("q") ?? "",
+  );
+  const [debouncedSearch] = useDebounce(searchInput, 300);
+
+  // Sync debounced search value to URL
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const current = searchParams.get("q") ?? "";
+      if (debouncedSearch !== current) {
+        navigate(
+          debouncedSearch ? `/?q=${encodeURIComponent(debouncedSearch)}` : "/",
+          { replace: true },
+        );
+      }
+    } else if (debouncedSearch) {
+      navigate(`/?q=${encodeURIComponent(debouncedSearch)}`);
+    }
+  }, [debouncedSearch, location.pathname, searchParams, navigate]);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -25,10 +47,25 @@ export const Header = (): JSX.Element => {
 
   return (
     <div className={styles.header}>
-      <h1 className={styles.title} onClick={() => navigate("/")}>
+      <h1
+        className={styles.title}
+        onClick={() => {
+          setSearchInput("");
+          navigate("/");
+        }}
+      >
         Music Player
       </h1>
-      <MiniPlayer />
+      <div className={styles.searchWrapper}>
+        <input
+          type="search"
+          placeholder="Search songs..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className={styles.searchInput}
+          aria-label="Search songs"
+        />
+      </div>
       <div className={styles.actions}>
         <Button
           variant="primary"

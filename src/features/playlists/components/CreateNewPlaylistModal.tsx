@@ -1,6 +1,9 @@
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { createPlaylist } from "../api";
 import { CreateNewPlaylistForm } from "./CreateNewPlaylistForm/CreateNewPlaylistForm";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface CreateNewPlaylistModalProps {
   isOpen: boolean;
@@ -13,34 +16,38 @@ export const CreateNewPlaylistModal = ({
   onClose,
   onPlaylistCreated,
 }: CreateNewPlaylistModalProps) => {
-  if (!isOpen) return null;
+  const queryClient = useQueryClient();
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = async ({
-    title,
-    description,
-    is_public,
-  }: {
-    title: string;
-    description: string;
-    is_public: boolean;
-  }) => {
-    try {
-      await createPlaylist({
-        title,
-        description,
-        is_public,
-      });
-      onPlaylistCreated();
+  const createMutation = useMutation({
+    mutationFn: (values: {
+      title: string;
+      description: string;
+      cover_art_url: string;
+      is_collaborative: boolean;
+      is_public: boolean;
+    }) => createPlaylist(values),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
       onClose();
-    } catch (err) {
-      console.error("Failed to create playlist:", err);
-      alert("Failed to create playlist. Check console.");
-    }
-  };
+    },
+    onError: () => {
+      setFormError("Failed to create playlist. Please try again.");
+    },
+  });
+
+  if (!isOpen) return null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create a New Playlist">
-      <CreateNewPlaylistForm onSubmit={handleSubmit} />
+      <CreateNewPlaylistForm
+        onSubmit={(values) => {
+          setFormError(null);
+          createMutation.mutate(values);
+        }}
+        isSubmitting={createMutation.isPending}
+        error={formError}
+      />
     </Modal>
   );
 };
