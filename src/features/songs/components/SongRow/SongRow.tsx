@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { type Song } from "@/features/songs/types";
+import { type Song, type UserMini } from "@/features/songs/types";
 import {
   SongManagementDropdown,
   type DropdownItem,
@@ -11,6 +11,7 @@ interface SongRowProps {
   isActive: boolean;
   onPlay: (song: Song) => void;
   dropdownItems: DropdownItem[];
+  avatarUser?: UserMini;
 }
 
 const formatTime = (seconds: number): string => {
@@ -19,8 +20,24 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
 
+const UserAvatar = ({ user }: { user: UserMini }) => (
+  <span className={styles.userAvatar} title={user.username}>
+    {user.avatar_url ? (
+      <img
+        src={user.avatar_url}
+        alt={user.username}
+        className={styles.userAvatarImg}
+      />
+    ) : (
+      <span className={styles.userAvatarFallback}>
+        {user.username[0].toUpperCase()}
+      </span>
+    )}
+  </span>
+);
+
 export const SongRow = memo(
-  ({ song, isActive, onPlay, dropdownItems }: SongRowProps) => {
+  ({ song, isActive, onPlay, dropdownItems, avatarUser }: SongRowProps) => {
     return (
       <li
         onClick={(e) => {
@@ -29,13 +46,24 @@ export const SongRow = memo(
         }}
         className={isActive ? styles.songItemActive : styles.songItem}
       >
-        <div className={styles.songMeta}>
-          <strong className={styles.songTitle}>{song.title}</strong>
-          <br />
-          <span className={styles.songArtist}>{song.artist}</span>
+        <div className={styles.librarySections}>
+          <div className={styles.songMeta}>
+            <img
+              src={song.cover_art_url}
+              alt={`${song.title} album art`}
+              className={styles.albumArt}
+            />
+            <div className={styles.songTitleArtist}>
+              <strong className={styles.songTitle}>{song.title}</strong>
+              <span className={styles.songArtist}>{song.artist}</span>
+            </div>
+          </div>
+          <span className={styles.songUploadedAt}>
+            {new Date(song.uploaded_at).toDateString()}
+          </span>
+          <span className={styles.duration}>{formatTime(song.duration)}</span>
+          {avatarUser && <UserAvatar user={avatarUser} />}
         </div>
-        <span className={styles.duration}>{formatTime(song.duration)}</span>
-
         <div className="dropdown-container">
           <SongManagementDropdown dropdownItems={dropdownItems} />
         </div>

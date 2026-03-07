@@ -19,6 +19,7 @@
   margin: 0;
 }
 
+
 .songItem,
 .songItemActive {
   padding: 12px 16px;
@@ -43,9 +44,48 @@
   background: rgba(29, 185, 84, 0.3);
 }
 
-.songMeta {
-  line-height: 1.5;
+.librarySections {
+  display: flex;
+  align-items: center;
   flex: 1;
+  min-width: 0;
+}
+
+.songMeta {
+  display: flex;
+  flex-direction: row;
+  line-height: 1.5;
+  min-width: 0;
+  flex: 1;
+}
+
+.songTitleArtist {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.albumArt {
+  width: 48px;
+  height: 48px;
+  border-radius: 5px;
+  object-fit: cover;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.songArtist {
+  font-size: 0.875rem;
+  color: var(--spotify-gray);
+  font-weight: 400;
+}
+
+.songUploadedAt {
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  color: var(--spotify-gray);
+  font-weight: 400;
 }
 
 .songTitle {
@@ -53,7 +93,6 @@
   font-size: 16px;
   color: var(--spotify-white);
   display: block;
-  margin-bottom: 4px;
 }
 
 .duration {
@@ -65,4 +104,32 @@
   border-radius: 0;
   min-width: 48px;
   text-align: right;
+}
+
+.userAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 12px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: default;
+}
+
+.userAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.userAvatarFallback {
+  line-height: 1;
 }

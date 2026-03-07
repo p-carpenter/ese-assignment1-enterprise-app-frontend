@@ -94,6 +94,14 @@ export const SongList = ({
 
   return (
     <>
+      <div className={styles.columnHeaders}>
+        <span className={styles.headerSong}>Title</span>
+        <span className={styles.headerDateAdded}>Date Added</span>
+        <span className={styles.headerDuration}>
+          <IoTimeOutline size={18} />
+        </span>
+        <div className={styles.headerDropdownSpacer} />
+      </div>
       <ul className={styles.list}>
         {songs.map((song) => (
           <SongRow
@@ -106,6 +114,7 @@ export const SongList = ({
                 ? getDropdownItems(song)
                 : generateDropdownItems(song)
             }
+            avatarUser={getAvatarUser ? getAvatarUser(song) : song.uploaded_by}
           />
         ))}
       </ul>
