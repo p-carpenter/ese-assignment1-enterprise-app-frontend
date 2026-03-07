@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { PlaylistsPage } from "@/features/playlists/pages/PlaylistsPage";
-import { PlaylistDetailPage } from "@/features/playlists/pages/PlaylistDetailPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PlaylistsPage } from "@/features/playlists/pages";
+import { PlaylistDetailPage } from "@/features/playlists/pages";
 import { AuthContext } from "@/shared/context/AuthContext";
 import { type UserProfile } from "@/features/auth/types";
 import { PlayerProvider } from "@/shared/context/PlayerContext";
@@ -13,18 +14,26 @@ const mockUser: UserProfile = {
   email: "test@test.com",
 };
 
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
 const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
   return render(
-    <AuthContext.Provider
-      value={{
-        user: mockUser,
-        loading: false,
-        setUser: () => {},
-        refreshUser: async () => {},
-      }}
-    >
-      <PlayerProvider>{ui}</PlayerProvider>
-    </AuthContext.Provider>,
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider
+        value={{
+          user: mockUser,
+          loading: false,
+          setUser: () => {},
+          refreshUser: () => Promise.resolve(),
+        }}
+      >
+        <PlayerProvider>{ui}</PlayerProvider>
+      </AuthContext.Provider>
+    </QueryClientProvider>,
   );
 };
 
@@ -46,12 +55,12 @@ describe("Playlist integration tests", () => {
     expect(await screen.findByText("Initial Playlist")).toBeInTheDocument();
 
     // Create a new playlist
-    fireEvent.click(screen.getByRole("button", { name: /add playlist/i }));
+    fireEvent.click(screen.getByRole("button", { name: /create playlist/i }));
     await waitFor(() => expect(screen.getByRole("dialog")).toBeInTheDocument());
     fireEvent.change(screen.getByLabelText(/title/i), {
       target: { value: "My New Awesome Playlist" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /create/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Create Playlist" }));
 
     // Wait for the new playlist to appear in the list
     expect(

@@ -7,6 +7,7 @@ import {
   act,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditSongModal } from "./components/EditSongModal/EditSongModal";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import type { Song } from "@/features/songs/types";
@@ -70,6 +71,7 @@ const mockSongs: Song[] = [
     file_url: "http://example.com/song1.mp3",
     cover_art_url: "http://example.com/cover1.jpg",
     album: "Album 1",
+    uploaded_at: "2023-01-01T12:00:00.000Z",
     release_year: "2023",
   },
   {
@@ -79,7 +81,9 @@ const mockSongs: Song[] = [
     duration: 150,
     file_url: "http://example.com/song2.mp3",
     cover_art_url: "http://example.com/cover2.jpg",
+
     album: "Album 2",
+    uploaded_at: "2023-01-01T12:00:00.000Z",
     release_year: "2024",
   },
 ];
@@ -100,17 +104,26 @@ const emptyPaginatedSongs = {
 
 type AnyFn = (...args: unknown[]) => unknown;
 
-/** Wraps SongLibrary in a MemoryRouter so useSearchParams works in tests. */
-const renderLibrary = (searchQuery = "") =>
-  render(
-    <MemoryRouter
-      initialEntries={[
-        searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
-      ]}
-    >
-      <SongLibrary />
-    </MemoryRouter>,
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+/** Wraps SongLibrary in a MemoryRouter + QueryClientProvider so hooks work in tests. */
+const renderLibrary = (searchQuery = "") => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter
+        initialEntries={[
+          searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
+        ]}
+      >
+        <SongLibrary />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
+};
 
 /** Shared player context mock matching PlayerContextType. */
 const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
@@ -133,8 +146,9 @@ const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
     setPlaylist: vi.fn() as unknown as PlayerContextType["setPlaylist"],
     isPlaying: false,
     isLoading: false,
+    isLooping: false,
+    toggleLoop: vi.fn() as unknown as AnyFn,
     duration: 0,
-    historyTick: 0,
     ...overrides,
   }) as PlayerContextType;
 
@@ -176,7 +190,11 @@ describe("Song management", () => {
     it("uploads a song and navigates home", async () => {
       mockUploadSong.mockResolvedValueOnce(mockSongs[0]);
 
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
 
       fireEvent.change(screen.getByPlaceholderText("Title"), {
         target: { value: "Test Song" },
@@ -221,12 +239,14 @@ describe("Song management", () => {
       });
 
       render(
-        <EditSongModal
-          song={mockSongs[0]}
-          isOpen={true}
-          onClose={onClose}
-          onSongUpdated={onSongUpdated}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={mockSongs[0]}
+            isOpen={true}
+            onClose={onClose}
+            onSongUpdated={onSongUpdated}
+          />
+        </QueryClientProvider>,
       );
 
       fireEvent.change(screen.getByPlaceholderText("Title"), {
@@ -255,7 +275,17 @@ describe("Song management", () => {
   // ─── Delete ──────────────────────────────────────────────────────────────
   describe("delete", () => {
     it("calls deleteSong and removes the song from the rendered list", async () => {
+      const songsAfterDelete = {
+        count: 1,
+        results: [mockSongs[1]],
+        next: null,
+        previous: null,
+      };
       mockDeleteSong.mockResolvedValueOnce({});
+      // First call: initial load. Second call: re-fetch after invalidation.
+      mockListSongsPaginated
+        .mockResolvedValueOnce(paginatedSongs)
+        .mockResolvedValueOnce(songsAfterDelete);
       renderLibrary();
 
       await screen.findByText("Song A");
@@ -277,8 +307,7 @@ describe("Song management", () => {
       expect(screen.getByText("Song B")).toBeInTheDocument();
     });
 
-    it("shows an alert and keeps the song list intact when deleteSong fails", async () => {
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("keeps the song list intact when deleteSong fails", async () => {
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
@@ -290,12 +319,11 @@ describe("Song management", () => {
       fireEvent.click(await screen.findByText("Delete"));
 
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalled();
+        expect(consoleSpy).toHaveBeenCalled();
       });
       // Song should still be in the DOM after the failed delete
       expect(screen.getByText("Song A")).toBeInTheDocument();
 
-      alertSpy.mockRestore();
       consoleSpy.mockRestore();
     });
   });
@@ -584,24 +612,28 @@ describe("Song management", () => {
   describe("EditSongModal – edge cases", () => {
     it("renders nothing when song prop is null", () => {
       const { container } = render(
-        <EditSongModal
-          song={null}
-          isOpen={true}
-          onClose={vi.fn()}
-          onSongUpdated={vi.fn()}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={null}
+            isOpen={true}
+            onClose={vi.fn()}
+            onSongUpdated={vi.fn()}
+          />
+        </QueryClientProvider>,
       );
-      expect(container).toBeEmptyDOMElement();
+      expect(container.firstChild).toBeNull();
     });
 
     it("renders nothing when isOpen is false", () => {
       render(
-        <EditSongModal
-          song={mockSongs[0]}
-          isOpen={false}
-          onClose={vi.fn()}
-          onSongUpdated={vi.fn()}
-        />,
+        <QueryClientProvider client={createTestQueryClient()}>
+          <EditSongModal
+            song={mockSongs[0]}
+            isOpen={false}
+            onClose={vi.fn()}
+            onSongUpdated={vi.fn()}
+          />
+        </QueryClientProvider>,
       );
       expect(screen.queryByText("Edit Song")).not.toBeInTheDocument();
     });
@@ -610,13 +642,21 @@ describe("Song management", () => {
   // ─── SongUploadForm validation ───────────────────────────────────────────
   describe("SongUploadForm – validation", () => {
     it("submit button is disabled until an audio file is selected", () => {
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
     });
 
     it("disabled submit button prevents upload without an audio file", async () => {
       const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-      render(<SongUploadForm />);
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <SongUploadForm />
+        </QueryClientProvider>,
+      );
       expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
       alertSpy.mockRestore();
     });
