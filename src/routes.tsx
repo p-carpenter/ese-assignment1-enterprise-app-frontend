@@ -9,7 +9,7 @@ import {
   ProfilePage,
   EmailVerificationPage,
 } from "@/features/auth";
-import { UploadPage } from "@/features/songs";
+import { UploadPage, SongDetailsPage } from "@/features/songs";
 import { HomePage } from "@/shared/HomePage/HomePage";
 import { useAuth } from "@/shared/context/AuthContext";
 import { PlaylistDetailPage } from "./features/playlists/pages/PlaylistDetailPage";
@@ -60,6 +60,7 @@ export const AppRoutes = (): JSX.Element => {
         />
         <Route path="/playlists" element={<PlaylistsPage />} />
         <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
+        <Route path="/songs/:id" element={<SongDetailsPage />} />
       </Route>
 
       {/* Fallback */}
