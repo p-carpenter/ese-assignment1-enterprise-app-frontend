@@ -1,0 +1,27 @@
+.container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.line {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  padding: 4px 0;
+  transition: color 0.3s ease, font-size 0.3s ease;
+  cursor: default;
+}
+
+.past {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.active {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
