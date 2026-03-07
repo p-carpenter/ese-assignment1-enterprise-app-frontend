@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { PlaybackControls, usePlayer, MusicPlayer, PlayHistory } from "../..";
-import { WaveProgressBar } from "../WaveProgressBar/WaveProgressBar";
+import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  PlaybackControls,
+  usePlayer,
+  PlayHistory,
+  WaveProgressBar,
+} from "../..";
 import { VolumeBar } from "../VolumeBar/VolumeBar";
 import {
   IoTimeOutline,
-  IoChevronDownOutline,
   IoCloseOutline,
+  IoRepeatOutline,
 } from "react-icons/io5";
 import styles from "./MiniPlayer.module.css";
 
@@ -20,6 +25,7 @@ export const MiniPlayer = () => {
     currentSong,
     isPlaying,
     isLoading,
+    isLooping,
     duration,
     play,
     pause,
@@ -27,15 +33,19 @@ export const MiniPlayer = () => {
     playNext,
     seek,
     getPosition,
-    historyTick,
+    toggleLoop,
   } = usePlayer();
 
+  const navigate = useNavigate();
   const [position, setPosition] = useState(0);
   const frameRef = useRef<number>(0);
-  const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const historyPanelRef = useRef<HTMLDivElement>(null);
   const historyBtnRef = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const artistRef = useRef<HTMLSpanElement>(null);
+  const [isArtistScrolling, setIsArtistScrolling] = useState(false);
 
   // Close history on click-outside
   useEffect(() => {
@@ -63,6 +73,35 @@ export const MiniPlayer = () => {
     return () => document.removeEventListener("keydown", handleKey);
   }, [isHistoryOpen]);
 
+  // Observe the *parent* container, not the span itself.
+  // Watching the span causes a feedback loop: applying .scrolling sets
+  // width:max-content which changes the span's clientWidth, triggering the
+  // observer again and toggling the class on/off (flicker).
+  // The parent is capped at 150px and is stable, so the observer only fires
+  // on genuine container resizes, not because of the animation class.
+  useEffect(() => {
+    const el = titleRef.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+    const check = () => setIsScrolling(el.scrollWidth > parent.clientWidth);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [currentSong]);
+
+  useEffect(() => {
+    const el = artistRef.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+    const check = () =>
+      setIsArtistScrolling(el.scrollWidth > parent.clientWidth);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [currentSong]);
+
   useEffect(() => {
     const tick = () => {
       setPosition(getPosition());
@@ -80,46 +119,13 @@ export const MiniPlayer = () => {
 
   return (
     <>
-      {/* Now Playing full-screen overlay */}
-      {isNowPlayingOpen && (
-        <div className={styles.nowPlayingOverlay}>
-          <button
-            className={styles.nowPlayingClose}
-            onClick={() => setIsNowPlayingOpen(false)}
-            aria-label="Close now playing"
-          >
-            <IoChevronDownOutline size={28} />
-          </button>
-          <div className={styles.nowPlayingContent}>
-            <MusicPlayer />
-          </div>
-        </div>
-      )}
-
-      {/* History panel */}
-      {isHistoryOpen && (
-        <div className={styles.historyPanel} ref={historyPanelRef}>
-          <div className={styles.historyPanelHeader}>
-            <span className={styles.historyPanelTitle}>Recently Played</span>
-            <button
-              className={styles.historyPanelClose}
-              onClick={() => setIsHistoryOpen(false)}
-              aria-label="Close history"
-            >
-              <IoCloseOutline size={18} />
-            </button>
-          </div>
-          <PlayHistory key={historyTick} hideTitle />
-        </div>
-      )}
-
       {/* Mini Player bar */}
       <div className={styles.miniPlayer}>
         {/* Clickable album art & meta opens Now Playing */}
         <button
           className={styles.metaButton}
-          onClick={() => currentSong && setIsNowPlayingOpen(true)}
-          aria-label="Open now playing"
+          onClick={() => currentSong && navigate(`/songs/${currentSong.id}`)}
+          aria-label="Go to song details"
           disabled={!currentSong}
         >
           <img
@@ -128,16 +134,23 @@ export const MiniPlayer = () => {
             className={styles.albumArt}
           />
           <div className={styles.trackMeta}>
-            <span className={styles.trackTitle}>
+            <span
+              ref={titleRef}
+              className={`${styles.trackTitle} ${isScrolling ? styles.scrolling : ""}`}
+            >
               {currentSong?.title || "No track selected"}
             </span>
-            <span className={styles.trackArtist}>
+            <span
+              ref={artistRef}
+              className={`${styles.trackArtist} ${isArtistScrolling ? styles.scrolling : ""}`}
+            >
               {currentSong?.artist || "—"}
             </span>
           </div>
         </button>
 
         <PlaybackControls
+          compact
           isPlaying={isPlaying}
           isLoading={isLoading}
           onPlay={play}
@@ -149,7 +162,12 @@ export const MiniPlayer = () => {
         />
 
         {/* Waveform progress bar */}
-        <WaveProgressBar currentSong={currentSong ?? undefined} seek={seek} />
+        <WaveProgressBar
+          currentSong={currentSong ?? undefined}
+          duration={duration}
+          getPosition={getPosition}
+          seek={seek}
+        />
 
         {/* Time elapsed / duration */}
         <span className={styles.timeDisplay}>
@@ -159,15 +177,43 @@ export const MiniPlayer = () => {
         {/* Volume */}
         <VolumeBar />
 
-        {/* History toggle */}
+        {/* Loop toggle */}
         <button
-          ref={historyBtnRef}
-          className={`${styles.iconButton} ${isHistoryOpen ? styles.iconButtonActive : ""}`}
-          onClick={() => setIsHistoryOpen((v) => !v)}
-          aria-label="Toggle play history"
+          className={`${styles.iconButton} ${isLooping ? styles.iconButtonActive : ""}`}
+          onClick={toggleLoop}
+          aria-label={isLooping ? "Disable loop" : "Enable loop"}
         >
-          <IoTimeOutline size={20} />
+          <IoRepeatOutline size={20} />
         </button>
+
+        {/* History toggle - panel is anchored above this button */}
+        <div className={styles.historyAnchor}>
+          {isHistoryOpen && (
+            <div className={styles.historyPanel} ref={historyPanelRef}>
+              <div className={styles.historyPanelHeader}>
+                <span className={styles.historyPanelTitle}>
+                  Recently Played
+                </span>
+                <button
+                  className={styles.historyPanelClose}
+                  onClick={() => setIsHistoryOpen(false)}
+                  aria-label="Close history"
+                >
+                  <IoCloseOutline size={18} />
+                </button>
+              </div>
+              <PlayHistory hideTitle />
+            </div>
+          )}
+          <button
+            ref={historyBtnRef}
+            className={`${styles.iconButton} ${isHistoryOpen ? styles.iconButtonActive : ""}`}
+            onClick={() => setIsHistoryOpen((v) => !v)}
+            aria-label="Toggle play history"
+          >
+            <IoTimeOutline size={20} />
+          </button>
+        </div>
       </div>
     </>
   );

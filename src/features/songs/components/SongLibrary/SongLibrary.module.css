@@ -1,8 +1,23 @@
 
+.songLibraryWrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
 .songList {
   background: var(--spotify-dark-elevated);
   border-radius: 8px;
   padding: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .libraryTitle {
@@ -13,6 +28,15 @@
   letter-spacing: -0.04em;
 }
 
+.orderingSelect {
+  margin-left: 1rem;
+  padding: 6px 12px;
+  background: var(--spotify-dark-elevated);
+  border: 1px solid var(--spotify-gray-dark);
+  border-radius: 4px;
+  color: var(--spotify-white);
+}
+
 .list {
   list-style: none;
   padding: 0;
@@ -20,8 +44,43 @@
 }
 
 .scrollContainer {
-  height: 500px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+}
+
+.columnHeaders {
+  display: flex;
+  align-items: center;
+  padding: 0 16px 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 4px;
+  color: var(--spotify-gray);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.headerSong {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerDateAdded {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.headerDuration {
+  min-width: 48px;
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+.headerDropdownSpacer {
+  width: 32px;
+  flex-shrink: 0;
 }
 
 .songItem,

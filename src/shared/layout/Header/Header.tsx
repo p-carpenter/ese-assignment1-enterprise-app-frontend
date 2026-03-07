@@ -6,6 +6,7 @@ import { Button } from "@/shared/components";
 import { logout } from "@/features/auth/api";
 import { useAuth } from "@/shared/context/AuthContext";
 import { useDebounce } from "use-debounce";
+import { TiHome } from "react-icons/ti";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
@@ -42,7 +43,6 @@ export const Header = (): JSX.Element => {
     }
   };
 
-  const userInitial = user?.username?.charAt(0).toUpperCase() || "U";
   const avatarUrl = user?.avatar_url;
 
   return (
@@ -56,15 +56,26 @@ export const Header = (): JSX.Element => {
       >
         Music Player
       </h1>
-      <div className={styles.searchWrapper}>
-        <input
-          type="search"
-          placeholder="Search songs..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className={styles.searchInput}
-          aria-label="Search songs"
-        />
+      <div className={styles.centreActions}>
+        <div className={styles.homeButton}>
+          <TiHome
+            size={28}
+            onClick={() => {
+              setSearchInput("");
+              navigate("/");
+            }}
+          />
+        </div>
+        <div className={styles.searchWrapper}>
+          <input
+            type="search"
+            placeholder="Search songs..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className={styles.searchInput}
+            aria-label="Search songs"
+          />
+        </div>
       </div>
       <div className={styles.actions}>
         <Button
@@ -79,7 +90,13 @@ export const Header = (): JSX.Element => {
           onClick={() => navigate("/profile")}
           title="View Profile"
         >
-          {avatarUrl ? <img src={avatarUrl} alt="Profile" /> : userInitial}
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className={styles.avatar} />
+          ) : (
+            <span className={styles.avatarInitial}>
+              {user?.username?.[0]?.toUpperCase()}
+            </span>
+          )}
         </button>
         <Button variant="outlined" size="small" onClick={handleLogout}>
           Log Out

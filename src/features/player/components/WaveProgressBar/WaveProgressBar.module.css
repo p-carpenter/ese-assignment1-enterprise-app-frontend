@@ -1,6 +1,42 @@
+.container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
 .wrapper {
   flex: 1;
   min-width: 0;
   cursor: pointer;
   overflow: hidden;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 0 2px;
+  touch-action: none;
+  user-select: none;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 2px;
+  min-height: 2px;
+  transition: background-color 0.08s;
+}
+
+.barPlayed {
+  background: var(--spotify-white, #fff);
+}
+
+.barUnplayed {
+  background: #535353;
+}
+
+.wrapper:hover .barPlayed {
+  background: var(--spotify-green, #1db954);
+}
+
+.wrapper:hover .barUnplayed {
+  background: #6a6a6a;
 }

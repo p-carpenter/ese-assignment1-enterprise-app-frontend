@@ -60,18 +60,24 @@ export const SongLibrary = (): JSX.Element => {
 
   return (
     <div className={styles.songLibraryWrapper}>
-      <h3>Library ({totalCount} tracks)</h3>
+      <div className={styles.header}>
+        <h3>Library ({totalCount} tracks)</h3>
 
-      <select value={ordering} onChange={(e) => setOrdering(e.target.value)}>
-        <option value="title">Title (A-Z)</option>
-        <option value="-title">Title (Z-A)</option>
-        <option value="uploaded_at">Uploaded (Oldest)</option>
-        <option value="-uploaded_at">Uploaded (Newest)</option>
-        <option value="release_year">Release Year (Oldest)</option>
-        <option value="-release_year">Release Year (Newest)</option>
-        <option value="duration">Duration (Shortest)</option>
-        <option value="-duration">Duration (Longest)</option>
-      </select>
+        <select
+          className={styles.orderingSelect}
+          value={ordering}
+          onChange={(e) => setOrdering(e.target.value)}
+        >
+          <option value="title">Title (A-Z)</option>
+          <option value="-title">Title (Z-A)</option>
+          <option value="uploaded_at">Uploaded (Oldest)</option>
+          <option value="-uploaded_at">Uploaded (Newest)</option>
+          <option value="release_year">Release Year (Oldest)</option>
+          <option value="-release_year">Release Year (Newest)</option>
+          <option value="duration">Duration (Shortest)</option>
+          <option value="-duration">Duration (Longest)</option>
+        </select>
+      </div>
 
       <div
         ref={containerRef}

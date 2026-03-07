@@ -6,6 +6,8 @@ interface CreateNewPlaylistFormProps {
     title: string;
     description: string;
     is_public: boolean;
+    cover_art_url: string;
+    is_collaborative: boolean;
   }) => void;
   isSubmitting?: boolean;
   error?: string | null;
@@ -22,7 +24,7 @@ export const CreateNewPlaylistForm = ({
 
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({ title: playlistName, description, is_public: isPublic });
+    onSubmit({ title: playlistName, description, is_public: isPublic, cover_art_url: "", is_collaborative: false });
   };
 
   return (

@@ -11,6 +11,19 @@ export const AppLayout = (): JSX.Element => {
 
   return (
     <div className="page-layout">
+      {/* Dynamic blurred background */}
+      <div className={styles.bg}>
+        {coverUrl && (
+          <div
+            className={styles.bgArt}
+            style={{ backgroundImage: `url(${coverUrl})` }}
+          />
+        )}
+        <div
+          className={styles.bgFallback}
+          style={{ opacity: coverUrl ? 0.35 : 1 }}
+        />
+      </div>
       {/* TOP ROW: Header */}
       <Header />
 
