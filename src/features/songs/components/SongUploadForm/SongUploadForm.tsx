@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { readId3Tags, type Id3Tags } from "@/shared/hooks/useId3Tags";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { uploadSong } from "../../api";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ export const SongUploadForm = () => {
   const [songDuration, setSongDuration] = useState<number>(0);
   const [coverArtUrl, setCoverArtUrl] = useState<string>("");
   const [songFileName, setSongFileName] = useState<string>("");
+  const [id3Tags, setId3Tags] = useState<Id3Tags>({});
 
   // Dedicated state for the database submission
   const [isSaving, setIsSaving] = useState(false);
@@ -44,12 +46,18 @@ export const SongUploadForm = () => {
   const handleMp3Upload = async (file: File | null) => {
     if (!file) return;
     try {
-      const cloudData = await uploadMp3(file);
+      // Read ID3 tags and upload to Cloudinary in parallel
+      const [cloudData, tags] = await Promise.all([
+        uploadMp3(file),
+        readId3Tags(file),
+      ]);
       if (cloudData) {
         setSongUrl(cloudData.secure_url);
         setSongDuration(Math.round(cloudData.duration || 0));
         setSongFileName(file.name);
       }
+      // Pre-fill form with whatever ID3 tags we found
+      setId3Tags(tags);
     } catch (err) {
       console.error("MP3 upload failed:", err);
     }
@@ -76,13 +84,13 @@ export const SongUploadForm = () => {
 
     try {
       await uploadSong({
-        title: title || songFileName,
-        artist: artist || "Unknown Artist",
+        title: title || id3Tags.title || songFileName,
+        artist: artist || id3Tags.artist || "Unknown Artist",
         file_url: songUrl,
         cover_art_url: coverArtUrl,
         duration: songDuration,
-        album: album || "Unknown Album",
-        release_year: releaseYear || "Unknown Year",
+        album: album || id3Tags.album || "Unknown Album",
+        release_year: releaseYear || id3Tags.year || "Unknown Year",
       });
 
       navigate("/");
@@ -105,11 +113,12 @@ export const SongUploadForm = () => {
       )}
 
       <SongDetailsForm
+        key={JSON.stringify(id3Tags)}
         initialValues={{
-          title: "",
-          artist: "",
-          album: "",
-          releaseYear: "",
+          title: id3Tags.title || "",
+          artist: id3Tags.artist || "",
+          album: id3Tags.album || "",
+          releaseYear: id3Tags.year || "",
         }}
         onSubmit={handleSubmit}
         isSubmitting={isSaving}

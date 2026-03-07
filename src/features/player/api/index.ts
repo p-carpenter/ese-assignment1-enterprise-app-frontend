@@ -3,6 +3,11 @@ import { type PagedPlayHistory } from "../types";
 
 const HISTORY_PAGE_SIZE = 5;
 
+export const getSongHistory = async (
+  songId: number,
+): Promise<PagedPlayHistory> =>
+  await request<PagedPlayHistory>(`/history/?song=${songId}&page_size=1000`);
+
 export const getPlayHistory = async (
   page = 1,
   pageSize = HISTORY_PAGE_SIZE,
