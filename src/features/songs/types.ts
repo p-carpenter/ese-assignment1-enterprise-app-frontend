@@ -1,3 +1,9 @@
+export interface UserMini {
+  id: number;
+  username: string;
+  avatar_url?: string;
+}
+
 export interface Song {
   id: number;
   title: string;
@@ -7,6 +13,8 @@ export interface Song {
   file_url: string; // The MP3 URL from Cloudinary
   cover_art_url?: string;
   duration: number; // In seconds
+  uploaded_at: string; // ISO date string
+  uploaded_by?: UserMini;
 }
 
 export interface SongUploadPayload {
