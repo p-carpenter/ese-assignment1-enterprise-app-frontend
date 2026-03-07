@@ -3,9 +3,12 @@ import { Outlet } from "react-router-dom";
 import { MiniPlayer, usePlayer } from "@/features/player";
 import { Header } from "@/shared/layout";
 import { PlaylistList } from "@/features/playlists/components/PlaylistList";
+import styles from "./AppLayout.module.css";
 
 export const AppLayout = (): JSX.Element => {
-  const { playlistTick } = usePlayer();
+  const { currentSong } = usePlayer();
+  const coverUrl = currentSong?.cover_art_url;
+
   return (
     <div className="page-layout">
       {/* TOP ROW: Header */}
@@ -13,9 +16,9 @@ export const AppLayout = (): JSX.Element => {
 
       {/* CONTENT ROW: Left column + Center (current route) */}
       <div className="app-grid">
-        {/* LEFT COLUMN: remounts when playlistTick changes, re-fetching playlists */}
-        <div className="col-scroll-auto">
-          <PlaylistList key={playlistTick} />
+        {/* LEFT COLUMN: PlaylistList auto-refetches via React Query cache invalidation */}
+        <div className={`col-scroll-auto ${styles.leftCol}`}>
+          <PlaylistList />
         </div>
 
         {/* CENTER COLUMN: route content renders here */}
