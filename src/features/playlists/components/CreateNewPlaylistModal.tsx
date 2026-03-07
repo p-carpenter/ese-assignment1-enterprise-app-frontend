@@ -8,13 +8,11 @@ import { queryKeys } from "@/shared/lib/queryKeys";
 interface CreateNewPlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPlaylistCreated: () => void;
 }
 
 export const CreateNewPlaylistModal = ({
   isOpen,
   onClose,
-  onPlaylistCreated,
 }: CreateNewPlaylistModalProps) => {
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);

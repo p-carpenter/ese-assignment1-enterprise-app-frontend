@@ -27,7 +27,6 @@ export const MiniPlayer = () => {
     playNext,
     seek,
     getPosition,
-    historyTick,
   } = usePlayer();
 
   const [position, setPosition] = useState(0);
@@ -109,7 +108,7 @@ export const MiniPlayer = () => {
               <IoCloseOutline size={18} />
             </button>
           </div>
-          <PlayHistory key={historyTick} hideTitle />
+          <PlayHistory hideTitle />
         </div>
       )}
 
