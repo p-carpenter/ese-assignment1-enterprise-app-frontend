@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginPage } from "./LoginPage";
 import { login, getMe } from "@/features/auth/api";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import "@testing-library/jest-dom/vitest";
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
 
 vi.mock("@/features/auth/api", () => ({
   login: vi.fn(),
@@ -16,11 +22,13 @@ const mockGetMe = vi.mocked(getMe) as unknown as ReturnType<typeof vi.fn>;
 
 const renderLoginPage = async () => {
   const utils = render(
-    <MemoryRouter>
-      <AuthProvider>
-        <LoginPage />
-      </AuthProvider>
-    </MemoryRouter>,
+    <QueryClientProvider client={createTestQueryClient()}>
+      <MemoryRouter>
+        <AuthProvider>
+          <LoginPage />
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 
   // Wait for AuthProvider's getMe effect to finish to avoid act() warnings

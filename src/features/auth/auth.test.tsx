@@ -1,12 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginForm } from "./components/LoginForm/LoginForm";
 import { RegistrationForm } from "./components/RegistrationForm/RegistrationForm";
 import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
 import { login, register, getMe } from "./api";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import "@testing-library/jest-dom/vitest";
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
 
 vi.mock("./api", () => ({
   login: vi.fn(),
@@ -32,12 +38,17 @@ describe("Auth features", () => {
     mockLogin.mockResolvedValueOnce(undefined);
 
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <LoginForm />
-        </AuthProvider>
-      </MemoryRouter>,
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter>
+          <AuthProvider>
+            <LoginForm />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
+
+    // Wait for the initial getMe call to settle before submitting
+    await waitFor(() => expect(mockGetMe).toHaveBeenCalledTimes(1));
 
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "user@example.com" },
@@ -58,11 +69,13 @@ describe("Auth features", () => {
     mockLogin.mockRejectedValueOnce(new Error("Invalid credentials"));
 
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <LoginForm />
-        </AuthProvider>
-      </MemoryRouter>,
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter>
+          <AuthProvider>
+            <LoginForm />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
 
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
@@ -159,11 +172,13 @@ describe("Auth features", () => {
     mockLogin.mockImplementationOnce(() => new Promise(() => {})); // never resolves
 
     render(
-      <MemoryRouter>
-        <AuthProvider>
-          <LoginForm />
-        </AuthProvider>
-      </MemoryRouter>,
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter>
+          <AuthProvider>
+            <LoginForm />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
 
     fireEvent.change(screen.getByPlaceholderText("Email address"), {

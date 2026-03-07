@@ -7,6 +7,7 @@ import {
   act,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MusicPlayer } from "@/features/player";
 import { PlayerProvider } from "@/features/player";
 import { SongLibrary } from "@/features/songs";
@@ -48,6 +49,8 @@ const mockSongs: Song[] = [
     duration: 120,
     file_url: "http://example.com/song1.mp3",
     cover_art_url: "http://example.com/cover1.jpg",
+    uploaded_at: "2026-01-01T12:00:00.000Z",
+    release_year: "2026",
   },
   {
     id: 2,
@@ -56,19 +59,30 @@ const mockSongs: Song[] = [
     duration: 150,
     file_url: "http://example.com/song2.mp3",
     cover_art_url: "http://example.com/cover2.jpg",
+    uploaded_at: "2026-01-02T12:00:00.000Z",
+    release_year: "2025",
   },
 ];
 
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
 describe("MusicPlayer", () => {
-  const renderWithProvider = () =>
-    render(
-      <MemoryRouter>
-        <PlayerProvider>
-          <MusicPlayer />
-          <SongLibrary />
-        </PlayerProvider>
-      </MemoryRouter>,
+  const renderWithProvider = () => {
+    const queryClient = createTestQueryClient();
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <PlayerProvider>
+            <MusicPlayer />
+            <SongLibrary />
+          </PlayerProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();

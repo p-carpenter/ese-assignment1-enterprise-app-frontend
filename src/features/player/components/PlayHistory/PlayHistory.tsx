@@ -1,8 +1,9 @@
-import { useEffect, useState, type JSX } from "react";
+import { useState, type JSX } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { type PlayHistoryEntry } from "../../types";
 import styles from "./PlayHistory.module.css";
 import { getPlayHistory } from "../../api";
-import { usePlayer } from "../..";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 const PAGE_SIZE = 5;
 
@@ -13,21 +14,18 @@ interface PlayHistoryProps {
 export const PlayHistory = ({
   hideTitle = false,
 }: PlayHistoryProps): JSX.Element => {
-  const { historyTick } = usePlayer();
-  const [playHistory, setPlayHistory] = useState<PlayHistoryEntry[]>([]);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
+  const { data } = useQuery({
+    queryKey: queryKeys.playHistory(page),
+    queryFn: () => getPlayHistory(page, PAGE_SIZE),
+    // Keep previous page data visible while the next page loads
+    placeholderData: (prev) => prev,
+  });
+
+  const playHistory: PlayHistoryEntry[] = data?.results ?? [];
+  const totalCount = data?.count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-
-  useEffect(() => {
-    getPlayHistory(page, PAGE_SIZE)
-      .then((data) => {
-        setPlayHistory(data.results);
-        setTotalCount(data.count);
-      })
-      .catch((err) => console.error(err));
-  }, [page, historyTick]);
 
   return (
     <div className={styles.container}>
