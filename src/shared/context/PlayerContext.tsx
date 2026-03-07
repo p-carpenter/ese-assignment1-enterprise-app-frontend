@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
+import { useQueryClient } from "@tanstack/react-query";
 import { logPlay } from "@/features/songs/api";
 import { type Song } from "@/features/songs/types";
 
@@ -18,6 +19,7 @@ export interface PlayerContextType {
   playlist: Song[];
   isPlaying: boolean;
   isLoading: boolean;
+  isLooping: boolean;
   duration: number;
   play: () => void;
   pause: () => void;
@@ -27,9 +29,7 @@ export interface PlayerContextType {
   playSong: (song: Song, playlist?: Song[]) => Promise<void>;
   playPrev: () => Promise<void>;
   playNext: () => Promise<void>;
-  historyTick: number;
-  playlistTick: number;
-  incrementPlaylistTick: () => void;
+  toggleLoop: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -47,14 +47,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     duration,
   } = useAudioPlayer();
 
+  const queryClient = useQueryClient();
+
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [playlist, setPlaylist] = useState<Song[]>([]);
-  const [historyTick, setHistoryTick] = useState(0);
-  const [playlistTick, setPlaylistTick] = useState(0);
-  const incrementPlaylistTick = useCallback(
-    () => setPlaylistTick((n) => n + 1),
-    [],
-  );
+  const [isLooping, setIsLooping] = useState(false);
+  const isLoopingRef = useRef(false);
+
+  const toggleLoop = useCallback(() => {
+    setIsLooping((prev) => {
+      isLoopingRef.current = !prev;
+      return !prev;
+    });
+  }, []);
 
   const playNextRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
@@ -100,12 +105,20 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         format: "mp3",
         html5: true,
         onend: () => {
-          void playNextRef.current?.();
+          if (isLoopingRef.current) {
+            seek(0);
+            play();
+          } else {
+            void playNextRef.current?.();
+          }
         },
         onplay: () => {
           try {
             void logPlay(song.id);
-            setHistoryTick((prev) => prev + 1);
+            // Invalidate all play-history pages so PlayHistory refetches automatically
+            void queryClient.invalidateQueries({
+              queryKey: ["playHistory"],
+            });
           } catch (err) {
             console.error("Failed to log play:", err);
           }
@@ -115,7 +128,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       // Restore immediately - Howler creates the element synchronously above
       (window as unknown as { Audio: typeof Audio }).Audio = OrigAudio;
     },
-    [currentSong?.id, isPlaying, load, pause, play, stop],
+    [currentSong?.id, isPlaying, load, pause, play, queryClient, seek, stop],
   );
 
   const playPrev = useCallback(async (): Promise<void> => {
@@ -143,6 +156,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playlist,
       isPlaying,
       isLoading,
+      isLooping,
       duration,
       play,
       pause,
@@ -152,15 +166,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playSong,
       playPrev,
       playNext,
-      historyTick,
-      playlistTick,
-      incrementPlaylistTick,
+      toggleLoop,
     }),
     [
       currentSong,
       playlist,
       isPlaying,
       isLoading,
+      isLooping,
       duration,
       play,
       pause,
@@ -169,9 +182,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       playSong,
       playPrev,
       playNext,
-      historyTick,
-      playlistTick,
-      incrementPlaylistTick,
+      toggleLoop,
     ],
   );
 
