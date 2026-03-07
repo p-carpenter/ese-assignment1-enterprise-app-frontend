@@ -76,6 +76,7 @@ export const PlaylistDetail = () => {
         title: editTitle,
         description: editDescription,
         is_public: editIsPublic,
+        is_collaborative: editIsCollaborative,
         cover_art_url: editCoverUrl || null,
       }),
     onSuccess: () => {

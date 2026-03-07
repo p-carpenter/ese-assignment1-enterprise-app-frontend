@@ -26,3 +26,19 @@ Non-functional requirements:
 BDD will help me test behavioural flow. 
 TDD ensures I stick to the functional requirements.
 ts-audio library simplifies music control.
+
+NOTES FOR THINGS TO FIX:
+- Lyrics seem to get refetched when the song is updated; cache it with RQ?
+- SongList, PlaylistList not updating/refetching when new song/playlist added.
+- Volume control doesn't work.
+- PlayHistory does not show song details
+- Add 'Resend Email Verification' option when registering to avoid issues w/ emails
+- {"non_field_errors":["E-mail is not verified."]} - Turn these into human-readable errors. Centralised error handling service?
+- Public routes styling needs to reflect new glass/acrylic styling of application.
+- Song upload form needs improved styling. Especially file select - add to globals.css?
+- Create New Playlist modal needs to display over main layout, not over PlaylistsList sidebar only.
+- Add visible UI error messages for: unable to manage song in library (perm error)
+- Playlist title moves on details page depending on content below it. Make the placement consistent. Maybe move contributors stack next to
+owner & song count.
+- An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string.
+
