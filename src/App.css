@@ -1,7 +1,7 @@
 #root {
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);
+  background: transparent;
 }
 
 .loading_text {
@@ -11,7 +11,7 @@
 }
 .app-container {
   padding: 24px;
-  max-width: 1400px;
+  max-width: 100vw;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -27,6 +27,9 @@
   flex: 1;
   min-height: 0;
   height: 100%;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .app-header {
@@ -47,9 +50,9 @@
 
 .app-grid {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 1fr 5fr;
   gap: 24px;
-  padding: 24px 0;
+  /* padding: 24px 0; */
   height: 100%;
   min-height: 0;
   overflow: hidden;

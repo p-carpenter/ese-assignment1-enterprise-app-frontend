@@ -3,9 +3,10 @@
   align-items: center;
   gap: 16px;
   padding: 10px 16px;
-  background: var(--spotify-dark-elevated);
+  background: rgba(18, 18, 18, 0.75);
+  backdrop-filter: blur(24px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  min-width: 0;
+  min-width:100%;
 }
 
 /* ── Time display ─────────────────────── */
@@ -28,8 +29,8 @@
 
 .playerButton,
 .playerButtonPrimary {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: none;
   display: flex;
@@ -70,18 +71,40 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: 200px;
+  max-width: 150px;
   flex-shrink: 0;
   margin-left: 8px;
+  overflow: hidden;
 }
 
 .trackTitle {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
   color: var(--spotify-white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.trackTitle.scrolling {
+  animation: scroll-text 10s linear infinite;
+  width: max-content;
+  overflow: visible;
+}
+
+@keyframes scroll-text {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(calc(150px - 100%));
+  }
+  100% {
+    transform: translateX(calc(150px - 100%));
+  }
 }
 
 .trackArtist {
@@ -92,6 +115,13 @@
   text-overflow: ellipsis;
 }
 
+.trackArtist.scrolling {
+  width: max-content;
+  overflow: visible;
+  text-overflow: clip;
+  animation: scroll-text 10s linear infinite;
+}
+
 /* ── Album art ────────────────────────── */
 .albumArt {
   width: 48px;
@@ -99,6 +129,18 @@
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
+}
+
+@media (max-width: 1200px) {
+  .timeDisplay {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .trackMeta {
+    display: none;
+  }
 }
 
 @media (max-width: 920px) {
@@ -185,19 +227,19 @@
   padding: 24px;
 }
 
-/* History floating panel */
+/* History panel — positioned above its toggle button */
 .historyPanel {
-  position: fixed;
+  position: absolute;
   right: 0;
-  bottom: 72px;
+  bottom: calc(100% + 8px);
   width: 360px;
   max-height: 60vh;
   overflow-y: auto;
   z-index: 100;
-  background: var(--spotify-dark-elevated);
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(24px);
   border-radius: 8px 0 0 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: -4px -4px 16px rgba(0, 0, 0, 0.4);
   animation: panelIn 0.2s ease;
 }
@@ -244,6 +286,12 @@
 @keyframes panelIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+/* Anchor wrapper for the history panel — keeps the panel aligned above the button */
+.historyAnchor {
+  position: relative;
+  flex-shrink: 0;
 }
 
 /* History toggle icon button */
