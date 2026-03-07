@@ -1,125 +1,395 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/shared/context/AuthContext";
 import {
   deletePlaylist,
   getPlaylistDetails,
   removeSongFromPlaylist,
+  updatePlaylist,
 } from "@/features/playlists/api";
-import type { Playlist } from "@/features/playlists/types";
+import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import styles from "./PlaylistDetail.module.css";
 import { SongList } from "@/features/songs/components/SongList/SongList";
-import { Button } from "@/shared/components/Button/Button";
 import { type DropdownItem } from "@/features/songs/components/SongManagementDropdown/SongManagementDropdown";
 import { type Song } from "@/features/songs/types";
-import { usePlayer } from "@/shared/context/PlayerContext";
+import { queryKeys } from "@/shared/lib/queryKeys";
+import { AddSongToPlaylistModal } from "../AddSongToPlaylistModal/AddSongToPlaylistModal";
+import {
+  IoPencilOutline,
+  IoCheckmarkOutline,
+  IoCloseOutline,
+  IoTrashOutline,
+  IoImageOutline,
+  IoAddOutline,
+} from "react-icons/io5";
 
 export const PlaylistDetail = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
-  const { incrementPlaylistTick } = usePlayer();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const parsedId = parseInt(playlistId ?? "0", 10);
 
-  const fetchPlaylist = useCallback(async () => {
-    if (!playlistId) return;
-    try {
-      setError(null); // Clear errors on fresh fetch
-      setLoading(true);
-      const data = await getPlaylistDetails(parseInt(playlistId, 10));
-      setPlaylist(data);
-    } catch (err) {
-      setError("Failed to fetch playlist details.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [playlistId]);
+  const {
+    data: playlist,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: queryKeys.playlist(parsedId),
+    queryFn: () => getPlaylistDetails(parsedId),
+    enabled: !!parsedId,
+  });
 
-  useEffect(() => {
-    void fetchPlaylist();
-  }, [fetchPlaylist]);
+  // ── Inline editing ────────────────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editIsPublic, setEditIsPublic] = useState(false);
+  const [editCoverUrl, setEditCoverUrl] = useState("");
+  const [editIsCollaborative, setEditIsCollaborative] = useState(false);
 
-  const handleDeletePlaylist = useCallback(async () => {
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const { upload: uploadCover, isUploading: isCoverUploading } =
+    useCloudinaryUpload();
+
+  const startEdit = () => {
     if (!playlist) return;
-    try {
-      setError(null);
-      await deletePlaylist(playlist.id);
-      incrementPlaylistTick();
-      navigate("/");
-    } catch (err) {
-      setError("Failed to delete playlist.");
-      console.error(err);
-    }
-  }, [playlist, navigate, incrementPlaylistTick]);
+    setEditTitle(playlist.title);
+    setEditDescription(playlist.description ?? "");
+    setEditIsPublic(playlist.is_public);
+    setEditCoverUrl(playlist.cover_art_url ?? "");
+    setIsEditing(true);
+  };
 
-  const handleRemoveSongFromPlaylist = useCallback(
-    async (songId: number) => {
-      if (!playlist) return;
-      try {
-        setError(null);
-        await removeSongFromPlaylist(playlist.id, songId);
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const res = await uploadCover(file);
+    if (res) setEditCoverUrl(res.secure_url);
+  };
 
-        setPlaylist((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            songs: prev.songs.filter((item) => item.song.id !== songId),
-          };
-        });
-      } catch (err) {
-        setError("Failed to remove song from playlist.");
-        console.error(err);
-      }
+  const { mutate: saveEdit, isPending: isSaving } = useMutation({
+    mutationFn: () =>
+      updatePlaylist(parsedId, {
+        title: editTitle,
+        description: editDescription,
+        is_public: editIsPublic,
+        cover_art_url: editCoverUrl || null,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.playlist(parsedId),
+      });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
+      setIsEditing(false);
     },
-    [playlist],
-  );
+  });
 
-  const handleGlobalSongDeleted = useCallback((deletedSongId: number) => {
-    setPlaylist((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        songs: prev.songs.filter((item) => item.song.id !== deletedSongId),
-      };
-    });
-  }, []);
+  // ── Add song modal ────────────────────────────────────────────────────────
+  const [isAddSongOpen, setIsAddSongOpen] = useState(false);
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePlaylist(parsedId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
+      navigate("/");
+    },
+  });
+
+  // ── Remove song ───────────────────────────────────────────────────────────
+  const removeSongMutation = useMutation({
+    mutationFn: (songId: number) => removeSongFromPlaylist(parsedId, songId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.playlist(parsedId),
+      });
+    },
+  });
 
   const getPlaylistSongDropdownItems = useCallback(
     (song: Song): DropdownItem[] => [
       {
         label: "Remove from Playlist",
-        onSelect: () => handleRemoveSongFromPlaylist(song.id),
+        onSelect: () => removeSongMutation.mutate(song.id),
       },
     ],
-    [handleRemoveSongFromPlaylist],
+    [removeSongMutation],
   );
 
-  if (loading) return <div>Loading playlist...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!playlist) return <div>Playlist not found.</div>;
+  if (isLoading)
+    return <div className={styles.statusPage}>Loading playlist…</div>;
+  if (isError)
+    return <div className={styles.statusPage}>Failed to load playlist.</div>;
+  if (!playlist)
+    return <div className={styles.statusPage}>Playlist not found.</div>;
 
+  const isOwner = user?.id === playlist.owner.id;
+  const canAddSongs = isOwner || playlist.is_collaborative;
   const songs = playlist.songs.map((item) => item.song);
+  const existingSongIds = new Set(songs.map((s) => s.id));
+  const addedByMap = new Map(
+    playlist.songs.map((item) => [item.song.id, item.added_by]),
+  );
+
+  // Unique contributors (users who added at least one song, including the owner)
+  const contributors = playlist.is_collaborative
+    ? Array.from(
+        new Map(
+          [...addedByMap.values()]
+            .filter((u): u is NonNullable<typeof u> => !!u)
+            .map((u) => [u.id, u]),
+        ).values(),
+      )
+    : [];
+
+  const coverUrl =
+    (isEditing ? editCoverUrl : playlist.cover_art_url) ||
+    "https://placehold.co/220";
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>{playlist.title}</h1>
-        <p className={styles.description}>{playlist.description}</p>
-        <p className={styles.owner}>Created by: {playlist.owner}</p>
-        <Button variant="outlined" onClick={handleDeletePlaylist}>
-          Delete Playlist
-        </Button>
-      </header>
-      <section className={styles.songSection}>
-        <h2 className={styles.songsTitle}>Songs</h2>
-        <SongList
-          songs={songs}
-          onSongDeleted={handleGlobalSongDeleted}
-          getDropdownItems={getPlaylistSongDropdownItems}
+    <div className={styles.page}>
+      <div className={styles.content}>
+        {/* ── Hero ──────────────────────────────────────────────────────── */}
+        <div className={styles.hero}>
+          {/* Cover art */}
+          <div className={styles.coverWrap}>
+            <img
+              src={coverUrl}
+              alt={playlist.title}
+              className={styles.coverArt}
+            />
+            {isEditing && (
+              <>
+                <button
+                  className={styles.coverEditBtn}
+                  onClick={() => coverInputRef.current?.click()}
+                  disabled={isCoverUploading}
+                  aria-label="Change cover art"
+                >
+                  <IoImageOutline size={18} />
+                  {isCoverUploading ? "Uploading…" : "Change cover"}
+                </button>
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleCoverChange}
+                />
+              </>
+            )}
+          </div>
+
+          <div className={styles.heroInfo}>
+            {isOwner && isEditing ? (
+              <div className={styles.editFields}>
+                <input
+                  className={styles.editInput}
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Title"
+                />
+                <textarea
+                  className={styles.editTextarea}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Description"
+                  rows={3}
+                />
+                <label className={styles.toggleRow}>
+                  <span>Public</span>
+                  <button
+                    type="button"
+                    className={`${styles.toggle} ${editIsPublic ? styles.toggleOn : ""}`}
+                    onClick={() => setEditIsPublic((v) => !v)}
+                    aria-label="Toggle visibility"
+                  >
+                    <span className={styles.toggleThumb} />
+                  </button>
+                  <span>Collaborative</span>
+                  <button
+                    type="button"
+                    className={`${styles.toggle} ${editIsCollaborative ? styles.toggleOn : ""}`}
+                    onClick={() => setEditIsCollaborative((v) => !v)}
+                    aria-label="Toggle collaborative"
+                  >
+                    <span className={styles.toggleThumb} />
+                  </button>
+                </label>
+                <div className={styles.editActions}>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() => saveEdit()}
+                    disabled={isSaving || isCoverUploading}
+                    aria-label="Save"
+                  >
+                    <IoCheckmarkOutline size={18} />
+                    {isSaving ? "Saving…" : "Save"}
+                  </button>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() => setIsEditing(false)}
+                    aria-label="Cancel"
+                  >
+                    <IoCloseOutline size={18} />
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className={styles.heroLabel}>Playlist</p>
+                <div className={styles.titleRow}>
+                  <h1 className={styles.heroTitle}>{playlist.title}</h1>
+                  <span
+                    className={`${styles.badge} ${playlist.is_public ? styles.badgePublic : styles.badgePrivate}`}
+                  >
+                    {playlist.is_public ? "Public" : "Private"}
+                  </span>
+
+                  {playlist.is_collaborative && (
+                    <span
+                      className={`${styles.badge} ${styles.badgeCollaborative}`}
+                    >
+                      Collaborative
+                    </span>
+                  )}
+                </div>
+                {playlist.description && (
+                  <p className={styles.heroDescription}>
+                    {playlist.description}
+                  </p>
+                )}
+                <p className={styles.heroMeta}>
+                  <span className={styles.heroMetaOwner}>
+                    {playlist.owner.avatar_url ? (
+                      <img
+                        src={playlist.owner.avatar_url}
+                        alt={playlist.owner.username}
+                        className={styles.ownerAvatar}
+                      />
+                    ) : (
+                      <span className={styles.ownerAvatarFallback}>
+                        {playlist.owner.username[0].toUpperCase()}
+                      </span>
+                    )}
+                    <span>{playlist.owner.username}</span>
+                  </span>
+                  <span className={styles.heroMetaDot}>·</span>
+                  {songs.length} {songs.length === 1 ? "song" : "songs"}
+                </p>
+                {contributors.length > 0 && (
+                  <div className={styles.contributors}>
+                    <div className={styles.contributorAvatars}>
+                      {contributors.slice(0, 5).map((u) => (
+                        <span
+                          key={u.id}
+                          className={styles.contributorAvatar}
+                          title={u.username}
+                        >
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.username} />
+                          ) : (
+                            u.username[0].toUpperCase()
+                          )}
+                        </span>
+                      ))}
+                      {contributors.length > 5 && (
+                        <span
+                          className={styles.contributorAvatar}
+                          title={`${contributors.length - 5} more`}
+                        >
+                          +{contributors.length - 5}
+                        </span>
+                      )}
+                    </div>
+                    <span className={styles.contributorsLabel}>
+                      Contributors
+                    </span>
+                  </div>
+                )}
+                <div className={styles.heroActions}>
+                  {canAddSongs && (
+                    <button
+                      className={styles.editBtn}
+                      onClick={() => setIsAddSongOpen(true)}
+                      aria-label="Add songs"
+                    >
+                      <IoAddOutline size={14} /> Add songs
+                    </button>
+                  )}
+                  {isOwner && (
+                    <button
+                      className={styles.editBtn}
+                      onClick={startEdit}
+                      aria-label="Edit playlist"
+                    >
+                      <IoPencilOutline size={14} /> Edit
+                    </button>
+                  )}
+                  {isOwner &&
+                    (confirmDelete ? (
+                      <>
+                        <span className={styles.confirmText}>
+                          Are you sure?
+                        </span>
+                        <button
+                          className={`${styles.iconBtn} ${styles.deleteBtn}`}
+                          onClick={() => deleteMutation.mutate()}
+                          disabled={deleteMutation.isPending}
+                        >
+                          {deleteMutation.isPending
+                            ? "Deleting…"
+                            : "Yes, delete"}
+                        </button>
+                        <button
+                          className={styles.iconBtn}
+                          onClick={() => setConfirmDelete(false)}
+                        >
+                          <IoCloseOutline size={16} /> Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className={`${styles.iconBtn} ${styles.deleteBtn}`}
+                        onClick={() => setConfirmDelete(true)}
+                        aria-label="Delete playlist"
+                      >
+                        <IoTrashOutline size={16} /> Delete
+                      </button>
+                    ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <AddSongToPlaylistModal
+          playlistId={parsedId}
+          existingSongIds={existingSongIds}
+          isOpen={isAddSongOpen}
+          onClose={() => setIsAddSongOpen(false)}
         />
-      </section>
+
+        {/* ── Song list ─────────────────────────────────────────────────── */}
+        <section className={styles.songSection}>
+          <h2 className={styles.sectionTitle}>Songs</h2>
+          {songs.length === 0 ? (
+            <p className={styles.dim}>No songs in this playlist yet.</p>
+          ) : (
+            <SongList
+              songs={songs}
+              getDropdownItems={getPlaylistSongDropdownItems}
+              getAvatarUser={(song) => addedByMap.get(song.id)}
+            />
+          )}
+        </section>
+      </div>
     </div>
   );
 };

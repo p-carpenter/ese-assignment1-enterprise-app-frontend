@@ -1,38 +1,379 @@
-.container {
-  padding: 1.5rem;
+/* ── Page shell ──────────────────────────────────────────────────────────── */
+.page {
   color: #fff;
 }
 
-.header {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #444;
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 32px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
-.title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding-top: 16px;
 }
 
-.description {
-  font-size: 1.1rem;
-  color: #ccc;
-  margin-bottom: 0.5rem;
+/* Cover art */
+.coverWrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.owner {
+.coverArt {
+  width: 220px;
+  height: 220px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+  display: block;
+}
+
+.coverEditBtn {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.coverWrap:hover .coverEditBtn {
+  opacity: 1;
+}
+
+/* Hero text */
+.heroInfo {
+  flex: 1;
+  min-width: 200px;
+}
+
+.heroLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 8px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 0;
+  line-height: 1.05;
+}
+
+/* Public / Private badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 500px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.badgePublic {
+  background: rgba(29, 185, 84, 0.18);
+  color: #1db954;
+  border: 1px solid rgba(29, 185, 84, 0.4);
+}
+
+.badgePrivate {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.badgeCollaborative {
+  background: rgba(39, 5, 237, 0.193);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.heroDescription {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 6px;
+  max-width: 480px;
+  line-height: 1.5;
+}
+
+.heroMeta {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 4px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heroMetaOwner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+}
+
+.ownerAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.ownerAvatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.heroMetaDot {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Contributor avatar stack */
+.contributors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.contributorAvatars {
+  display: flex;
+}
+
+.contributorAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(10, 10, 10, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  margin-left: -6px;
+  cursor: default;
+}
+.contributorAvatar:first-child { margin-left: 0; }
+.contributorAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.contributorsLabel {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.editBtn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.confirmText {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Inline edit form ────────────────────────────────────────────────────── */
+.editFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.editInput {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  outline: none;
+  font-family: inherit;
+}
+.editInput::placeholder { color: rgba(255, 255, 255, 0.4); }
+.editInput:focus { border-color: #1db954; }
+
+.editTextarea {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
   font-size: 0.9rem;
-  color: #aaa;
+  padding: 8px 12px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.editTextarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+.editTextarea:focus { border-color: #1db954; }
+
+/* Toggle switch */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
 }
 
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 500px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: background 0.25s;
+  padding: 0;
+  flex-shrink: 0;
+}
+.toggleOn { background: #1db954; }
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.25s;
+  display: block;
+}
+.toggleOn .toggleThumb {
+  transform: translateX(18px);
+}
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.iconBtn:hover { background: rgba(255, 255, 255, 0.1); }
+.iconBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.deleteBtn {
+  border-color: rgba(255, 80, 80, 0.35);
+  color: rgba(255, 120, 120, 0.9);
+}
+.deleteBtn:hover { background: rgba(255, 60, 60, 0.15); }
+
+/* ── Song section ────────────────────────────────────────────────────────── */
 .songSection {
-  margin-top: 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.songsTitle {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #333;
-  padding-bottom: 0.5rem;
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+/* ── Misc ────────────────────────────────────────────────────────────────── */
+.dim {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+}
+
+.statusPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.1rem;
 }
