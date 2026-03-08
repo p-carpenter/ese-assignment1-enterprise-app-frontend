@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect } from "react";
+import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -20,7 +21,7 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.modal}
@@ -39,6 +40,7 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
         {title && <h2 className={styles.title}>{title}</h2>}
         <div className={styles.content}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
