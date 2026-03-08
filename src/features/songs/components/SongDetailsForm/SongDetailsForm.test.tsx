@@ -64,6 +64,7 @@ describe("SongDetailsForm", () => {
           onSubmit={noop}
           showMp3Upload={true}
           mp3Uploaded={true}
+          onMp3Upload={() => {}}
         />,
       );
       expect(screen.getByText(/audio file ready/i)).toBeInTheDocument();
