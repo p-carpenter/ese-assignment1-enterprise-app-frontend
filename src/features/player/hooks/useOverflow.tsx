@@ -1,4 +1,9 @@
-import { useState, useLayoutEffect, type RefObject, type DependencyList } from "react";
+import {
+  useState,
+  useLayoutEffect,
+  type RefObject,
+  type DependencyList,
+} from "react";
 
 export const useIsOverflowing = (
   ref: RefObject<HTMLElement | null>,
