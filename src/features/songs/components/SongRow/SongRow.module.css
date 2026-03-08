@@ -95,6 +95,11 @@
   display: block;
 }
 
+.songTitleLink:hover {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .duration {
   font-size: 0.875rem;
   color: var(--spotify-gray);
