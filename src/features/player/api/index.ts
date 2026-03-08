@@ -20,7 +20,7 @@ export const logPlay = async (songId: number) => {
   try {
     await request("/history/", {
       method: "POST",
-      body: JSON.stringify({ song: songId }),
+      body: JSON.stringify({ song_id: songId }),
     });
   } catch (err) {
     console.error("Audit log failed:", err);

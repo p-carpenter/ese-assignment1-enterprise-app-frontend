@@ -33,12 +33,8 @@ export const PlayHistory = ({
         ) : (
           playHistory.map((entry) => (
             <div key={entry.id} className={styles.historyCard}>
-              <div className={styles.songTitle}>
-                {entry.song?.title || "Unknown Track"}
-              </div>
-              <div className={styles.songArtist}>
-                {entry.song?.artist || "Unknown Artist"}
-              </div>
+              <div className={styles.songTitle}>{entry.song.title}</div>
+              <div className={styles.songArtist}>{entry.song.artist}</div>
               <div className={styles.songMeta}>
                 {new Date(entry.played_at).toLocaleString()}
               </div>
