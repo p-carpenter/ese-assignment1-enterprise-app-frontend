@@ -21,10 +21,12 @@ export interface PlayerContextType {
   isLoading: boolean;
   isLooping: boolean;
   duration: number;
+  volume: number;
   play: () => void;
   pause: () => void;
   seek: (position: number) => void;
   getPosition: () => number;
+  setVolume: (volume: number) => void;
   setPlaylist: (songs: Song[]) => void;
   playSong: (song: Song, playlist?: Song[]) => Promise<void>;
   playPrev: () => Promise<void>;
@@ -45,6 +47,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     getPosition,
     seek,
     duration,
+    setVolume: audioSetVolume,
   } = useAudioPlayer();
 
   const queryClient = useQueryClient();
@@ -53,6 +56,17 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [isLooping, setIsLooping] = useState(false);
   const isLoopingRef = useRef(false);
+  const [volume, setVolumeState] = useState(1);
+  const volumeRef = useRef(1);
+
+  const setVolume = useCallback(
+    (v: number) => {
+      volumeRef.current = v;
+      setVolumeState(v);
+      audioSetVolume(v);
+    },
+    [audioSetVolume],
+  );
 
   const toggleLoop = useCallback(() => {
     setIsLooping((prev) => {
@@ -94,6 +108,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         autoplay: true,
         format: "mp3",
         html5: true,
+        initialVolume: volumeRef.current,
         onend: () => {
           if (isLoopingRef.current) {
             seek(0);
@@ -135,10 +150,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       isLooping,
       duration,
+      volume,
       play,
       pause,
       seek,
       getPosition,
+      setVolume,
       setPlaylist,
       playSong,
       playPrev,
@@ -152,10 +169,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       isLooping,
       duration,
+      volume,
       play,
       pause,
       seek,
       getPosition,
+      setVolume,
       playSong,
       playPrev,
       playNext,
