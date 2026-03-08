@@ -2,6 +2,8 @@ import { useState } from "react";
 import { login } from "../../api/";
 import styles from "../AuthForm.module.css";
 import { useAuth } from "@/shared/context/AuthContext";
+import { AlertMessage } from "@/shared/components";
+import { ApiError } from "@/shared/api/errors";
 
 export const LoginForm = () => {
   const { refreshUser } = useAuth();
@@ -19,7 +21,13 @@ export const LoginForm = () => {
       await login(email, password);
       await refreshUser();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(
+        err instanceof ApiError
+          ? err.getReadableMessage("Login failed")
+          : err instanceof Error
+            ? err.message
+            : "Login failed",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -29,7 +37,7 @@ export const LoginForm = () => {
     <>
       <h2 className={styles.title}>Log in to Spotify</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {error && <div className={styles.error}>{error}</div>}
+        <AlertMessage message={error} onDismiss={() => setError("")} />
         <input
           placeholder="Email address"
           className={styles.inputField}

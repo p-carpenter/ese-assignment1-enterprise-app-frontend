@@ -9,6 +9,7 @@ import {
   updatePlaylist,
 } from "@/features/playlists/api";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { AlertMessage } from "@/shared/components";
 import styles from "./PlaylistDetail.module.css";
 import { SongList } from "@/features/songs/components/SongList/SongList";
 import { type DropdownItem } from "@/features/songs/components/SongManagementDropdown/SongManagementDropdown";
@@ -125,7 +126,11 @@ export const PlaylistDetail = () => {
   if (isLoading)
     return <div className={styles.statusPage}>Loading playlist…</div>;
   if (isError)
-    return <div className={styles.statusPage}>Failed to load playlist.</div>;
+    return (
+      <div className={styles.statusPage}>
+        <AlertMessage message="Failed to load playlist." />
+      </div>
+    );
   if (!playlist)
     return <div className={styles.statusPage}>Playlist not found.</div>;
 
@@ -266,7 +271,7 @@ export const PlaylistDetail = () => {
                     {playlist.description}
                   </p>
                 )}
-                <p className={styles.heroMeta}>
+                <div className={styles.heroMeta}>
                   <span className={styles.heroMetaOwner}>
                     {playlist.owner.avatar_url ? (
                       <img
@@ -283,37 +288,38 @@ export const PlaylistDetail = () => {
                   </span>
                   <span className={styles.heroMetaDot}>·</span>
                   {songs.length} {songs.length === 1 ? "song" : "songs"}
-                </p>
-                {contributors.length > 0 && (
-                  <div className={styles.contributors}>
-                    <div className={styles.contributorAvatars}>
-                      {contributors.slice(0, 5).map((u) => (
-                        <span
-                          key={u.id}
-                          className={styles.contributorAvatar}
-                          title={u.username}
-                        >
-                          {u.avatar_url ? (
-                            <img src={u.avatar_url} alt={u.username} />
-                          ) : (
-                            u.username[0].toUpperCase()
-                          )}
-                        </span>
-                      ))}
-                      {contributors.length > 5 && (
-                        <span
-                          className={styles.contributorAvatar}
-                          title={`${contributors.length - 5} more`}
-                        >
-                          +{contributors.length - 5}
-                        </span>
-                      )}
-                    </div>
-                    <span className={styles.contributorsLabel}>
-                      Contributors
-                    </span>
-                  </div>
-                )}
+                  {contributors.length > 0 && (
+                    <>
+                      <span className={styles.heroMetaDot}>·</span>
+                      <div className={styles.contributorAvatars}>
+                        {contributors.slice(0, 5).map((u) => (
+                          <span
+                            key={u.id}
+                            className={styles.contributorAvatar}
+                            title={u.username}
+                          >
+                            {u.avatar_url ? (
+                              <img src={u.avatar_url} alt={u.username} />
+                            ) : (
+                              u.username[0].toUpperCase()
+                            )}
+                          </span>
+                        ))}
+                        {contributors.length > 5 && (
+                          <span
+                            className={styles.contributorAvatar}
+                            title={`${contributors.length - 5} more`}
+                          >
+                            +{contributors.length - 5}
+                          </span>
+                        )}
+                      </div>
+                      <span className={styles.contributorsLabel}>
+                        Contributors
+                      </span>
+                    </>
+                  )}
+                </div>
                 <div className={styles.heroActions}>
                   {canAddSongs && (
                     <button

@@ -1,13 +1,17 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { readId3Tags, type Id3Tags } from "@/shared/hooks/useId3Tags";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { uploadSong } from "../../api";
 import { useNavigate } from "react-router-dom";
 import styles from "./SongUploadForm.module.css";
+import { AlertMessage } from "@/shared/components";
+import { ApiError } from "@/shared/api/errors";
 
 export const SongUploadForm = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Instantiate the hook twice to completely isolate their loading/error states.
   const {
@@ -93,10 +97,19 @@ export const SongUploadForm = () => {
         release_year: releaseYear || id3Tags.year || "Unknown Year",
       });
 
+      // Refresh the song library so the new track appears immediately
+      void queryClient.invalidateQueries({ queryKey: ["songs"] });
+
       navigate("/");
     } catch (err) {
       console.error("Failed to save song:", err);
-      setSubmitError("Failed to save song to the database.");
+      setSubmitError(
+        err instanceof ApiError
+          ? err.getReadableMessage("Failed to save song to the database.")
+          : err instanceof Error
+            ? err.message
+            : "Failed to save song to the database.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -104,13 +117,22 @@ export const SongUploadForm = () => {
 
   return (
     <div className={styles.errorContainer}>
-      {submitError && <div className={styles.error}>{submitError}</div>}
-      {(mp3Error || coverError) && (
-        <div className={styles.error}>
-          {mp3Error && <div>MP3 Upload Error: {mp3Error}</div>}
-          {coverError && <div>Cover Art Error: {coverError}</div>}
-        </div>
-      )}
+      <AlertMessage
+        message={submitError}
+        onDismiss={() => setSubmitError("")}
+      />
+      <AlertMessage
+        message={
+          mp3Error || coverError
+            ? [
+                mp3Error && `MP3 Upload Error: ${mp3Error}`,
+                coverError && `Cover Art Error: ${coverError}`,
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : null
+        }
+      />
 
       <SongDetailsForm
         key={JSON.stringify(id3Tags)}

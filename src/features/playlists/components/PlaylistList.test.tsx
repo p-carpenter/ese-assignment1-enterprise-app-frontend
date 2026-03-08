@@ -102,8 +102,10 @@ describe("PlaylistList", () => {
     );
     renderWithProviders(<PlaylistList />);
     expect(
-      await screen.findByText("Error: Failed to fetch playlists."),
+      await screen.findByText("Failed to fetch playlists."),
     ).toBeInTheDocument();
+    // AlertMessage renders with role="alert" for error variant
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("should render a list of playlists", async () => {

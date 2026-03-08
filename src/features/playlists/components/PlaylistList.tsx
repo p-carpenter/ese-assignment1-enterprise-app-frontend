@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listPlaylists } from "@/features/playlists/api";
+import { AlertMessage } from "@/shared/components";
 import styles from "./PlaylistList.module.css";
 import {
   IoAddCircleOutline,
@@ -35,7 +36,7 @@ export const PlaylistList = () => {
   }
 
   if (isError) {
-    return <div>Error: Failed to fetch playlists.</div>;
+    return <AlertMessage message="Failed to fetch playlists." />;
   }
 
   return (

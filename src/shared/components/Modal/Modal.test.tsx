@@ -53,13 +53,15 @@ describe("Modal", () => {
 
   it("calls onClose when the overlay backdrop is clicked", () => {
     const onClose = vi.fn();
-    const { container } = render(
+    render(
       <Modal isOpen={true} onClose={onClose}>
         Content
       </Modal>,
     );
-    // The outermost element is the overlay div
-    fireEvent.click(container.firstChild as HTMLElement);
+    // Modal uses createPortal so the overlay is a direct child of document.body,
+    // not the render container. Find it via the dialog role's parent.
+    const overlay = screen.getByRole("dialog").parentElement as HTMLElement;
+    fireEvent.click(overlay);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

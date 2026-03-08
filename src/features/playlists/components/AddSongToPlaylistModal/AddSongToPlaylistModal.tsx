@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
+import { AlertMessage } from "@/shared/components";
 import { SongRow } from "@/features/songs/components/SongRow/SongRow";
 import { listAllSongs } from "@/features/songs/api";
 import { addSongToPlaylist } from "@/features/playlists/api";
@@ -85,7 +86,7 @@ export const AddSongToPlaylistModal = ({
       </div>
 
       {isLoading && <p className={styles.hint}>Loading songs…</p>}
-      {isError && <p className={styles.hint}>Failed to load songs.</p>}
+      {isError && <AlertMessage message="Failed to load songs." />}
 
       {!isLoading &&
         !isError &&

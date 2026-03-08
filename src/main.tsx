@@ -5,23 +5,34 @@ import { App } from "./App.tsx";
 import { AudioPlayerProvider } from "react-use-audio-player";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import { PlayerProvider } from "@/features/player";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  MutationCache,
+} from "@tanstack/react-query";
+import { ApiError } from "@/shared/api/errors";
 
 const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.getReadableMessage()
+          : error.message || "An unexpected error occurred.";
+
+      console.error("[Mutation Error]:", errorMessage);
+    },
+  }),
+
   defaultOptions: {
     queries: {
-      // Don't retry on 401 / 403 – treat those as "not logged in"
       retry: (failureCount, error) => {
-        if (
-          error instanceof Error &&
-          "status" in error &&
-          (error as unknown as { status: number }).status < 500
-        ) {
+        if (error instanceof ApiError && error.status < 500) {
           return false;
         }
         return failureCount < 2;
       },
-      staleTime: 10000 * 60, // 10 minute default
+      staleTime: 10000 * 60,
     },
   },
 });

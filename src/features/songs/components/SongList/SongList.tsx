@@ -10,6 +10,9 @@ import { SongRow } from "../SongRow/SongRow";
 import styles from "../SongLibrary/SongLibrary.module.css";
 import { type DropdownItem } from "../SongManagementDropdown/SongManagementDropdown";
 import { IoTimeOutline } from "react-icons/io5";
+import { ApiError } from "@/shared/api/errors";
+import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
+
 interface SongListProps {
   songs: Song[];
   getDropdownItems?: (song: Song) => DropdownItem[];
@@ -34,12 +37,8 @@ export const SongList = ({
   const deleteMutation = useMutation({
     mutationFn: (songId: number) => deleteSong(songId),
     onSuccess: () => {
-      // Invalidate the infinite songs list and any open playlist detail
       void queryClient.invalidateQueries({ queryKey: ["songs"] });
       void queryClient.invalidateQueries({ queryKey: ["playlist"] });
-    },
-    onError: () => {
-      console.error("Failed to delete song");
     },
   });
 
@@ -55,10 +54,6 @@ export const SongList = ({
       void queryClient.invalidateQueries({ queryKey: ["playlist"] });
       setSongToAddToPlaylist(null);
     },
-    onError: () => {
-      // ADD UI ERROR MESSAGE
-      console.error("Error adding song to playlist");
-    },
   });
 
   const handlePlay = useCallback(
@@ -68,13 +63,9 @@ export const SongList = ({
     [playSong, songs],
   );
 
-  const handleEdit = useCallback((song: Song) => {
-    setEditSong(song);
-  }, []);
-
   const generateDropdownItems = useCallback(
     (song: Song): DropdownItem[] => [
-      { label: "Edit", onSelect: () => handleEdit(song) },
+      { label: "Edit", onSelect: () => setEditSong(song) },
       {
         label: "Delete",
         onSelect: () => deleteMutation.mutate(song.id),
@@ -85,8 +76,20 @@ export const SongList = ({
         onSelect: () => setSongToAddToPlaylist(song),
       },
     ],
-    [handleEdit, deleteMutation],
+    [deleteMutation],
   );
+
+  const activeError = deleteMutation.error || addToPlaylistMutation.error;
+
+  const errorMessage =
+    activeError instanceof ApiError
+      ? activeError.getReadableMessage()
+      : activeError?.message;
+
+  const dismissError = () => {
+    if (deleteMutation.error) deleteMutation.reset();
+    if (addToPlaylistMutation.error) addToPlaylistMutation.reset();
+  };
 
   if (!songs || songs.length === 0) {
     return <p>No songs found.</p>;
@@ -94,6 +97,12 @@ export const SongList = ({
 
   return (
     <>
+      <AlertMessage
+        message={errorMessage}
+        variant="error"
+        onDismiss={dismissError}
+      />
+
       <div className={styles.columnHeaders}>
         <span className={styles.headerSong}>Title</span>
         <span className={styles.headerDateAdded}>Date Added</span>
@@ -102,6 +111,7 @@ export const SongList = ({
         </span>
         <div className={styles.headerDropdownSpacer} />
       </div>
+
       <ul className={styles.list}>
         {songs.map((song) => (
           <SongRow

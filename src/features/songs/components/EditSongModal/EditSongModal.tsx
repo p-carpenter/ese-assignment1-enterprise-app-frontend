@@ -5,6 +5,7 @@ import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { type Song } from "../../types";
 import { updateSong } from "../../api";
+import { ApiError } from "@/shared/api/errors"; // Husk denne!
 
 interface EditSongModalProps {
   song: Song | null;
@@ -70,13 +71,23 @@ export const EditSongModal = ({
   }: {
     title: string;
     artist: string;
+    album: string;
+    releaseYear: string;
   }) => {
     updateMutation.mutate({ title, artist, url: coverArtUrl });
   };
 
-  const submitError = updateMutation.isError
-    ? "Failed to update song. Please try again."
-    : (uploadError as string | null);
+  const activeError = updateMutation.error || uploadError;
+  const errorMessage =
+    activeError instanceof ApiError
+      ? activeError.getReadableMessage()
+      : (activeError as Error)?.message ||
+        (typeof activeError === "string" ? activeError : null);
+
+  const handleDismissError = () => {
+    if (updateMutation.error) updateMutation.reset();
+    // Hvis useCloudinaryUpload har en clearError()-funksjon, kall den her.
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Song">
@@ -88,7 +99,8 @@ export const EditSongModal = ({
         }}
         onSubmit={handleSubmit}
         isSubmitting={updateMutation.isPending || isUploading}
-        error={submitError}
+        error={errorMessage}
+        onErrorDismiss={handleDismissError}
         showMp3Upload={false}
         coverArtUploading={isUploading}
         onCoverArtUpload={handleCoverArtUpload}

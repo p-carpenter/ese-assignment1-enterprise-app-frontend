@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthLayout } from "@/features/auth";
-import styles from "../AuthPages.module.css";
 import { useEffect, useState } from "react";
 import { verifyRegistrationEmail } from "../../api";
+import { AlertMessage } from "@/shared/components";
 
 export const EmailVerificationPage = () => {
   const { key } = useParams<{ key: string }>();
@@ -55,14 +55,15 @@ export const EmailVerificationPage = () => {
       {isVerifying && <div>Verifying your email...</div>}
 
       {!isVerifying && success && (
-        <div className={styles.success}>
-          Your email has been verified! You will be redirected to the login page
-          shortly. If you are not redirected, please click{" "}
-          <a href="/login">here</a>.
-        </div>
+        <AlertMessage
+          message={
+            "Your email has been verified! You will be redirected to the login page shortly. If you are not redirected, please click here."
+          }
+          variant="success"
+        />
       )}
 
-      {!isVerifying && error && <div className={styles.error}>{error}</div>}
+      {!isVerifying && error && <AlertMessage message={error} />}
     </AuthLayout>
   );
 };

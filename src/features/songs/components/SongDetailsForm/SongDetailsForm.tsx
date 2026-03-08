@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "../SongUploadForm/SongUploadForm.module.css";
+import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 
 interface SongDetailsFormProps {
   initialValues?: {
@@ -16,6 +17,7 @@ interface SongDetailsFormProps {
   }) => void;
   isSubmitting?: boolean;
   error?: string | null;
+  onErrorDismiss?: () => void;
   showMp3Upload?: boolean;
   onMp3Upload?: (file: File) => void;
   mp3Uploaded?: boolean;
@@ -30,6 +32,7 @@ export const SongDetailsForm = ({
   onSubmit,
   isSubmitting = false,
   error,
+  onErrorDismiss,
   showMp3Upload = false,
   onMp3Upload,
   mp3Uploaded = false,
@@ -110,9 +113,11 @@ export const SongDetailsForm = ({
         </div>
       )}
 
-      {mp3Uploaded && <p className={styles.success}>✓ Audio file ready</p>}
-
-      {error && <div className={styles.error}>{error}</div>}
+      <AlertMessage
+        message={error}
+        variant="error"
+        onDismiss={onErrorDismiss}
+      />
 
       <button
         type="submit"
