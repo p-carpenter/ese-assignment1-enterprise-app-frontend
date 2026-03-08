@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
 import { useQueryClient } from "@tanstack/react-query";
-import { logPlay } from "@/features/songs/api";
+import { logPlay } from "@/features/player/api";
 import { type Song } from "@/features/songs/types";
 
 export interface PlayerContextType {

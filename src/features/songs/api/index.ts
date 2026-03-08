@@ -63,17 +63,3 @@ export const getSongDetails = (songId: number): Promise<Song> =>
  */
 export const searchSongs = (query: string): Promise<Song[]> =>
   request<Song[]>(`/songs/search/?q=${encodeURIComponent(query)}`);
-
-/**
- * POST a play event.
- */
-export const logPlay = async (songId: number): Promise<void> => {
-  try {
-    await request("/history/", {
-      method: "POST",
-      body: JSON.stringify({ song: songId }),
-    });
-  } catch (err) {
-    console.error("Audit log failed (silent failure):", err);
-  }
-};
