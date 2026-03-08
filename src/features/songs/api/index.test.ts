@@ -6,9 +6,9 @@ import {
   deleteSong,
   updateSong,
   getSongDetails,
-  searchSongs,
-  logPlay,
+  searchSongs
 } from "./index";
+import { logPlay } from "@/features/player/api";
 
 vi.mock("@/shared/api/client", () => ({
   request: vi.fn(),
