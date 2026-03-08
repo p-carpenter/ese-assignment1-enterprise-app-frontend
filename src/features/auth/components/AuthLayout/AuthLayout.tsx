@@ -7,12 +7,18 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <>
-      <div className="app-header">
-        <h1 className="app-title">Music Player</h1>
+    <div className={styles.root}>
+      <div className={styles.bg} aria-hidden="true">
+        <div className={styles.bgFallback} />
       </div>
 
-      <div className={styles.container}>{children}</div>
-    </>
+      <header className={styles.header}>
+        <span className={styles.logo}>Music Player</span>
+      </header>
+
+      <main className={styles.main}>
+        <div className={styles.card}>{children}</div>
+      </main>
+    </div>
   );
 };
