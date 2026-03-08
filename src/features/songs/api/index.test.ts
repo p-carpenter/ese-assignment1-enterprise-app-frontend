@@ -6,7 +6,7 @@ import {
   deleteSong,
   updateSong,
   getSongDetails,
-  searchSongs
+  searchSongs,
 } from "./index";
 import { logPlay } from "@/features/player/api";
 

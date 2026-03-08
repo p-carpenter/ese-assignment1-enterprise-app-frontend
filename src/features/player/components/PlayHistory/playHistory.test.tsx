@@ -138,7 +138,7 @@ describe("PlayHistory", () => {
   });
 
   it("handles API errors gracefully (empty state shown)", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockGetPlayHistory.mockRejectedValue(new Error("Server error"));
 
     renderHistory();
