@@ -6,7 +6,7 @@ import {
   deleteSong,
   updateSong,
   getSongDetails,
-  searchSongs
+  searchSongs,
 } from "./index";
 import { logPlay } from "@/features/player/api";
 
@@ -227,7 +227,7 @@ describe("Songs API", () => {
 
       expect(mockRequest).toHaveBeenCalledWith("/history/", {
         method: "POST",
-        body: JSON.stringify({ song: 1 }),
+        body: JSON.stringify({ song_id: 1 }),
       });
     });
 
