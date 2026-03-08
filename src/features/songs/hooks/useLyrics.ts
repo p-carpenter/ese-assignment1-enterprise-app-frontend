@@ -75,7 +75,8 @@ export const useLyrics = (
       return res.json() as Promise<LrclibResponse>;
     },
     enabled,
-    staleTime: Infinity, // lyrics don't change
+    staleTime: Infinity, // lyrics don't change – never consider stale
+    gcTime: Infinity, // keep in cache permanently so navigating away & back doesn't re-fetch
     retry: false,
   });
 
