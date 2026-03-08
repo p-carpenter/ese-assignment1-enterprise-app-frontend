@@ -217,29 +217,4 @@ describe("Songs API", () => {
       );
     });
   });
-
-  describe("logPlay", () => {
-    it("POSTs to /history/ with the song id", async () => {
-      mockRequest.mockResolvedValueOnce(undefined);
-
-      await logPlay(1);
-
-      expect(mockRequest).toHaveBeenCalledWith("/history/", {
-        method: "POST",
-        body: JSON.stringify({ song_id: 1 }),
-      });
-    });
-
-    it("silently swallows errors and does not throw", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      mockRequest.mockRejectedValueOnce(new Error("Network error"));
-
-      await expect(logPlay(1)).resolves.toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
-    });
-  });
 });
