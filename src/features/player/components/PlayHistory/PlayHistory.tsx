@@ -2,10 +2,8 @@ import { useState, type JSX } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { type PlayHistoryEntry } from "../../types";
 import styles from "./PlayHistory.module.css";
-import { getPlayHistory } from "../../api";
+import { getPlayHistory, HISTORY_PAGE_SIZE } from "../../api";
 import { queryKeys } from "@/shared/lib/queryKeys";
-
-const PAGE_SIZE = 5;
 
 interface PlayHistoryProps {
   hideTitle?: boolean;
@@ -18,15 +16,14 @@ export const PlayHistory = ({
 
   const { data } = useQuery({
     queryKey: queryKeys.playHistory(page),
-    queryFn: () => getPlayHistory(page, PAGE_SIZE),
+    queryFn: () => getPlayHistory(page, HISTORY_PAGE_SIZE),
     // Keep previous page data visible while the next page loads
     placeholderData: (prev) => prev,
   });
 
   const playHistory: PlayHistoryEntry[] = data?.results ?? [];
   const totalCount = data?.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-
+  const totalPages = Math.max(1, Math.ceil(totalCount / HISTORY_PAGE_SIZE));
   return (
     <div className={styles.container}>
       {!hideTitle && <h3 className={styles.title}>Recently Played</h3>}

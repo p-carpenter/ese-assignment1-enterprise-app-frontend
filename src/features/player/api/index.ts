@@ -1,7 +1,7 @@
 import { request } from "@/shared/api/client";
 import { type PagedPlayHistory } from "../types";
 
-const HISTORY_PAGE_SIZE = 5;
+export const HISTORY_PAGE_SIZE = 5;
 
 export const getSongHistory = async (
   songId: number,
