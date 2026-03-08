@@ -5,7 +5,7 @@ import { PlayHistory } from "./PlayHistory";
 import { getPlayHistory, HISTORY_PAGE_SIZE } from "../../api";
 import type { Song } from "@/features/songs/types";
 
-vi.mock("./api", () => ({
+vi.mock("../../api", () => ({
   getPlayHistory: vi.fn(),
   HISTORY_PAGE_SIZE: 5,
 }));
