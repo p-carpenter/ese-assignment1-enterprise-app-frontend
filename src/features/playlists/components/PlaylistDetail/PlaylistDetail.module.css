@@ -15,7 +15,7 @@
 /* ── Hero ────────────────────────────────────────────────────────────────── */
 .hero {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 32px;
   flex-wrap: wrap;
   padding-top: 16px;
