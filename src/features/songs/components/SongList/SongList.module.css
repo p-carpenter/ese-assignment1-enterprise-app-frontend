@@ -63,6 +63,21 @@
   margin-top: 8px;
 }
 
+.dismissButton {
+  float: right;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.error {
+  margin-bottom: 16px;
+}
+
 /* Alternative: List view instead of grid */
 @media (max-width: 768px) {
   .grid {
