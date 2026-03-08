@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type Song } from "@/features/songs/types";
 import { listPlaylists } from "@/features/playlists/api";
 import { Modal } from "@/shared/components/Modal/Modal";
+import { AlertMessage } from "@/shared/components";
 import styles from "./AddToPlaylistModal.module.css";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
@@ -19,7 +20,7 @@ export const AddToPlaylistModal = ({
   onClose,
   onSongAdded,
 }: AddToPlaylistModalProps): JSX.Element => {
-  // Reuses the shared ['playlists'] cache — no duplicate network call if PlaylistList
+  // Reuses the shared ['playlists'] cache; no duplicate network call if PlaylistList
   // has already fetched recently.
   const {
     data: playlists = [],
@@ -46,7 +47,7 @@ export const AddToPlaylistModal = ({
       title={`Add "${song.title}" to a playlist`}
     >
       {isLoading && <p>Loading playlists...</p>}
-      {isError && <p className={styles.error}>Failed to load playlists.</p>}
+      {isError && <AlertMessage message="Failed to load playlists." />}
       {!isLoading && !isError && (
         <ul className={styles.playlistList}>
           {playlists.length > 0 ? (

@@ -1,9 +1,8 @@
+import { ApiError } from "@/shared/api/errors";
+
 const API_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
-/**
- * Helper for fetch boilerplate
- */
 export const request = async <T>(
   endpoint: string,
   options: RequestInit = {},
@@ -34,10 +33,11 @@ export const request = async <T>(
   }
 
   if (!response.ok) {
-    const error = await response
+    const errorData = await response
       .json()
       .catch(() => ({ detail: "Unknown error" }));
-    throw new Error(JSON.stringify(error));
+
+    throw new ApiError(response.status, errorData);
   }
 
   return response.json();

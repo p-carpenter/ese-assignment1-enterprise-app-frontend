@@ -2,6 +2,8 @@ import { useState } from "react";
 import { confirmPasswordReset } from "../../api";
 import styles from "../AuthForm.module.css";
 import { useParams } from "react-router-dom";
+import { AlertMessage } from "@/shared/components";
+import { ApiError } from "@/shared/api/errors";
 
 export const ResetPasswordForm = () => {
   const { uid, token } = useParams<{ uid: string; token: string }>();
@@ -26,7 +28,13 @@ export const ResetPasswordForm = () => {
       await confirmPasswordReset(uid, token, password, confirmPassword);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reset password");
+      setError(
+        err instanceof ApiError
+          ? err.getReadableMessage("Failed to reset password")
+          : err instanceof Error
+            ? err.message
+            : "Failed to reset password",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -36,13 +44,15 @@ export const ResetPasswordForm = () => {
     <>
       <h2 className={styles.title}>Reset your password</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && (
-          <div className={styles.success}>
-            Password reset successfully! You can now log in with your new
-            password.
-          </div>
-        )}
+        <AlertMessage message={error} onDismiss={() => setError("")} />
+        <AlertMessage
+          message={
+            success
+              ? "Password reset successfully! You can now log in with your new password."
+              : null
+          }
+          variant="success"
+        />
         <input
           placeholder="New password"
           className={styles.inputField}
