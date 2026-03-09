@@ -15,6 +15,9 @@ import {
   IoCheckmarkOutline,
   IoCloseOutline,
 } from "react-icons/io5";
+import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
+import { ApiError } from "@/shared/api/errors";
+import { useAuth } from "@/shared/context/AuthContext";
 
 const fmt = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
@@ -104,7 +107,12 @@ export const SongDetailsPage = () => {
     setIsEditing(true);
   };
 
-  const { mutate: saveEdit, isPending: isSaving } = useMutation({
+  const {
+    mutate: saveEdit,
+    isPending: isSaving,
+    isError: isSaveError,
+    error: saveError,
+  } = useMutation({
     mutationFn: () =>
       updateSong(song!.id, {
         title: editTitle,
@@ -124,12 +132,21 @@ export const SongDetailsPage = () => {
     },
   });
 
+  const editErrorMessage =
+    saveError instanceof ApiError
+      ? saveError.getReadableMessage()
+      : saveError?.message || "An unexpected error occurred.";
+
   // ── Loading / error states ────────────────────────────────────────────────
   if (isLoading) {
     return <div className={styles.statusPage}>Loading…</div>;
   }
   if (isError || !song) {
-    return <div className={styles.statusPage}>Song not found.</div>;
+    return (
+      <div className={styles.statusPage}>
+        <AlertMessage message="Song not found or an error has occurred." />
+      </div>
+    );
   }
 
   const coverUrl = song.cover_art_url || "https://placehold.co/400";
@@ -148,6 +165,8 @@ export const SongDetailsPage = () => {
           <img src={coverUrl} alt={song.title} className={styles.coverArt} />
 
           <div className={styles.heroInfo}>
+            {isSaveError && <AlertMessage message={editErrorMessage} />}
+
             {isEditing ? (
               <div className={styles.editFields}>
                 <input

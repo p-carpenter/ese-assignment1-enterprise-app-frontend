@@ -291,3 +291,31 @@
   font-size: 1.1rem;
 }
 
+.heroMetaOwner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+}
+
+.ownerAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.ownerAvatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+}
