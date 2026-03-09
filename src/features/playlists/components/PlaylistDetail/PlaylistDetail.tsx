@@ -128,14 +128,12 @@ export const PlaylistDetail = () => {
 
   if (isLoading)
     return <div className={styles.statusPage}>Loading playlist…</div>;
-  if (isError)
+  if (isError || !playlist)
     return (
       <div className={styles.statusPage}>
         <AlertMessage message="Playlist not found or you don't have permission to view it." />
       </div>
     );
-  if (!playlist)
-    return <div className={styles.statusPage}>Playlist not found.</div>;
 
   const isOwner = user?.id === playlist.owner.id;
   const canAddSongs = isOwner || playlist.is_collaborative;
