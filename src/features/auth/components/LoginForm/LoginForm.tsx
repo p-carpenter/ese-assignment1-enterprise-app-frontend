@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { login } from "../../api/";
+import { useNavigate } from "react-router-dom";
 import styles from "../AuthForm.module.css";
 import { useAuth } from "@/shared/context/AuthContext";
 import { AlertMessage } from "@/shared/components";
 import { ApiError } from "@/shared/api/errors";
 
 export const LoginForm = () => {
-  const { refreshUser } = useAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,10 +17,9 @@ export const LoginForm = () => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
     try {
       await login(email, password);
-      await refreshUser();
+      navigate("/");
     } catch (err) {
       setError(
         err instanceof ApiError

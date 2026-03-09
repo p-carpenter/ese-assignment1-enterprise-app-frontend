@@ -3,7 +3,6 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
-import { logout } from "@/features/auth/api";
 import { useAuth } from "@/shared/context/AuthContext";
 import { useDebounce } from "use-debounce";
 import { TiHome } from "react-icons/ti";
@@ -11,7 +10,7 @@ import { TiHome } from "react-icons/ti";
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setUser } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(
     () => searchParams.get("q") ?? "",

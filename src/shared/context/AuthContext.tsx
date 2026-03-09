@@ -1,7 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMe } from "@/features/auth/api";
+import {
+  getMe,
+  login as loginApi,
+  logout as logoutApi,
+} from "@/features/auth/api";
 import { type UserProfile } from "@/features/auth/types";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
@@ -10,6 +14,8 @@ interface AuthContextType {
   loading: boolean;
   setUser: (user: UserProfile | null) => void;
   refreshUser: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -36,8 +42,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshUser = () =>
     queryClient.refetchQueries({ queryKey: queryKeys.me });
 
+  const login = async (email: string, password: string) => {
+    await loginApi(email, password);
+    await queryClient.refetchQueries({ queryKey: queryKeys.me });
+  };
+
+  const logout = async () => {
+    await logoutApi();
+    // Set user to null synchronously so ProtectedRoute redirects immediately.
+    queryClient.setQueryData(queryKeys.me, null);
+    // Remove all other cached queries so stale user-specific data (playlists,
+    // songs, etc.) is gone and re-fetched fresh on the next login.
+    queryClient.removeQueries({
+      predicate: (query) => query.queryKey[0] !== "me",
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, refreshUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, setUser, refreshUser, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -128,7 +128,7 @@ export const PlaylistDetail = () => {
   if (isError)
     return (
       <div className={styles.statusPage}>
-        <AlertMessage message="Failed to load playlist." />
+        <AlertMessage message="Playlist not found or you don't have permission to view it." />
       </div>
     );
   if (!playlist)
