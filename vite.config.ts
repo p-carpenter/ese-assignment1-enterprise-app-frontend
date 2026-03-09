@@ -10,7 +10,7 @@ export default defineConfig({
     pool: 'forks',
     setupFiles: './vitest.setup.ts',
     coverage: {
-      reporter: ['text', 'json-summary', 'json'],
+      reporter: ['text', 'text-summary', 'json-summary', 'json'],
       reportOnFailure: true,
     },
   },
