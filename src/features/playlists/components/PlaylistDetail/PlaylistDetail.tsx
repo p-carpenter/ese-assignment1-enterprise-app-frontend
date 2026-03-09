@@ -72,14 +72,17 @@ export const PlaylistDetail = () => {
   };
 
   const { mutate: saveEdit, isPending: isSaving } = useMutation({
-    mutationFn: () =>
-      updatePlaylist(parsedId, {
+    mutationFn: () => {
+      const payload = {
         title: editTitle,
         description: editDescription,
         is_public: editIsPublic,
         is_collaborative: editIsCollaborative,
-        cover_art_url: editCoverUrl || null,
-      }),
+        ...(editCoverUrl ? { cover_art_url: editCoverUrl } : {}),
+      };
+
+      return updatePlaylist(parsedId, payload);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.playlist(parsedId),
