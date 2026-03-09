@@ -27,6 +27,8 @@ const renderWithProviders = (ui: React.ReactElement) => {
         value={{
           user: mockUser,
           loading: false,
+          login: () => Promise.resolve(),
+          logout: () => Promise.resolve(),
           setUser: () => {},
           refreshUser: () => Promise.resolve(),
         }}

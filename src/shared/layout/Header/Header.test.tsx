@@ -2,12 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
-import { logout } from "@/features/auth/api";
 import "@testing-library/jest-dom/vitest";
-
-vi.mock("@/features/auth/api", () => ({
-  logout: vi.fn(),
-}));
 
 const mockNavigate = vi.fn();
 
@@ -27,6 +22,7 @@ const mockAuthState = {
     avatar_url: "",
   },
   setUser: vi.fn(),
+  logout: vi.fn(),
   loading: false,
   refreshUser: vi.fn(),
 };
@@ -35,7 +31,7 @@ vi.mock("@/shared/context/AuthContext", () => ({
   useAuth: () => mockAuthState,
 }));
 
-const mockLogout = vi.mocked(logout);
+const mockLogout = mockAuthState.logout;
 
 const renderHeader = () => {
   return render(
