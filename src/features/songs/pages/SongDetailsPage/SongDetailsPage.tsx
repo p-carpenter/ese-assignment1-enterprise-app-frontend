@@ -29,7 +29,8 @@ export const SongDetailsPage = () => {
   const songId = id ? Number(id) : null;
 
   const { currentSong, getPosition } = usePlayer();
-
+  const { user } = useAuth();
+  const canEdit = currentSong?.uploaded_by?.id === user?.id;
   // ── Song details ──────────────────────────────────────────────────────────
   const {
     data: song,
@@ -227,15 +228,30 @@ export const SongDetailsPage = () => {
                 )}
                 <p className={styles.heroMeta}>{fmt(song.duration)}</p>
                 <p className={styles.heroMeta}>
-                  Uploaded {new Date(song.uploaded_at).toLocaleDateString()}
+                  <span className={styles.heroMetaOwner}>
+                    {song.uploaded_by?.avatar_url ? (
+                      <img
+                        src={song.uploaded_by?.avatar_url}
+                        alt={song.uploaded_by?.username}
+                        className={styles.ownerAvatar}
+                      />
+                    ) : (
+                      <span className={styles.ownerAvatarFallback}>
+                        {song.uploaded_by?.username[0].toUpperCase()}
+                      </span>
+                    )}
+                  </span>
+                  uploaded {new Date(song.uploaded_at).toLocaleDateString()}
                 </p>
-                <button
-                  className={styles.editBtn}
-                  onClick={startEdit}
-                  aria-label="Edit song"
-                >
-                  <IoPencilOutline size={14} /> Edit
-                </button>
+                {canEdit && (
+                  <button
+                    className={styles.editBtn}
+                    onClick={startEdit}
+                    aria-label="Edit song"
+                  >
+                    <IoPencilOutline size={14} /> Edit
+                  </button>
+                )}
               </>
             )}
           </div>
