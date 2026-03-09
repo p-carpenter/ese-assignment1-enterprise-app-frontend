@@ -62,6 +62,8 @@ const renderWithProviders = (
             loading,
             setUser: () => {},
             refreshUser: () => Promise.resolve(),
+            login: () => Promise.resolve(),
+            logout: () => Promise.resolve(),
           }}
         >
           {ui}
