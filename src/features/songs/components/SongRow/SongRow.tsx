@@ -1,5 +1,7 @@
 import { memo } from "react";
-import { type Song, type UserMini } from "@/features/songs/types";
+import { type Song } from "@/features/songs/types";
+import type { UserMini } from "@/features/auth/types";
+
 import {
   SongManagementDropdown,
   type DropdownItem,

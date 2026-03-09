@@ -18,7 +18,7 @@ interface SongListProps {
   getDropdownItems?: (song: Song) => DropdownItem[];
   getAvatarUser?: (
     song: Song,
-  ) => import("@/features/songs/types").UserMini | undefined;
+  ) => import("@/features/auth/types").UserMini | undefined;
 }
 
 export const SongList = ({
