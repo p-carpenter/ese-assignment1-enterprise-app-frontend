@@ -1,7 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMe, login as loginApi, logout as logoutApi} from "@/features/auth/api";
+import {
+  getMe,
+  login as loginApi,
+  logout as logoutApi,
+} from "@/features/auth/api";
 import { type UserProfile } from "@/features/auth/types";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
@@ -55,7 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, refreshUser, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, setUser, refreshUser, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
