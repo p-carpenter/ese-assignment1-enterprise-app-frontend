@@ -1,8 +1,4 @@
-export interface UserMini {
-  id: number;
-  username: string;
-  avatar_url?: string;
-}
+import type { UserMini } from "@/features/auth/types";
 
 export interface Song {
   id: number;

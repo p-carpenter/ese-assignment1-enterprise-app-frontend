@@ -1,4 +1,5 @@
-import type { Song, UserMini } from "@/features/songs/types";
+import type { Song } from "@/features/songs/types";
+import type { UserMini } from "@/features/auth/types";
 
 export type PlaylistSong = {
   id: number;

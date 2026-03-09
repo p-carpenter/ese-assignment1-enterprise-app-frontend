@@ -4,3 +4,9 @@ export interface UserProfile {
   email: string;
   avatar_url?: string;
 }
+
+export interface UserMini {
+  id: number;
+  username: string;
+  avatar_url?: string;
+}
