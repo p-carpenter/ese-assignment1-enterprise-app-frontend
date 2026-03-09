@@ -5,6 +5,7 @@ import {
   type DropdownItem,
 } from "@/features/songs/components/SongManagementDropdown/SongManagementDropdown";
 import styles from "./SongRow.module.css";
+import { Link } from "react-router-dom";
 
 interface SongRowProps {
   song: Song;
@@ -49,12 +50,18 @@ export const SongRow = memo(
         <div className={styles.librarySections}>
           <div className={styles.songMeta}>
             <img
-              src={song.cover_art_url}
-              alt={`${song.title} album art`}
+              src={song.cover_art_url || undefined}
+              alt={song.cover_art_url ? `${song.title} album art` : ""}
               className={styles.albumArt}
+              onError={(e) => {
+                // Hide broken images silently
+                (e.target as HTMLImageElement).style.visibility = "hidden";
+              }}
             />
             <div className={styles.songTitleArtist}>
-              <strong className={styles.songTitle}>{song.title}</strong>
+              <Link to={`/songs/${song.id}`} className={styles.songTitleLink}>
+                <strong className={styles.songTitle}>{song.title}</strong>
+              </Link>
               <span className={styles.songArtist}>{song.artist}</span>
             </div>
           </div>

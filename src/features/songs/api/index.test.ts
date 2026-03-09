@@ -7,7 +7,6 @@ import {
   updateSong,
   getSongDetails,
   searchSongs,
-  logPlay,
 } from "./index";
 
 vi.mock("@/shared/api/client", () => ({
@@ -216,31 +215,6 @@ describe("Songs API", () => {
       expect(mockRequest).toHaveBeenCalledWith(
         "/songs/search/?q=rock%20%26%20roll",
       );
-    });
-  });
-
-  describe("logPlay", () => {
-    it("POSTs to /history/ with the song id", async () => {
-      mockRequest.mockResolvedValueOnce(undefined);
-
-      await logPlay(1);
-
-      expect(mockRequest).toHaveBeenCalledWith("/history/", {
-        method: "POST",
-        body: JSON.stringify({ song: 1 }),
-      });
-    });
-
-    it("silently swallows errors and does not throw", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      mockRequest.mockRejectedValueOnce(new Error("Network error"));
-
-      await expect(logPlay(1)).resolves.toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
     });
   });
 });

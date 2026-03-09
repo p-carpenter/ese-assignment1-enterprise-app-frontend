@@ -6,16 +6,7 @@
   background: rgba(18, 18, 18, 0.75);
   backdrop-filter: blur(24px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  min-width:100%;
-}
-
-/* ── Time display ─────────────────────── */
-.timeDisplay {
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  color: var(--spotify-gray);
-  white-space: nowrap;
-  letter-spacing: 0.02em;
+  min-width: 100%;
 }
 
 /* ── Controls ─────────────────────────── */
@@ -64,62 +55,6 @@
 .playerButtonPrimary:not(:disabled):hover {
   background: var(--spotify-green-bright);
   transform: scale(1.08);
-}
-
-/* ── Song meta ────────────────────────── */
-.trackMeta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 150px;
-  flex-shrink: 0;
-  margin-left: 8px;
-  overflow: hidden;
-}
-
-.trackTitle {
-  font-weight: 700;
-  font-size: 0.80rem;
-  color: var(--spotify-white);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.trackTitle.scrolling {
-  animation: scroll-text 10s linear infinite;
-  width: max-content;
-  overflow: visible;
-}
-
-@keyframes scroll-text {
-  0% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(0);
-  }
-  80% {
-    transform: translateX(calc(150px - 100%));
-  }
-  100% {
-    transform: translateX(calc(150px - 100%));
-  }
-}
-
-.trackArtist {
-  font-size: 0.75rem;
-  color: var(--spotify-gray);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.trackArtist.scrolling {
-  width: max-content;
-  overflow: visible;
-  text-overflow: clip;
-  animation: scroll-text 10s linear infinite;
 }
 
 /* ── Album art ────────────────────────── */
@@ -192,6 +127,7 @@
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -227,11 +163,9 @@
   padding: 24px;
 }
 
-/* History panel — positioned above its toggle button */
 .historyPanel {
   position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
+  margin: 0;
   width: 360px;
   max-height: 60vh;
   overflow-y: auto;
@@ -242,6 +176,11 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: -4px -4px 16px rgba(0, 0, 0, 0.4);
   animation: panelIn 0.2s ease;
+  position-anchor: --history-btn;
+  top: auto; 
+  left: auto; 
+  bottom: calc(anchor(top) + 8px);
+  right: anchor(right);
 }
 
 .historyPanelHeader {
@@ -284,8 +223,15 @@
 }
 
 @keyframes panelIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Anchor wrapper for the history panel — keeps the panel aligned above the button */
@@ -309,6 +255,7 @@
   flex-shrink: 0;
   transition: color 0.2s ease, background-color 0.2s ease;
   padding: 0;
+  anchor-name: --history-btn;
 }
 
 .iconButton:hover {

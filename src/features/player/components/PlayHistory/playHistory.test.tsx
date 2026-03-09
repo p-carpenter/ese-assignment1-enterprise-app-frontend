@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PlayHistory } from "./components/PlayHistory/PlayHistory";
-import { getPlayHistory } from "./api";
+import { PlayHistory } from "./PlayHistory";
+import { getPlayHistory, HISTORY_PAGE_SIZE } from "../../api";
 import type { Song } from "@/features/songs/types";
 
-vi.mock("./api", () => ({
+vi.mock("../../api", () => ({
   getPlayHistory: vi.fn(),
+  HISTORY_PAGE_SIZE: 5,
 }));
 
 const mockGetPlayHistory = vi.mocked(getPlayHistory) as unknown as ReturnType<
@@ -74,7 +75,6 @@ describe("PlayHistory", () => {
   });
 
   it("re-fetches history when the page changes (Next clicked)", async () => {
-    const PAGE_SIZE = 5;
     const makeEntries = (n: number, prefix: string) =>
       Array.from({ length: n }, (_, i) => ({
         id: i + 1,
@@ -85,11 +85,11 @@ describe("PlayHistory", () => {
     mockGetPlayHistory
       .mockResolvedValueOnce({
         count: 10,
-        results: makeEntries(PAGE_SIZE, "Track"),
+        results: makeEntries(HISTORY_PAGE_SIZE, "Track"),
       })
       .mockResolvedValueOnce({
         count: 10,
-        results: makeEntries(PAGE_SIZE, "Other"),
+        results: makeEntries(HISTORY_PAGE_SIZE, "Other"),
       });
 
     renderHistory();
@@ -99,7 +99,7 @@ describe("PlayHistory", () => {
 
     await waitFor(() => {
       expect(mockGetPlayHistory).toHaveBeenCalledTimes(2);
-      expect(mockGetPlayHistory).toHaveBeenCalledWith(2, PAGE_SIZE);
+      expect(mockGetPlayHistory).toHaveBeenCalledWith(2, HISTORY_PAGE_SIZE);
     });
     expect(await screen.findByText("Other 1")).toBeInTheDocument();
   });
@@ -153,15 +153,13 @@ describe("PlayHistory", () => {
   // ─── Pagination ─────────────────────────────────────────────────────────────
 
   describe("pagination", () => {
-    const PAGE_SIZE = 5;
-
     const makePage = (page: number, total: number) => {
-      const results = Array.from({ length: PAGE_SIZE }, (_, i) => ({
-        id: (page - 1) * PAGE_SIZE + i + 1,
+      const results = Array.from({ length: HISTORY_PAGE_SIZE }, (_, i) => ({
+        id: (page - 1) * HISTORY_PAGE_SIZE + i + 1,
         song: {
           ...mockSong,
-          id: (page - 1) * PAGE_SIZE + i + 1,
-          title: `Track ${(page - 1) * PAGE_SIZE + i + 1}`,
+          id: (page - 1) * HISTORY_PAGE_SIZE + i + 1,
+          title: `Track ${(page - 1) * HISTORY_PAGE_SIZE + i + 1}`,
         },
         played_at: "2026-02-19T10:30:00.000Z",
       }));
@@ -220,7 +218,7 @@ describe("PlayHistory", () => {
       fireEvent.click(screen.getByRole("button", { name: /next/i }));
 
       await waitFor(() => {
-        expect(mockGetPlayHistory).toHaveBeenCalledWith(2, PAGE_SIZE);
+        expect(mockGetPlayHistory).toHaveBeenCalledWith(2, HISTORY_PAGE_SIZE);
       });
       expect(await screen.findByText("Track 6")).toBeInTheDocument();
     });
@@ -251,7 +249,7 @@ describe("PlayHistory", () => {
       fireEvent.click(screen.getByRole("button", { name: /prev/i }));
 
       await waitFor(() => {
-        expect(mockGetPlayHistory).toHaveBeenCalledWith(1, PAGE_SIZE);
+        expect(mockGetPlayHistory).toHaveBeenCalledWith(1, HISTORY_PAGE_SIZE);
       });
       expect(await screen.findByText("Track 1")).toBeInTheDocument();
     });

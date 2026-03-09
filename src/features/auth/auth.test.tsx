@@ -7,6 +7,7 @@ import { RegistrationForm } from "./components/RegistrationForm/RegistrationForm
 import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
 import { login, register, getMe } from "./api";
 import { AuthProvider } from "@/shared/context/AuthContext";
+import { ApiError } from "@/shared/api/errors";
 import "@testing-library/jest-dom/vitest";
 
 const createTestQueryClient = () =>
@@ -88,6 +89,8 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
+    // AlertMessage displays errors with role="alert"
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("submits registration form and shows success message", async () => {
@@ -126,6 +129,8 @@ describe("Auth features", () => {
     expect(
       await screen.findByText(/Registration successful!/i),
     ).toBeInTheDocument();
+    // AlertMessage displays success with role="status"
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("redirects to login when not authenticated", () => {
@@ -166,6 +171,99 @@ describe("Auth features", () => {
     );
 
     expect(screen.getByText("Private Page")).toBeInTheDocument();
+  });
+
+  it("shows login error with ApiError details from the server", async () => {
+    mockLogin.mockRejectedValueOnce(
+      new ApiError(400, {
+        non_field_errors: ["Unable to log in with provided credentials."],
+      }),
+    );
+
+    render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter>
+          <AuthProvider>
+            <LoginForm />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "bad" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+
+    expect(
+      await screen.findByText("Unable to log in with provided credentials."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("shows registration error with ApiError field-level details", async () => {
+    mockRegister.mockRejectedValueOnce(
+      new ApiError(400, { email: ["A user with this email already exists."] }),
+    );
+
+    render(
+      <MemoryRouter>
+        <RegistrationForm />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Username"), {
+      target: { value: "taken" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "taken@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "pass1234" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
+      target: { value: "pass1234" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
+
+    expect(
+      await screen.findByText(/A user with this email already exists/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("allows dismissing the login error", async () => {
+    mockLogin.mockRejectedValueOnce(new Error("Login failed"));
+
+    render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter>
+          <AuthProvider>
+            <LoginForm />
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "bad" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+
+    expect(await screen.findByText("Login failed")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /dismiss/i }));
+
+    expect(screen.queryByText("Login failed")).not.toBeInTheDocument();
   });
 
   it("disables the login button while the request is in flight", async () => {
@@ -219,6 +317,8 @@ describe("Auth features", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     expect(await screen.findByText("Email already in use")).toBeInTheDocument();
+    // AlertMessage displays errors with role="alert"
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("disables the registration button while the request is in flight", async () => {

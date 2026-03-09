@@ -81,7 +81,7 @@ describe("Player API", () => {
 
       expect(mockRequest).toHaveBeenCalledWith("/history/", {
         method: "POST",
-        body: JSON.stringify({ song: 42 }),
+        body: JSON.stringify({ song_id: 42 }),
       });
     });
 

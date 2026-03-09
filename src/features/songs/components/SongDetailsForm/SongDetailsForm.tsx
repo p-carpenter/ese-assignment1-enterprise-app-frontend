@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import styles from "../SongUploadForm/SongUploadForm.module.css";
+import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 
 interface SongDetailsFormProps {
   initialValues?: {
@@ -16,6 +17,7 @@ interface SongDetailsFormProps {
   }) => void;
   isSubmitting?: boolean;
   error?: string | null;
+  onErrorDismiss?: () => void;
   showMp3Upload?: boolean;
   onMp3Upload?: (file: File) => void;
   mp3Uploaded?: boolean;
@@ -23,6 +25,7 @@ interface SongDetailsFormProps {
   mp3Label?: string;
   coverArtUploading?: boolean;
   onCoverArtUpload?: (file: File) => void;
+  coverArtLabel?: string;
 }
 
 export const SongDetailsForm = ({
@@ -30,6 +33,7 @@ export const SongDetailsForm = ({
   onSubmit,
   isSubmitting = false,
   error,
+  onErrorDismiss,
   showMp3Upload = false,
   onMp3Upload,
   mp3Uploaded = false,
@@ -37,6 +41,7 @@ export const SongDetailsForm = ({
   mp3Label = "Select MP3",
   coverArtUploading = false,
   onCoverArtUpload,
+  coverArtLabel = "Select Cover Art",
 }: SongDetailsFormProps) => {
   const [title, setTitle] = useState(initialValues.title || "");
   const [artist, setArtist] = useState(initialValues.artist || "");
@@ -44,6 +49,11 @@ export const SongDetailsForm = ({
   const [releaseYear, setReleaseYear] = useState(
     initialValues.releaseYear || "",
   );
+  const [mp3FileName, setMp3FileName] = useState<string>("");
+  const [coverFileName, setCoverFileName] = useState<string>("");
+
+  const mp3InputId = useId();
+  const coverInputId = useId();
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,13 +66,41 @@ export const SongDetailsForm = ({
 
       {showMp3Upload && onMp3Upload && (
         <div className={styles.fileUploadWrapper}>
-          <label className={styles.uploadLabel}>{mp3Label}</label>
+          <label
+            htmlFor={mp3InputId}
+            className={`${styles.uploadLabel} ${mp3Uploading ? styles.uploading : ""}`}
+          >
+            {mp3Uploading
+              ? "Uploading…"
+              : mp3Uploaded
+                ? "✓ Change MP3"
+                : mp3Label}
+          </label>
           <input
+            id={mp3InputId}
             type="file"
             accept="audio/*"
-            onChange={(e) => e.target.files && onMp3Upload(e.target.files[0])}
+            className={styles.fileInput}
             disabled={mp3Uploading}
+            onChange={(e) => {
+              if (!e.target.files) return;
+              const file = e.target.files[0];
+              setMp3FileName(file.name);
+              onMp3Upload(file);
+            }}
           />
+          {mp3FileName && !mp3Uploading && (
+            <span
+              className={`${styles.fileStatusText} ${mp3Uploaded ? styles.ready : ""}`}
+            >
+              {mp3Uploaded ? `✓ ${mp3FileName}` : mp3FileName}
+            </span>
+          )}
+          {!mp3FileName && mp3Uploaded && (
+            <span className={`${styles.fileStatusText} ${styles.ready}`}>
+              ✓ Audio file ready
+            </span>
+          )}
         </div>
       )}
 
@@ -96,23 +134,42 @@ export const SongDetailsForm = ({
 
       {onCoverArtUpload && (
         <div className={styles.fileUploadWrapper}>
-          <label className={styles.uploadLabel}>
-            {coverArtUploading ? "Uploading Cover Art..." : "Select Cover Art"}
+          <label
+            htmlFor={coverInputId}
+            className={`${styles.uploadLabel} ${coverArtUploading ? styles.uploading : ""}`}
+          >
+            {coverArtUploading
+              ? "Uploading…"
+              : coverFileName
+                ? "✓ Change Cover"
+                : coverArtLabel}
           </label>
           <input
+            id={coverInputId}
             type="file"
             accept="image/*"
-            onChange={(e) =>
-              e.target.files && onCoverArtUpload(e.target.files[0])
-            }
+            className={styles.fileInput}
             disabled={coverArtUploading}
+            onChange={(e) => {
+              if (!e.target.files) return;
+              const file = e.target.files[0];
+              setCoverFileName(file.name);
+              onCoverArtUpload(file);
+            }}
           />
+          {coverFileName && !coverArtUploading && (
+            <span className={`${styles.fileStatusText} ${styles.ready}`}>
+              ✓ {coverFileName}
+            </span>
+          )}
         </div>
       )}
 
-      {mp3Uploaded && <p className={styles.success}>✓ Audio file ready</p>}
-
-      {error && <div className={styles.error}>{error}</div>}
+      <AlertMessage
+        message={error}
+        variant="error"
+        onDismiss={onErrorDismiss}
+      />
 
       <button
         type="submit"

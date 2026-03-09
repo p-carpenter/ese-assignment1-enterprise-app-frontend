@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { register } from "../../api";
 import styles from "../AuthForm.module.css";
+import { AlertMessage } from "@/shared/components";
+import { ApiError } from "@/shared/api/errors";
 
 export const RegistrationForm = () => {
   const [username, setUsername] = useState("");
@@ -20,7 +22,13 @@ export const RegistrationForm = () => {
       await register(username, email, password, password2);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(
+        err instanceof ApiError
+          ? err.getReadableMessage("Registration failed")
+          : err instanceof Error
+            ? err.message
+            : "Registration failed",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -30,13 +38,15 @@ export const RegistrationForm = () => {
     <>
       <h2 className={styles.title}>Sign up for Spotify</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && (
-          <div className={styles.success}>
-            Registration successful! Please check your email for a verification
-            link.
-          </div>
-        )}
+        <AlertMessage message={error} onDismiss={() => setError("")} />
+        <AlertMessage
+          message={
+            success
+              ? "Registration successful! Please check your email for a verification link."
+              : null
+          }
+          variant="success"
+        />
         <input
           placeholder="Username"
           className={styles.inputField}

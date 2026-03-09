@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from "@/features/songs/components/SongUploadForm/SongUploadForm.module.css";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { AlertMessage } from "@/shared/components";
 
 interface CreateNewPlaylistFormProps {
   onSubmit: (values: {
@@ -57,14 +58,10 @@ export const CreateNewPlaylistForm = ({
   return (
     <form className={styles.container} onSubmit={handleSubmit}>
       <h3 className={styles.title}>Playlist Details</h3>
-      <div className={styles.errorContainer}>
-        {error && <div className={styles.error}>{error}</div>}
-        {coverError && (
-          <div className={styles.error}>
-            {coverError && <div>Cover Art Error: {coverError}</div>}
-          </div>
-        )}
-      </div>
+      <AlertMessage message={error} />
+      <AlertMessage
+        message={coverError ? `Cover Art Error: ${coverError}` : null}
+      />
       <input
         aria-label="Upload Cover Art"
         type="file"

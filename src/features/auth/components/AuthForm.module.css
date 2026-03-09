@@ -1,3 +1,12 @@
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 24px;
+  text-align: center;
+  color: var(--spotify-white);
+}
+
 .form {
   display: flex;
   flex-direction: column;

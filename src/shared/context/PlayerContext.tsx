@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useAudioPlayer } from "react-use-audio-player";
 import { useQueryClient } from "@tanstack/react-query";
-import { logPlay } from "@/features/songs/api";
+import { logPlay } from "@/features/player/api";
 import { type Song } from "@/features/songs/types";
 
 export interface PlayerContextType {
@@ -21,10 +21,12 @@ export interface PlayerContextType {
   isLoading: boolean;
   isLooping: boolean;
   duration: number;
+  volume: number;
   play: () => void;
   pause: () => void;
   seek: (position: number) => void;
   getPosition: () => number;
+  setVolume: (volume: number) => void;
   setPlaylist: (songs: Song[]) => void;
   playSong: (song: Song, playlist?: Song[]) => Promise<void>;
   playPrev: () => Promise<void>;
@@ -45,6 +47,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     getPosition,
     seek,
     duration,
+    setVolume: audioSetVolume,
   } = useAudioPlayer();
 
   const queryClient = useQueryClient();
@@ -53,6 +56,17 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [isLooping, setIsLooping] = useState(false);
   const isLoopingRef = useRef(false);
+  const [volume, setVolumeState] = useState(1);
+  const volumeRef = useRef(1);
+
+  const setVolume = useCallback(
+    (v: number) => {
+      volumeRef.current = v;
+      setVolumeState(v);
+      audioSetVolume(v);
+    },
+    [audioSetVolume],
+  );
 
   const toggleLoop = useCallback(() => {
     setIsLooping((prev) => {
@@ -85,25 +99,16 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       stop();
       setCurrentSong(song);
 
-      // Briefly patch the Audio constructor so Howler creates the <audio> element
-      // with crossOrigin="anonymous" already set. Web Audio API's
-      // createMediaElementSource (used by @audiowave/react) requires this to be
-      // present before the src is loaded, otherwise the analyser sees only zeros.
-      const OrigAudio = window.Audio;
-      (window as unknown as Record<string, unknown>).Audio = function (
-        ...args: unknown[]
-      ) {
-        const el = new OrigAudio(
-          ...(args as ConstructorParameters<typeof Audio>),
-        );
-        el.crossOrigin = "anonymous";
-        return el;
+      const handlePlay = async () => {
+        await logPlay(song.id);
+        void queryClient.invalidateQueries({ queryKey: ["playHistory"] });
       };
 
       load(song.file_url, {
         autoplay: true,
         format: "mp3",
         html5: true,
+        initialVolume: volumeRef.current,
         onend: () => {
           if (isLoopingRef.current) {
             seek(0);
@@ -112,21 +117,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
             void playNextRef.current?.();
           }
         },
-        onplay: () => {
-          try {
-            void logPlay(song.id);
-            // Invalidate all play-history pages so PlayHistory refetches automatically
-            void queryClient.invalidateQueries({
-              queryKey: ["playHistory"],
-            });
-          } catch (err) {
-            console.error("Failed to log play:", err);
-          }
-        },
+        onplay: () => void handlePlay(),
       });
-
-      // Restore immediately - Howler creates the element synchronously above
-      (window as unknown as { Audio: typeof Audio }).Audio = OrigAudio;
     },
     [currentSong?.id, isPlaying, load, pause, play, queryClient, seek, stop],
   );
@@ -158,10 +150,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       isLooping,
       duration,
+      volume,
       play,
       pause,
       seek,
       getPosition,
+      setVolume,
       setPlaylist,
       playSong,
       playPrev,
@@ -175,10 +169,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       isLooping,
       duration,
+      volume,
       play,
       pause,
       seek,
       getPosition,
+      setVolume,
       playSong,
       playPrev,
       playNext,

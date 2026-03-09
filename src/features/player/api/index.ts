@@ -1,7 +1,7 @@
 import { request } from "@/shared/api/client";
 import { type PagedPlayHistory } from "../types";
 
-const HISTORY_PAGE_SIZE = 5;
+export const HISTORY_PAGE_SIZE = 5;
 
 export const getSongHistory = async (
   songId: number,
@@ -20,7 +20,7 @@ export const logPlay = async (songId: number) => {
   try {
     await request("/history/", {
       method: "POST",
-      body: JSON.stringify({ song: songId }),
+      body: JSON.stringify({ song_id: songId }),
     });
   } catch (err) {
     console.error("Audit log failed:", err);

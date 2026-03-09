@@ -1,15 +1,9 @@
-import { useState, type FC } from "react";
-import { useAudioPlayer } from "react-use-audio-player";
+import { type FC } from "react";
+import { usePlayer } from "@/shared/context/PlayerContext";
 import styles from "./VolumeBar.module.css";
 
 export const VolumeBar: FC = () => {
-  const { setVolume } = useAudioPlayer();
-  const [volume, setVolumeState] = useState(1);
-
-  const handleChange = (value: number) => {
-    setVolumeState(value);
-    setVolume(value);
-  };
+  const { volume, setVolume } = usePlayer();
 
   return (
     <div className={styles.wrapper}>
@@ -19,7 +13,7 @@ export const VolumeBar: FC = () => {
         max={1}
         step={0.01}
         value={volume}
-        onChange={(e) => handleChange(Number(e.target.value))}
+        onChange={(e) => setVolume(Number(e.target.value))}
         className={styles.volumeBar}
         aria-label="Volume"
         style={{ "--vol": volume } as React.CSSProperties}

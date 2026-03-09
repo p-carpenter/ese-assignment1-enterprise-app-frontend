@@ -209,7 +209,7 @@ describe("Song management", () => {
       ) as HTMLInputElement;
       fireEvent.change(audioInput, { target: { files: [file] } });
 
-      expect(await screen.findByText("✓ Audio file ready")).toBeInTheDocument();
+      expect(await screen.findByText("✓ test.mp3")).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: /save song/i }));
 
@@ -308,9 +308,6 @@ describe("Song management", () => {
     });
 
     it("keeps the song list intact when deleteSong fails", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
       mockDeleteSong.mockRejectedValueOnce(new Error("Server error"));
       renderLibrary();
 
@@ -318,13 +315,12 @@ describe("Song management", () => {
       fireEvent.click(screen.getAllByRole("button")[0]); // open dropdown
       fireEvent.click(await screen.findByText("Delete"));
 
+      // The mutation error is shown in the UI via AlertMessage
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalled();
+        expect(screen.getByRole("alert")).toBeInTheDocument();
       });
       // Song should still be in the DOM after the failed delete
       expect(screen.getByText("Song A")).toBeInTheDocument();
-
-      consoleSpy.mockRestore();
     });
   });
 

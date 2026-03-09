@@ -6,6 +6,7 @@ import { ResetPasswordForm } from "./components/ResetPasswordForm/ResetPasswordF
 import { RequestResetPasswordPage } from "./pages/RequestResetPasswordPage/RequestResetPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage/ResetPasswordPage";
 import { requestPasswordReset, confirmPasswordReset } from "./api";
+import { ApiError } from "@/shared/api/errors";
 import "@testing-library/jest-dom/vitest";
 
 // Mock the api module
@@ -73,6 +74,8 @@ describe("Reset Password Features", () => {
           /Password reset requested! Please check your email/i,
         ),
       ).toBeInTheDocument();
+      // AlertMessage success variant uses role="status"
+      expect(screen.getByRole("status")).toBeInTheDocument();
     });
 
     it("shows error message when API rejects", async () => {
@@ -94,6 +97,32 @@ describe("Reset Password Features", () => {
       );
 
       expect(await screen.findByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    it("shows error message when API rejects with ApiError", async () => {
+      mockRequestPasswordReset.mockRejectedValueOnce(
+        new ApiError(400, { email: ["No account found with this email."] }),
+      );
+
+      render(
+        <MemoryRouter>
+          <RequestResetPasswordForm />
+        </MemoryRouter>,
+      );
+
+      fireEvent.change(screen.getByPlaceholderText("Email address"), {
+        target: { value: "nonexistent@example.com" },
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /Request Password Reset/i }),
+      );
+
+      expect(
+        await screen.findByText(/No account found with this email/i),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toBeInTheDocument();
     });
 
     it("disables button while loading", async () => {
@@ -202,6 +231,7 @@ describe("Reset Password Features", () => {
       expect(
         await screen.findByText(/Password reset successfully!/i),
       ).toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeInTheDocument();
     });
 
     it("shows error when API call fails", async () => {
@@ -227,6 +257,7 @@ describe("Reset Password Features", () => {
       fireEvent.click(screen.getByRole("button", { name: /Reset Password/i }));
 
       expect(await screen.findByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toBeInTheDocument();
     });
 
     it("shows error when uid or token is missing", async () => {
@@ -251,6 +282,7 @@ describe("Reset Password Features", () => {
       expect(
         await screen.findByText(/Invalid reset link/i),
       ).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toBeInTheDocument();
     });
 
     it("disables button while loading", async () => {
