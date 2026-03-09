@@ -1,14 +1,11 @@
-import { useCallback, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/context/AuthContext";
 import {
-  deletePlaylist,
   getPlaylistDetails,
   removeSongFromPlaylist,
-  updatePlaylist,
 } from "@/features/playlists/api";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { AlertMessage } from "@/shared/components";
 import styles from "./PlaylistDetail.module.css";
 import { SongList } from "@/features/songs/components/SongList/SongList";
@@ -27,7 +24,6 @@ import {
 
 export const PlaylistDetail = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const parsedId = parseInt(playlistId ?? "0", 10);
@@ -42,71 +38,8 @@ export const PlaylistDetail = () => {
     enabled: !!parsedId,
   });
 
-  // ── Inline editing ────────────────────────────────────────────────────────
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editIsPublic, setEditIsPublic] = useState(false);
-  const [editCoverUrl, setEditCoverUrl] = useState("");
-  const [editIsCollaborative, setEditIsCollaborative] = useState(false);
-
-  const coverInputRef = useRef<HTMLInputElement>(null);
-
-  const { upload: uploadCover, isUploading: isCoverUploading } =
-    useCloudinaryUpload();
-
-  const startEdit = () => {
-    if (!playlist) return;
-    setEditTitle(playlist.title);
-    setEditDescription(playlist.description ?? "");
-    setEditIsPublic(playlist.is_public);
-    setEditCoverUrl(playlist.cover_art_url ?? "");
-    setIsEditing(true);
-  };
-
-  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const res = await uploadCover(file);
-    if (res) setEditCoverUrl(res.secure_url);
-  };
-
-  const { mutate: saveEdit, isPending: isSaving } = useMutation({
-    mutationFn: () => {
-      const payload = {
-        title: editTitle,
-        description: editDescription,
-        is_public: editIsPublic,
-        is_collaborative: editIsCollaborative,
-        ...(editCoverUrl ? { cover_art_url: editCoverUrl } : {}),
-      };
-
-      return updatePlaylist(parsedId, payload);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.playlist(parsedId),
-      });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
-      setIsEditing(false);
-    },
-  });
-
-  // ── Add song modal ────────────────────────────────────────────────────────
   const [isAddSongOpen, setIsAddSongOpen] = useState(false);
 
-  // ── Delete ────────────────────────────────────────────────────────────────
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePlaylist(parsedId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
-      navigate("/");
-    },
-  });
-
-  // ── Remove song ───────────────────────────────────────────────────────────
   const removeSongMutation = useMutation({
     mutationFn: (songId: number) => removeSongFromPlaylist(parsedId, songId),
     onSuccess: () => {
@@ -143,7 +76,6 @@ export const PlaylistDetail = () => {
     playlist.songs.map((item) => [item.song.id, item.added_by]),
   );
 
-  // Unique contributors (users who added at least one song, including the owner)
   const contributors = playlist.is_collaborative
     ? Array.from(
         new Map(
@@ -384,7 +316,6 @@ export const PlaylistDetail = () => {
           onClose={() => setIsAddSongOpen(false)}
         />
 
-        {/* ── Song list ─────────────────────────────────────────────────── */}
         <section className={styles.songSection}>
           <h2 className={styles.sectionTitle}>Songs</h2>
           {songs.length === 0 ? (
