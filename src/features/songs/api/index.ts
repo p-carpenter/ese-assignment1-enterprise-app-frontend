@@ -5,7 +5,9 @@ import type { PaginatedResponse, Song, SongUploadPayload } from "../types";
  * GET all songs
  */
 export const listAllSongs = (): Promise<Song[]> =>
-  request<Song[]>("/songs/?page_size=1000"); // or create a dedicated endpoint
+  request<PaginatedResponse<Song>>("/songs/?page_size=1000").then(
+    (data) => data.results,
+  );
 
 /**
  * GET songs with pagination, sorting, and optional search.

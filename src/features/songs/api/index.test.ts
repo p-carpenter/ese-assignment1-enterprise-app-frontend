@@ -32,7 +32,12 @@ describe("Songs API", () => {
 
   describe("listSongs", () => {
     it("GETs /songs/?page_size=1000 and returns an array of songs", async () => {
-      mockRequest.mockResolvedValueOnce([mockSong]);
+      mockRequest.mockResolvedValueOnce({
+        count: 1,
+        results: [mockSong],
+        next: null,
+        previous: null,
+      });
 
       const result = await listAllSongs();
 
@@ -41,7 +46,12 @@ describe("Songs API", () => {
     });
 
     it("returns an empty array when there are no songs", async () => {
-      mockRequest.mockResolvedValueOnce([]);
+      mockRequest.mockResolvedValueOnce({
+        count: 0,
+        results: [],
+        next: null,
+        previous: null,
+      });
 
       expect(await listAllSongs()).toEqual([]);
     });
