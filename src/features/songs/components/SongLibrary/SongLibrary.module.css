@@ -60,6 +60,9 @@
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  background: var(--spotify-dark-elevated);
 }
 
 .headerSong {
