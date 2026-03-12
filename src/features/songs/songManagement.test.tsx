@@ -156,7 +156,7 @@ describe("Song management", () => {
   let mockPlaySong: PlayerContextType["playSong"];
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mockPlaySong = vi
       .fn()
       .mockResolvedValue(undefined) as unknown as PlayerContextType["playSong"];
