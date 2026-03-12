@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SongUploadForm } from "@/features/songs";
-import { SpotifySearch } from "@/features/spotify";
+import { SpotifySearch } from "@/features/spotify/components";
 import { Button } from "@/shared/components";
 import { useNavigate } from "react-router-dom";
 

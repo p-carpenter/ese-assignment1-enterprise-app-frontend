@@ -9,11 +9,9 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { getValidAccessToken, clearCachedToken } from "./auth";
-import { playOnDevice } from "./api";
-import type { SpotifySDKPlayer, SpotifyPlayerState } from "./types";
-
-// ── Context shape ─────────────────────────────────────────────────────────────
+import { getValidAccessToken, clearCachedToken } from "../auth";
+import { playOnDevice } from "../api";
+import type { SpotifySDKPlayer, SpotifyPlayerState } from "../types";
 
 export interface SpotifyContextType {
   /** True once the SDK script has loaded and the player is connected. */

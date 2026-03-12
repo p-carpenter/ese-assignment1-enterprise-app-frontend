@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@/mocks/server";
-import { searchTracks, getTrack, playOnDevice } from "./api";
+import { searchTracks, getTrack, playOnDevice } from ".";
 
 // ── Mock auth module ──────────────────────────────────────────────────────────
-vi.mock("./auth", () => ({
+vi.mock("../auth", () => ({
   getValidAccessToken: vi.fn(),
 }));
-import { getValidAccessToken } from "./auth";
+import { getValidAccessToken } from "../auth";
 const mockGetToken = vi.mocked(getValidAccessToken);
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────

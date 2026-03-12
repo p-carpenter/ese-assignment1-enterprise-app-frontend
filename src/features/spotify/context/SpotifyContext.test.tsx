@@ -12,16 +12,16 @@ import { SpotifyProvider, useSpotify } from "./SpotifyContext";
 import "@testing-library/jest-dom/vitest";
 
 // ── Mock auth & api modules ───────────────────────────────────────────────────
-vi.mock("./auth", () => ({
+vi.mock("../auth", () => ({
   getValidAccessToken: vi.fn().mockResolvedValue("fake-token"),
   clearCachedToken: vi.fn(),
 }));
-vi.mock("./api", () => ({
+vi.mock("../api", () => ({
   playOnDevice: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { clearCachedToken } from "./auth";
-import { playOnDevice } from "./api";
+import { clearCachedToken } from "../auth";
+import { playOnDevice } from "../api";
 const mockClearToken = vi.mocked(clearCachedToken);
 const mockPlayOnDevice = vi.mocked(playOnDevice);
 

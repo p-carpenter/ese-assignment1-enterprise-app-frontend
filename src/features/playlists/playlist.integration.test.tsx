@@ -9,7 +9,7 @@ import { type UserProfile } from "@/features/auth/types";
 import { PlayerProvider } from "@/shared/context/PlayerContext";
 
 // PlayerProvider calls useSpotify() internally; stub it so no SpotifyProvider is needed.
-vi.mock("@/features/spotify/SpotifyContext", () => ({
+vi.mock("@/features/spotify/context", () => ({
   useSpotify: vi.fn(() => ({
     isReady: false,
     isLoading: false,

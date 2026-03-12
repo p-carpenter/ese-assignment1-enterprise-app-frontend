@@ -1,5 +1,5 @@
-import { getValidAccessToken } from "./auth";
-import type { SpotifySearchResult, SpotifyTrack } from "./types";
+import { getValidAccessToken } from "../auth";
+import type { SpotifySearchResult, SpotifyTrack } from "../types";
 
 const BASE = "https://api.spotify.com/v1";
 
@@ -51,15 +51,8 @@ export const playOnDevice = async (
   uri: string,
   deviceId: string,
 ): Promise<void> => {
-  const token = await getValidAccessToken();
-  if (!token) throw new Error("Not authenticated with Spotify.");
-
-  const res = await fetch(`${BASE}/me/player/play?device_id=${deviceId}`, {
+  const res = await spotifyFetch(`/me/player/play?device_id=${deviceId}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ uris: [uri] }),
   });
 

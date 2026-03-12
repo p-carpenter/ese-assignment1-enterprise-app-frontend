@@ -6,25 +6,27 @@ import "@testing-library/jest-dom/vitest";
 
 // ── Mock external dependencies ────────────────────────────────────────────────
 
-vi.mock("../SpotifyContext", () => ({
+vi.mock("../../context", () => ({
   useSpotify: vi.fn(),
 }));
 
-vi.mock("../api", () => ({
+vi.mock("../../api", () => ({
   searchTracks: vi.fn(),
 }));
 
 vi.mock("@/features/songs/api", () => ({
   uploadSong: vi.fn(),
+  listAllSongs: vi.fn().mockResolvedValue([]),
 }));
 
-import { useSpotify } from "../SpotifyContext";
-import { searchTracks } from "../api";
-import { uploadSong } from "@/features/songs/api";
+import { useSpotify } from "../../context";
+import { searchTracks } from "../../api";
+import { uploadSong, listAllSongs } from "@/features/songs/api";
 
 const mockUseSpotify = vi.mocked(useSpotify);
 const mockSearchTracks = vi.mocked(searchTracks);
 const mockUploadSong = vi.mocked(uploadSong);
+const mockListAllSongs = vi.mocked(listAllSongs);
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -99,6 +101,8 @@ const renderComponent = (isReady = true) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Restore the default: initial query returns an empty library
+  mockListAllSongs.mockResolvedValue([]);
 });
 
 describe("SpotifySearch — status badge", () => {
@@ -107,7 +111,7 @@ describe("SpotifySearch — status badge", () => {
     expect(screen.getByText(/Spotify player ready/)).toBeInTheDocument();
   });
 
-  it("shows '⏳ Connecting player…' when isReady is false", () => {
+  it("shows 'Connecting player…' when isReady is false", () => {
     renderComponent(false);
     expect(screen.getByText(/Connecting player/)).toBeInTheDocument();
   });
@@ -255,7 +259,7 @@ describe("SpotifySearch — adding a track to the library", () => {
         artist: "Queen",
         album: "A Night at the Opera",
         release_year: "1975",
-        file_url: "http://googleusercontent.com/spotify.com/track1",
+        file_url: "https://open.spotify.com/track/track1",
         cover_art_url: "https://img.example.com/cover64.jpg",
         duration: 354,
       }),
@@ -283,8 +287,13 @@ describe("SpotifySearch — adding a track to the library", () => {
   it("shows 'Added ✓' and disables the button after a successful add", async () => {
     mockUploadSong.mockResolvedValueOnce({} as never);
     mockSearchTracks.mockResolvedValueOnce([mockTracks[0]]);
+    // Initial load returns no songs; refetch after upload returns the added song
+    mockListAllSongs.mockResolvedValueOnce([]);
+    mockListAllSongs.mockResolvedValueOnce([
+      { file_url: "https://open.spotify.com/track/track1" },
+    ] as never);
 
-    const { queryClient } = renderComponent();
+    renderComponent();
 
     fireEvent.change(screen.getByPlaceholderText(/Search Spotify/i), {
       target: { value: "queen" },
@@ -293,11 +302,6 @@ describe("SpotifySearch — adding a track to the library", () => {
     await screen.findByText("Bohemian Rhapsody");
 
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
-
-    queryClient.setQueryData(
-      ["songs"],
-      [{ file_url: "http://googleusercontent.com/spotify.com/track1" }],
-    );
 
     expect(
       await screen.findByRole("button", { name: "Added ✓" }),
@@ -307,7 +311,13 @@ describe("SpotifySearch — adding a track to the library", () => {
   it("does not call uploadSong again once the track is marked Added", async () => {
     mockUploadSong.mockResolvedValueOnce({} as never);
     mockSearchTracks.mockResolvedValueOnce([mockTracks[0]]);
-    const { queryClient } = renderComponent();
+    // Initial load returns no songs; refetch after upload returns the added song
+    mockListAllSongs.mockResolvedValueOnce([]);
+    mockListAllSongs.mockResolvedValueOnce([
+      { file_url: "https://open.spotify.com/track/track1" },
+    ] as never);
+
+    renderComponent();
 
     fireEvent.change(screen.getByPlaceholderText(/Search Spotify/i), {
       target: { value: "queen" },
@@ -317,13 +327,9 @@ describe("SpotifySearch — adding a track to the library", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
-    queryClient.setQueryData(
-      ["songs"],
-      [{ file_url: "http://googleusercontent.com/spotify.com/track1" }],
-    );
-
     await screen.findByRole("button", { name: "Added ✓" });
 
+    // Button is now disabled — a second click should be a no-op
     fireEvent.click(screen.getByRole("button", { name: "Added ✓" }));
 
     expect(mockUploadSong).toHaveBeenCalledOnce();
