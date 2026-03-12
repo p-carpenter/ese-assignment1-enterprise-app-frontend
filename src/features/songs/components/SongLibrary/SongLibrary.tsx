@@ -43,6 +43,18 @@ export const SongLibrary = (): JSX.Element => {
     }
   }, [isError, error]);
 
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const el = e.currentTarget;
+      const nearBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 100;
+      if (nearBottom && hasNextPage && !isFetchingNextPage) {
+        void fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
+
   const observer = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -81,10 +93,10 @@ export const SongLibrary = (): JSX.Element => {
         </select>
       </div>
 
-      <div className={styles.scrollContainer}>
+      <div className={styles.scrollContainer} onScroll={handleScroll}>
         {isLoading && <p>Loading...</p>}
         <SongList songs={songs} />
-        
+
         <div ref={loadMoreRef} className="h-10">
           {isFetchingNextPage && <p>Loading more...</p>}
         </div>
