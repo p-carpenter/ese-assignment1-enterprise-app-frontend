@@ -95,10 +95,11 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
         {PLACEHOLDER_BARS.map((h, i) => (
           <div
             key={i}
-            className={`${styles.bar} ${i / BAR_COUNT < displayProgress
+            className={`${styles.bar} ${
+              i / BAR_COUNT < displayProgress
                 ? styles.barPlayed
                 : styles.barUnplayed
-              }`}
+            }`}
             style={{ height: `${h}%` }}
           />
         ))}
