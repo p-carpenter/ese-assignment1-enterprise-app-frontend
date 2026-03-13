@@ -51,3 +51,9 @@
 .volumeBar::-moz-range-track {
   background: transparent;
 }
+
+.icon {
+  color: var(--spotify-gray);
+  margin-right: 8px;
+  
+}

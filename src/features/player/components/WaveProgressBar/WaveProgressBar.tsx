@@ -52,6 +52,7 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
 
   const getRelX = useCallback((e: PointerEvent<HTMLDivElement>): number => {
     const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width === 0) return 0;
     return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   }, []);
 

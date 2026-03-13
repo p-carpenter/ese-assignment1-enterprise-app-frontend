@@ -1,12 +1,15 @@
 import { type FC } from "react";
 import { usePlayer } from "@/shared/context/PlayerContext";
 import styles from "./VolumeBar.module.css";
+import { IoVolumeMedium } from "react-icons/io5";
 
 export const VolumeBar: FC = () => {
   const { volume, setVolume } = usePlayer();
 
   return (
     <div className={styles.wrapper}>
+      <IoVolumeMedium className={styles.icon} />
+
       <input
         type="range"
         min={0}

@@ -82,6 +82,7 @@ export const MiniPlayer = () => {
         <PlaybackTimeDisplay
           getPosition={getPosition}
           maxDuration={maxDuration}
+          isPlaying={isPlaying}
         />
 
         <VolumeBar />
