@@ -1,5 +1,8 @@
 import { useEffect, useRef, type FC } from "react";
-import { getActiveLyricIndex, type ParsedLine } from "../../../hooks/useLyrics";
+import {
+  getActiveLyricIndex,
+  type ParsedLine,
+} from "../../../../hooks/useLyrics";
 import styles from "./SyncedLyrics.module.css";
 
 interface SyncedLyricsProps {

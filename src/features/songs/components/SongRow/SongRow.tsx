@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { type Song } from "@/features/songs/types";
 import type { UserMini } from "@/features/auth/types";
+import { UserAvatar } from "@/shared/components/";
 
 import {
   SongManagementDropdown,
@@ -22,22 +23,6 @@ const formatTime = (seconds: number): string => {
   const secs = Math.round(seconds % 60);
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
-
-const UserAvatar = ({ user }: { user: UserMini }) => (
-  <span className={styles.userAvatar} title={user.username}>
-    {user.avatar_url ? (
-      <img
-        src={user.avatar_url}
-        alt={user.username}
-        className={styles.userAvatarImg}
-      />
-    ) : (
-      <span className={styles.userAvatarFallback}>
-        {user.username[0].toUpperCase()}
-      </span>
-    )}
-  </span>
-);
 
 export const SongRow = memo(
   ({ song, isActive, onPlay, dropdownItems, avatarUser }: SongRowProps) => {
