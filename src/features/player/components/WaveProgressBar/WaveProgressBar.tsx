@@ -52,6 +52,7 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
 
   const getRelX = useCallback((e: PointerEvent<HTMLDivElement>): number => {
     const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width === 0) return 0;
     return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   }, []);
 
@@ -94,11 +95,10 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
         {PLACEHOLDER_BARS.map((h, i) => (
           <div
             key={i}
-            className={`${styles.bar} ${
-              i / BAR_COUNT < displayProgress
+            className={`${styles.bar} ${i / BAR_COUNT < displayProgress
                 ? styles.barPlayed
                 : styles.barUnplayed
-            }`}
+              }`}
             style={{ height: `${h}%` }}
           />
         ))}
