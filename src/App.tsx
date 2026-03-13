@@ -10,13 +10,7 @@ export const App = (): JSX.Element => {
   if (loading) {
     return (
       <div className="app-container">
-        <div
-          style={{
-            textAlign: "center",
-            padding: "60px",
-            color: "var(--spotify-gray)",
-          }}
-        >
+        <div className="loading_text">
           Loading...
         </div>
       </div>
