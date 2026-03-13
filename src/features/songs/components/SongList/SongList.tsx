@@ -120,7 +120,6 @@ export const SongList = ({
         <div className={styles.headerDropdownSpacer} />
       </div>
 
-      {/* Her er den nye scroll-containeren som KUN wrapper listen */}
       <div className={styles.scrollContainer} onScroll={onScroll}>
         <ul className={styles.list}>
           {songs.map((song) => (
