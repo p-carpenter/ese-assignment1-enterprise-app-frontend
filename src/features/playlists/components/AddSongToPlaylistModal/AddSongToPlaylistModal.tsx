@@ -44,8 +44,15 @@ export const AddSongToPlaylistModal = ({
     mutationFn: (song: Song) => addSongToPlaylist(playlistId, song.id),
     onSuccess: (_data, song) => {
       setAddedIds((prev) => new Set(prev).add(song.id));
+
+      // Update the playlist details in the cache to reflect the new song.
       void queryClient.invalidateQueries({
         queryKey: queryKeys.playlist(playlistId),
+      });
+
+      // Update the general playlists list to reflect the new song count.
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.playlists,
       });
     },
   });
