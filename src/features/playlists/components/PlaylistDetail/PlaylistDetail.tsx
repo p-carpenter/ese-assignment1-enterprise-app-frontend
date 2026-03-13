@@ -36,8 +36,14 @@ export const PlaylistDetail = () => {
   const removeSongMutation = useMutation({
     mutationFn: (songId: number) => removeSongFromPlaylist(parsedId, songId),
     onSuccess: () => {
+      // Update the playlist details in the cache to reflect the removed song.
       void queryClient.invalidateQueries({
         queryKey: queryKeys.playlist(parsedId),
+      });
+
+      // Invalidate the playlists list to update song counts.
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.playlists,
       });
     },
   });
