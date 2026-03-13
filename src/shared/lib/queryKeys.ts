@@ -8,8 +8,10 @@ export const queryKeys = {
   me: ["me"] as const,
 
   /** Paginated / filtered song list (used by useInfiniteQuery in SongLibrary) */
+  allSongs: ["songs"] as const,
+
   songs: (params: { ordering: string; search: string }) =>
-    ["songs", params] as const,
+    [...queryKeys.allSongs, params] as const,
 
   /** All playlists for the current user */
   playlists: ["playlists"] as const,
