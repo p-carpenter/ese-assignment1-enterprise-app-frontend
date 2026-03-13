@@ -12,6 +12,7 @@ import { type DropdownItem } from "../SongManagementDropdown/SongManagementDropd
 import { IoTimeOutline } from "react-icons/io5";
 import { ApiError } from "@/shared/api/errors";
 import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface SongListProps {
   songs: Song[];
@@ -44,8 +45,8 @@ export const SongList = ({
   const deleteMutation = useMutation({
     mutationFn: (songId: number) => deleteSong(songId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["songs"] });
-      void queryClient.invalidateQueries({ queryKey: ["playlist"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
     },
   });
 
@@ -58,7 +59,7 @@ export const SongList = ({
       songId: number;
     }) => addSongToPlaylist(playlistId, songId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["playlist"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
       setSongToAddToPlaylist(null);
     },
   });

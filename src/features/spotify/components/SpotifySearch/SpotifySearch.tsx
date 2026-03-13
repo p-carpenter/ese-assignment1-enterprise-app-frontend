@@ -7,6 +7,7 @@ import type { SpotifyTrack } from "../../types";
 import type { Song } from "@/features/songs";
 import { SearchRow } from "../SearchRow/SearchRow";
 import styles from "./SpotifySearch.module.css";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 const toSongPayload = (track: SpotifyTrack) => ({
   title: track.name,
@@ -27,8 +28,9 @@ export const SpotifySearch = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   const { data: existingSongs } = useQuery<Song[]>({
-    queryKey: ["songs"],
+    queryKey: queryKeys.allSongs,
     queryFn: listAllSongs,
+    staleTime: 1000 * 60 * 5,
   });
 
   const handleSearch = async () => {

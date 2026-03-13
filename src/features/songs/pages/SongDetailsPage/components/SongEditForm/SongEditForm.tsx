@@ -49,7 +49,7 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.song(song.id),
       });
-      void queryClient.invalidateQueries({ queryKey: ["songs"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
       onClose();
     },
   });

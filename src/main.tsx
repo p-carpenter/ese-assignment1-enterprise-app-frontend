@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
         }
         return failureCount < 2;
       },
-      staleTime: 10000 * 60,
+      staleTime: Infinity,
     },
   },
 });

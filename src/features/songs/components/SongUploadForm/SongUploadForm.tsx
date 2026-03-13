@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./SongUploadForm.module.css";
 import { AlertMessage } from "@/shared/components";
 import { ApiError } from "@/shared/api/errors";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 export const SongUploadForm = () => {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ export const SongUploadForm = () => {
       });
 
       // Refresh the song library so the new track appears immediately
-      void queryClient.invalidateQueries({ queryKey: ["songs"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
 
       navigate("/");
     } catch (err) {
