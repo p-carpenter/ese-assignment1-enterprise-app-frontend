@@ -10,9 +10,7 @@ export const App = (): JSX.Element => {
   if (loading) {
     return (
       <div className="app-container">
-        <div className="loading_text">
-          Loading...
-        </div>
+        <div className="loading_text">Loading...</div>
       </div>
     );
   }
