@@ -24,9 +24,11 @@ export const useIsOverflowing = (
 
     const resizeObserver = new ResizeObserver(checkOverflow);
     resizeObserver.observe(parent);
+    resizeObserver.observe(el);
 
     return () => resizeObserver.disconnect();
-  }, [ref, ...dependencies]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref, JSON.stringify(dependencies)]);
 
   return isOverflowing;
 };
