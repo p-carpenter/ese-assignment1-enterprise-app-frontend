@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { PlaybackControls } from "./PlaybackControls";
 import "@testing-library/jest-dom/vitest";
 
@@ -44,31 +45,43 @@ describe("PlaybackControls", () => {
   });
 
   describe("interactions", () => {
-    it("calls onPlay when the Play button is clicked", () => {
+    it("calls onPlay when the Play button is clicked", async () => {
+      const user = userEvent.setup();
       const onPlay = vi.fn();
+
       render(<PlaybackControls {...makeProps({ onPlay })} />);
-      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+
+      await user.click(screen.getByRole("button", { name: "Play" }));
       expect(onPlay).toHaveBeenCalledTimes(1);
     });
 
-    it("calls onPause when the Pause button is clicked", () => {
+    it("calls onPause when the Pause button is clicked", async () => {
+      const user = userEvent.setup();
       const onPause = vi.fn();
+
       render(<PlaybackControls {...makeProps({ isPlaying: true, onPause })} />);
-      fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+
+      await user.click(screen.getByRole("button", { name: "Pause" }));
       expect(onPause).toHaveBeenCalledTimes(1);
     });
 
-    it("calls onPrev when the Previous button is clicked", () => {
+    it("calls onPrev when the Previous button is clicked", async () => {
+      const user = userEvent.setup();
       const onPrev = vi.fn();
+
       render(<PlaybackControls {...makeProps({ onPrev })} />);
-      fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+
+      await user.click(screen.getByRole("button", { name: "Previous" }));
       expect(onPrev).toHaveBeenCalledTimes(1);
     });
 
-    it("calls onNext when the Next button is clicked", () => {
+    it("calls onNext when the Next button is clicked", async () => {
+      const user = userEvent.setup();
       const onNext = vi.fn();
+
       render(<PlaybackControls {...makeProps({ onNext })} />);
-      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+      await user.click(screen.getByRole("button", { name: "Next" }));
       expect(onNext).toHaveBeenCalledTimes(1);
     });
   });
@@ -76,6 +89,8 @@ describe("PlaybackControls", () => {
   describe("disabled states", () => {
     it("disables the Previous button when disablePrev=true", () => {
       render(<PlaybackControls {...makeProps({ disablePrev: true })} />);
+      // userEvent vil kaste en feil hvis du prøver å klikke på et disabled element.
+      // Det er beviset på at komponenten fungerer. Vi sjekker attributtet her.
       expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
     });
 
