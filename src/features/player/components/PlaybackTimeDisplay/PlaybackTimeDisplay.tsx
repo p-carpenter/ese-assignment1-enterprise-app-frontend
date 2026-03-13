@@ -1,28 +1,39 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import styles from "./PlaybackTimeDisplay.module.css";
 
 const formatTime = (seconds: number): string => {
-  if (!seconds || isNaN(seconds)) return "0:00";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  if (isNaN(seconds) || seconds <= 0) return "0:00";
+
+  const totalSeconds = Math.round(seconds);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
 interface PlaybackTimeDisplayProps {
   getPosition: () => number;
   maxDuration: number;
+  isPlaying: boolean;
 }
 
 export const PlaybackTimeDisplay = ({
   getPosition,
   maxDuration,
+  isPlaying,
 }: PlaybackTimeDisplayProps) => {
-  const [position, setPosition] = useState(0);
+  const timeDisplayRef = useRef<HTMLSpanElement>(null);
   const frameRef = useRef<number>(0);
 
+  const formattedMax = useMemo(() => formatTime(maxDuration), [maxDuration]);
+
   useEffect(() => {
+    if (!isPlaying) return;
+
     const tick = () => {
-      setPosition(getPosition());
+      if (timeDisplayRef.current) {
+        timeDisplayRef.current.textContent = `${formatTime(getPosition())} / ${formattedMax}`;
+      }
       frameRef.current = requestAnimationFrame(tick);
     };
 
@@ -31,11 +42,15 @@ export const PlaybackTimeDisplay = ({
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [getPosition]);
+  }, [getPosition, isPlaying, formattedMax]);
 
   return (
-    <span className={styles.timeDisplay}>
-      {formatTime(position)}&nbsp;/&nbsp;{formatTime(maxDuration)}
+    <span
+      aria-label="Playback time"
+      className={styles.timeDisplay}
+      ref={timeDisplayRef}
+    >
+      {formatTime(getPosition())} / {formattedMax}
     </span>
   );
 };
