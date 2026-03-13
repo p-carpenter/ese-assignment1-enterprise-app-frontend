@@ -36,12 +36,7 @@ export const AddSongToPlaylistModal = ({
     isError,
   } = useQuery({
     queryKey: ALL_SONGS_KEY,
-    queryFn: async () => {
-      const res = await listAllSongs();
-      return Array.isArray(res)
-        ? res
-        : ((res as { results: Song[] }).results ?? []);
-    },
+    queryFn: listAllSongs,
     enabled: isOpen,
   });
 

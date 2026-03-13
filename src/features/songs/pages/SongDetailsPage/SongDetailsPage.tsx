@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePlayer } from "@/features/player";
 // import { Button } from "@/shared/components";
 import { getSongDetails, listAllSongs, updateSong } from "@/features/songs/api";
-import { type Song } from "@/features/songs/types";
 import { getSongHistory } from "@/features/player/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import { useLyrics } from "../../hooks/useLyrics";
@@ -56,14 +55,7 @@ export const SongDetailsPage = () => {
   // ── More by artist ────────────────────────────────────────────────────────
   const { data: allSongs } = useQuery({
     queryKey: queryKeys.artistSongs(song?.artist ?? ""),
-    queryFn: async () => {
-      const res = await listAllSongs();
-      // listAllSongs is typed as Song[] but the backend returns a paginated shape
-      const songs = Array.isArray(res)
-        ? res
-        : ((res as unknown as { results: Song[] }).results ?? []);
-      return songs;
-    },
+    queryFn: listAllSongs,
     enabled: !!song,
   });
   const moreSongs = (allSongs ?? []).filter(

@@ -5,6 +5,7 @@ import { App } from "./App.tsx";
 import { AudioPlayerProvider } from "react-use-audio-player";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import { PlayerProvider } from "@/features/player";
+import { SpotifyProvider } from "@/features/spotify/context";
 import {
   QueryClient,
   QueryClientProvider,
@@ -41,11 +42,13 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AudioPlayerProvider>
-          <PlayerProvider>
-            <App />
-          </PlayerProvider>
-        </AudioPlayerProvider>
+        <SpotifyProvider>
+          <AudioPlayerProvider>
+            <PlayerProvider>
+              <App />
+            </PlayerProvider>
+          </AudioPlayerProvider>
+        </SpotifyProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
