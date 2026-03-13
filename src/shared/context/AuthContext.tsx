@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryFn: getMe,
     // Don't throw on 401 (not logged in) – just return null
     throwOnError: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: Infinity,
   });
 
   /** Immediately write a user object into the cache (e.g. after profile update). */
