@@ -29,7 +29,6 @@ export const SongList = ({
   songs,
   getDropdownItems,
   getAvatarUser,
-  isPlaylist,
   onScroll,
   loadMoreRef,
   isFetchingNextPage,
@@ -66,9 +65,9 @@ export const SongList = ({
 
   const handlePlay = useCallback(
     (song: Song) => {
-      void playSong(song, isPlaylist ? songs : [song]);
+      void playSong(song, songs);
     },
-    [playSong, songs, isPlaylist],
+    [playSong, songs],
   );
 
   const generateDropdownItems = useCallback(

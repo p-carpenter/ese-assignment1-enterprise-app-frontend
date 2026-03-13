@@ -144,7 +144,6 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // stopp det som spilles av nå
       if (isCurrentSpotify) {
         void spotifyPause().catch(() => {});
       } else {
@@ -205,13 +204,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const playPrev = useCallback(async (): Promise<void> => {
-    if (!playlist.length) return;
     const prevIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
     await playSong(playlist[prevIndex]);
   }, [currentIndex, playlist, playSong]);
 
   const playNext = useCallback(async (): Promise<void> => {
-    if (!playlist.length) return;
     const nextIndex =
       currentIndex >= 0 && currentIndex < playlist.length - 1
         ? currentIndex + 1

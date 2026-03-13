@@ -354,7 +354,7 @@ describe("Song management", () => {
     it("calls playSong with the correct song when a list item is clicked", async () => {
       renderLibrary();
       fireEvent.click(await screen.findByText("Song B"));
-      expect(mockPlaySong).toHaveBeenCalledWith(mockSongs[1], [mockSongs[1]]);
+      expect(mockPlaySong).toHaveBeenCalledWith(mockSongs[1], mockSongs);
     });
   });
 
