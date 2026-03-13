@@ -6,6 +6,7 @@ import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { type Song } from "../../types";
 import { updateSong } from "../../api";
 import { ApiError } from "@/shared/api/errors"; // Husk denne!
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface EditSongModalProps {
   song: Song | null;
@@ -45,8 +46,11 @@ export const EditSongModal = ({
         cover_art_url: url,
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["songs"] });
-      void queryClient.invalidateQueries({ queryKey: ["playlist"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.song(song!.id),
+      });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
       onSongUpdated();
       onClose();
     },
@@ -86,7 +90,6 @@ export const EditSongModal = ({
 
   const handleDismissError = () => {
     if (updateMutation.error) updateMutation.reset();
-    // Hvis useCloudinaryUpload har en clearError()-funksjon, kall den her.
   };
 
   return (
