@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
 import { SearchRow } from "./SearchRow";
 import type { SpotifyTrack } from "../../types";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -199,7 +200,9 @@ describe("SearchRow — add interaction", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     await waitFor(() =>
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["songs"] }),
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: queryKeys.allSongs,
+      }),
     );
   });
 

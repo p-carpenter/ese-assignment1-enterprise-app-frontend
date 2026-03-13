@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SpotifyTrack } from "../../types";
 import styles from "./SearchRow.module.css";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface SearchRowProps {
   track: SpotifyTrack;
@@ -18,7 +19,7 @@ export const SearchRow = ({
   const { mutate: addTrack, isPending } = useMutation({
     mutationFn: () => onUpload(track),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["songs"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
     },
     onError: (err) => {
       console.error("Failed to add track:", err);
