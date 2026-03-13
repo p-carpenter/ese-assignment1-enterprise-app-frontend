@@ -114,7 +114,7 @@ describe("SongEditForm", () => {
       queryKey: queryKeys.song(dummySong.id),
     });
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ["songs"],
+      queryKey: queryKeys.allSongs,
     });
     expect(mockOnClose).toHaveBeenCalled();
   });
