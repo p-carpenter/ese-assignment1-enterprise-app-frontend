@@ -7,7 +7,7 @@ import { addSongToPlaylist } from "@/features/playlists/api";
 import { EditSongModal } from "../EditSongModal/EditSongModal";
 import { AddToPlaylistModal } from "@/features/playlists/components/AddToPlaylistModal/AddToPlaylistModal";
 import { SongRow } from "../SongRow/SongRow";
-import styles from "../SongLibrary/SongLibrary.module.css";
+import styles from "./SongList.module.css";
 import { type DropdownItem } from "../SongManagementDropdown/SongManagementDropdown";
 import { IoTimeOutline } from "react-icons/io5";
 import { ApiError } from "@/shared/api/errors";
