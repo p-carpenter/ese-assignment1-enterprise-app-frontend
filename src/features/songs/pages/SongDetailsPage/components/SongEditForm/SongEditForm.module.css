@@ -1,0 +1,40 @@
+.editFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+}
+
+.editInput {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  outline: none;
+}
+.editInput::placeholder { color: rgba(255,255,255,0.4); }
+.editInput:focus { border-color: #1db954; }
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.iconBtn:hover { background: rgba(255,255,255,0.1); }
+.iconBtn:disabled { opacity: 0.5; cursor: not-allowed; }

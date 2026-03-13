@@ -5,6 +5,7 @@ import { DeletePlaylistButton } from "../DeletePlaylistButton/DeletePlaylistButt
 import { IoPencilOutline, IoAddOutline } from "react-icons/io5";
 import { type Playlist } from "@/features/playlists/types";
 import { type UserMini } from "@/features/auth/types";
+import { UserAvatar } from "@/shared/components/UserAvatar/UserAvatar";
 
 interface PlaylistHeroProps {
   playlist: Playlist;
@@ -67,17 +68,7 @@ export const PlaylistHero = ({
             )}
             <div className={styles.heroMeta}>
               <span className={styles.heroMetaOwner}>
-                {playlist.owner.avatar_url ? (
-                  <img
-                    src={playlist.owner.avatar_url}
-                    alt={playlist.owner.username}
-                    className={styles.ownerAvatar}
-                  />
-                ) : (
-                  <span className={styles.ownerAvatarFallback}>
-                    {playlist.owner.username[0].toUpperCase()}
-                  </span>
-                )}
+                <UserAvatar user={playlist.owner} />
                 <span>{playlist.owner.username}</span>
               </span>
               <span className={styles.heroMetaDot}>·</span>
@@ -87,16 +78,8 @@ export const PlaylistHero = ({
                   <span className={styles.heroMetaDot}>·</span>
                   <div className={styles.contributorAvatars}>
                     {contributors.slice(0, 5).map((u) => (
-                      <span
-                        key={u.id}
-                        className={styles.contributorAvatar}
-                        title={u.username}
-                      >
-                        {u.avatar_url ? (
-                          <img src={u.avatar_url} alt={u.username} />
-                        ) : (
-                          u.username[0].toUpperCase()
-                        )}
+                      <span key={u.id} className={styles.contributorAvatar}>
+                        <UserAvatar user={u} />
                       </span>
                     ))}
                     {contributors.length > 5 && (
