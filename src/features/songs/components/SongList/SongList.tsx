@@ -7,7 +7,7 @@ import { addSongToPlaylist } from "@/features/playlists/api";
 import { EditSongModal } from "../EditSongModal/EditSongModal";
 import { AddToPlaylistModal } from "@/features/playlists/components/AddToPlaylistModal/AddToPlaylistModal";
 import { SongRow } from "../SongRow/SongRow";
-import styles from "../SongLibrary/SongLibrary.module.css";
+import styles from "./SongList.module.css";
 import { type DropdownItem } from "../SongManagementDropdown/SongManagementDropdown";
 import { IoTimeOutline } from "react-icons/io5";
 import { ApiError } from "@/shared/api/errors";
@@ -19,12 +19,20 @@ interface SongListProps {
   getAvatarUser?: (
     song: Song,
   ) => import("@/features/auth/types").UserMini | undefined;
+  isPlaylist?: boolean;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
+  loadMoreRef?: React.Ref<HTMLDivElement>;
+  isFetchingNextPage?: boolean;
 }
 
 export const SongList = ({
   songs,
   getDropdownItems,
   getAvatarUser,
+  isPlaylist,
+  onScroll,
+  loadMoreRef,
+  isFetchingNextPage,
 }: SongListProps) => {
   const { currentSong, playSong } = usePlayer();
   const queryClient = useQueryClient();
@@ -58,9 +66,9 @@ export const SongList = ({
 
   const handlePlay = useCallback(
     (song: Song) => {
-      void playSong(song, songs);
+      void playSong(song, isPlaylist ? songs : [song]);
     },
-    [playSong, songs],
+    [playSong, songs, isPlaylist],
   );
 
   const generateDropdownItems = useCallback(
@@ -112,22 +120,32 @@ export const SongList = ({
         <div className={styles.headerDropdownSpacer} />
       </div>
 
-      <ul className={styles.list}>
-        {songs.map((song) => (
-          <SongRow
-            key={song.id}
-            song={song}
-            isActive={currentSong?.id === song.id}
-            onPlay={handlePlay}
-            dropdownItems={
-              getDropdownItems
-                ? getDropdownItems(song)
-                : generateDropdownItems(song)
-            }
-            avatarUser={getAvatarUser ? getAvatarUser(song) : song.uploaded_by}
-          />
-        ))}
-      </ul>
+      <div className={styles.scrollContainer} onScroll={onScroll}>
+        <ul className={styles.list}>
+          {songs.map((song) => (
+            <SongRow
+              key={song.id}
+              song={song}
+              isActive={currentSong?.id === song.id}
+              onPlay={handlePlay}
+              dropdownItems={
+                getDropdownItems
+                  ? getDropdownItems(song)
+                  : generateDropdownItems(song)
+              }
+              avatarUser={
+                getAvatarUser ? getAvatarUser(song) : song.uploaded_by
+              }
+            />
+          ))}
+        </ul>
+
+        {loadMoreRef && (
+          <div ref={loadMoreRef} className="h-10">
+            {isFetchingNextPage && <p>Loading more...</p>}
+          </div>
+        )}
+      </div>
 
       {editSong && (
         <EditSongModal

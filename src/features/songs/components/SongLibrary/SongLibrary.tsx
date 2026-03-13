@@ -93,14 +93,13 @@ export const SongLibrary = (): JSX.Element => {
         </select>
       </div>
 
-      <div className={styles.scrollContainer} onScroll={handleScroll}>
-        {isLoading && <p>Loading...</p>}
-        <SongList songs={songs} />
-
-        <div ref={loadMoreRef} className="h-10">
-          {isFetchingNextPage && <p>Loading more...</p>}
-        </div>
-      </div>
+      {isLoading && <p>Loading...</p>}
+      <SongList
+        songs={songs}
+        onScroll={handleScroll}
+        loadMoreRef={loadMoreRef}
+        isFetchingNextPage={isFetchingNextPage}
+      />
     </div>
   );
 };
