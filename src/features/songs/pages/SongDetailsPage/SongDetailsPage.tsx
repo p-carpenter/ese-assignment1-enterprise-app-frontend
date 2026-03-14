@@ -4,6 +4,7 @@ import { getSongDetails } from "@/features/songs/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 import styles from "./SongDetailsPage.module.css";
+import { usePlayer } from "@/shared/context/PlayerContext";
 
 import { SongHero } from "./components/SongHero/SongHero";
 import { LyricsSection } from "./components/LyricsSection/LyricsSection";
@@ -12,6 +13,7 @@ import { MoreByArtist } from "./components/MoreByArtist/MoreByArtist";
 export const SongDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const songId = id ? Number(id) : null;
+  const { playSong } = usePlayer();
 
   const {
     data: song,
@@ -38,7 +40,7 @@ export const SongDetailsPage = () => {
   return (
     <div className={styles.page}>
       <div className={styles.content}>
-        <SongHero song={song} />
+        <SongHero song={song} onPlayClick={() => playSong(song)} />
 
         <div className={styles.columns}>
           <LyricsSection song={song} />

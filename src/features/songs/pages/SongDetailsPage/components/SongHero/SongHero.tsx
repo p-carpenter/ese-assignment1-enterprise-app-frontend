@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/shared/context/AuthContext";
-import { IoPencilOutline } from "react-icons/io5";
+import { IoPencilOutline, IoPlayCircleOutline } from "react-icons/io5";
 import { SongEditForm } from "../SongEditForm/SongEditForm";
 import styles from "./SongHero.module.css";
 import type { Song } from "@/features/songs";
@@ -10,9 +10,10 @@ const fmt = (s: number) =>
 
 interface SongHeroProps {
   song: Song;
+  onPlayClick: () => void;
 }
 
-export const SongHero = ({ song }: SongHeroProps) => {
+export const SongHero = ({ song, onPlayClick }: SongHeroProps) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -38,15 +39,24 @@ export const SongHero = ({ song }: SongHeroProps) => {
             )}
             <p className={styles.heroMeta}>{fmt(song.duration)}</p>
             <p className={styles.heroMeta}></p>
-            {canEdit && (
+            <div className={styles.heroActions}>
               <button
-                className={styles.editBtn}
-                onClick={() => setIsEditing(true)}
-                aria-label="Edit song"
+                className={`${styles.editBtn} ${styles.playBtn}`}
+                onClick={onPlayClick}
+                aria-label="Play song"
               >
-                <IoPencilOutline size={14} /> Edit
+                <IoPlayCircleOutline size={16} /> Play
               </button>
-            )}
+              {canEdit && (
+                <button
+                  className={styles.editBtn}
+                  onClick={() => setIsEditing(true)}
+                  aria-label="Edit song"
+                >
+                  <IoPencilOutline size={14} /> Edit
+                </button>
+              )}
+            </div>
           </>
         )}
       </div>
