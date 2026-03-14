@@ -13,10 +13,6 @@
   justify-content: center;
 }
 
-.button:hover {
-  transform: scale(1.04);
-}
-
 /* visual variants */
 .outlined {
   background: transparent;
