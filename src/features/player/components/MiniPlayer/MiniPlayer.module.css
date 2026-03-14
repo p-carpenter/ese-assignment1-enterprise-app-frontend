@@ -28,7 +28,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--spotify-white);
+  color: var(--app-white);
   flex-shrink: 0;
   transition:
     opacity 0.15s ease,
@@ -36,11 +36,11 @@
 }
 
 .playerButton {
-  background: var(--spotify-gray-dark);
+  background: var(--app-gray-dark);
 }
 
 .playerButtonPrimary {
-  background: var(--spotify-green);
+  background: var(--accent-green);
 }
 
 .playerButton:disabled,
@@ -55,8 +55,8 @@
 }
 
 .playerButtonPrimary:not(:disabled):hover {
-  background: var(--spotify-green-bright);
   transform: scale(1.08);
+  background: var(--accent-green-bright);
 }
 
 /* ── Album art ────────────────────────── */
@@ -142,7 +142,7 @@
   left: 24px;
   background: none;
   border: none;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -157,7 +157,7 @@
 }
 
 .nowPlayingClose:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
   background: rgba(255, 255, 255, 0.07);
 }
 
@@ -195,14 +195,14 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 0;
-  background: var(--spotify-dark-elevated);
+  background: var(--app-dark-elevated);
   z-index: 1;
 }
 
 .historyPanelTitle {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--spotify-white);
+  color: var(--app-white);
   letter-spacing: 0.01em;
 }
 
@@ -215,7 +215,7 @@
   border-radius: 50%;
   border: none;
   background: none;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   cursor: pointer;
   padding: 0;
   transition:
@@ -224,7 +224,7 @@
 }
 
 .historyPanelClose:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -253,7 +253,7 @@
   border-radius: 50%;
   border: none;
   background: none;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -267,14 +267,16 @@
 }
 
 .iconButton:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
   background: rgba(255, 255, 255, 0.07);
 }
 
 .iconButtonActive {
-  color: var(--spotify-green);
+  color: var(--accent-green);
+  color: var(--accent-green);
 }
 
 .iconButtonActive:hover {
-  color: var(--spotify-green-bright);
+  color: var(--accent-green-bright);
+  color: var(--accent-green-bright);
 }

@@ -4,14 +4,14 @@
 }
 
 .footerText {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-size: 14px;
   display: block;
   margin-bottom: 12px;
 }
 
 .footerLink {
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-weight: 700;
   text-decoration: underline;
@@ -19,5 +19,5 @@
 }
 
 .footerLink:hover {
-  color: var(--spotify-green);
+  color: var(--accent-green);
 }

@@ -10,10 +10,10 @@
 .searchInput {
   width: 100%;
   padding: 10px 40px 10px 16px;
-  background: var(--spotify-dark-elevated);
-  border: 1px solid var(--spotify-gray-dark);
+  background: var(--app-dark-elevated);
+  border: 1px solid var(--app-gray-dark);
   border-radius: 500px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -21,12 +21,12 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
   background: #282828;
 }
 
 .searchInput::placeholder {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 
 .searchInput::-webkit-search-decoration,
@@ -44,11 +44,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   transition: color 0.2s ease;
 }
 
 .clearButton:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
   background-color: transparent;
 }

@@ -1,7 +1,7 @@
 .timeDisplay {
   flex-shrink: 0;
   font-size: 0.72rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   white-space: nowrap;
   letter-spacing: 0.02em;
 }

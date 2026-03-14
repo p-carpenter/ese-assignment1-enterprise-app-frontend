@@ -1,7 +1,7 @@
 .forgotPasswordLink {
   display: block;
   text-align: center;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-weight: 700;
   text-decoration: underline;
@@ -10,5 +10,5 @@
 }
 
 .forgotPasswordLink:hover {
-  color: var(--spotify-green);
+  color: var(--accent-green);
 }

@@ -16,13 +16,13 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--spotify-dark-highlight);
+  background: var(--app-dark-highlight);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
   font-weight: 700;
-  color: var(--spotify-white);
+  color: var(--app-white);
   overflow: hidden;
   position: relative;
   border: 2px solid transparent;
@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--spotify-white);
+  color: var(--app-white);
   z-index: 2;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
@@ -91,13 +91,13 @@
 .displayName {
   font-size: 2rem;
   font-weight: 900;
-  color: var(--spotify-white);
+  color: var(--app-white);
   margin: 0 0 8px 0;
   letter-spacing: -0.04em;
 }
 
 .uploadingText {
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   margin-top: 8px;
 }

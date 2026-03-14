@@ -16,22 +16,22 @@
 /* visual variants */
 .outlined {
   background: transparent;
-  color: var(--spotify-white);
-  border: 1px solid var(--spotify-gray-dark);
+  color: var(--app-white);
+  border: 1px solid var(--app-gray-dark);
 }
 
 .outlined:hover {
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
 }
 
 .primary {
-  background: var(--spotify-green);
-  color: var(--spotify-black);
+  background: var(--accent-green);
+  color: var(--app-black);
   border: none;
 }
 
 .primary:hover {
-  background: var(--spotify-green-bright);
+  background: var(--accent-green-bright);
 }
 
 /* size modifiers */

@@ -26,7 +26,7 @@
 }
 
 .barPlayed {
-  background: var(--spotify-white, #fff);
+  background: var(--app-white, #fff);
 }
 
 .barUnplayed {
@@ -34,7 +34,7 @@
 }
 
 .wrapper:hover .barPlayed {
-  background: var(--spotify-green, #1db954);
+  background: var(--accent-green, #1db954);
 }
 
 .wrapper:hover .barUnplayed {

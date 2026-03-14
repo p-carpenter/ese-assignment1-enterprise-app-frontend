@@ -8,9 +8,9 @@
   width: 100%;
   padding: 14px 24px;
   background-color: transparent;
-  border: 2px solid var(--spotify-gray-dark);
+  border: 2px solid var(--app-gray-dark);
   border-radius: 500px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
@@ -21,7 +21,7 @@
 }
 
 .label:hover {
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
   transform: scale(1.02);
 }
 

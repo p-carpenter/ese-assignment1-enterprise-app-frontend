@@ -2,7 +2,7 @@
   max-width: 450px;
   margin: 0 auto;
   padding: 48px;
-  background: var(--spotify-dark-elevated);
+  background: var(--app-dark-elevated);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
@@ -12,7 +12,7 @@
   font-size: 2rem;
   font-weight: 900;
   margin-bottom: 32px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   letter-spacing: -0.04em;
 }
 
@@ -29,14 +29,14 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: var(--spotify-gray-dark);
+  background: var(--app-gray-dark);
 }
 
 .divider span {
   position: relative;
-  background: var(--spotify-dark-elevated);
+  background: var(--app-dark-elevated);
   padding: 0 16px;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-size: 12px;
   text-transform: uppercase;
   font-weight: 700;

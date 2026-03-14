@@ -65,7 +65,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--spotify-white);
+  color: var(--app-white);
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
