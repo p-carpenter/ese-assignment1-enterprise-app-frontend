@@ -15,25 +15,6 @@
   margin: 0 24px;
 }
 
-.homeButton {
-  width: 40px;
-  height: 40px;
-  border-radius: 100%;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: var(--spotify-white);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-
-.homeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
 .title {
   font-size: 2rem;
   font-weight: 900;
@@ -73,38 +54,23 @@
   object-fit: cover;
   display: block;
 }
-
-
-/* Search bar */
-.searchWrapper {
-  flex: 1;
-  max-width: 400px;
-  margin: 0 24px;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 10px 16px;
-  background: var(--spotify-dark-elevated);
-  border: 1px solid var(--spotify-gray-dark);
-  border-radius: 500px;
+.homeButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   color: var(--spotify-white);
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-.searchInput:focus {
-  outline: none;
-  border-color: var(--spotify-white);
-  background: #282828;
-}
-
-.searchInput::placeholder {
-  color: var(--spotify-gray);
-}
-
-.searchInput::-webkit-search-decoration,
-.searchInput::-webkit-search-cancel-button {
-  -webkit-appearance: none;
+.homeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
