@@ -13,17 +13,6 @@ import { useAudioPlayer } from "react-use-audio-player";
 import { useQueryClient } from "@tanstack/react-query";
 import { logPlay } from "@/features/player/api";
 import { type Song } from "@/features/songs/types";
-import { useSpotify } from "@/features/spotify/context";
-
-/** Returns true if the song's file_url is a Spotify track URL. */
-const isSpotifyTrack = (song: Song | null): boolean =>
-  !!song?.file_url?.startsWith("https://open.spotify.com/track/");
-
-/** Converts an open.spotify.com track URL to a spotify:track: URI for the SDK. */
-const toSpotifyUri = (fileUrl: string): string => {
-  const trackId = fileUrl.split("/").pop() ?? "";
-  return `spotify:track:${trackId}`;
-};
 
 export interface PlayerContextType {
   currentSong: Song | null;
@@ -60,21 +49,6 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     duration: audioDuration,
     setVolume: audioSetVolume,
   } = useAudioPlayer();
-
-  const {
-    isReady: spotifyIsReady,
-    isPlaying: spotifyIsPlaying,
-    isLoading: spotifyIsLoading,
-    duration: spotifyDuration,
-    getPosition: spotifyGetPosition,
-    playTrack: spotifyPlayTrack,
-    setOnTrackEnded,
-    pause: spotifyPause,
-    resume: spotifyResume,
-    seek: spotifySeek,
-    setVolume: spotifySetVolume,
-  } = useSpotify();
-
   const queryClient = useQueryClient();
 
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -84,39 +58,30 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [volume, setVolumeState] = useState(1);
   const volumeRef = useRef(1);
 
-  const isCurrentSpotify = isSpotifyTrack(currentSong);
+  const isPlaying = audioIsPlaying;
+  const isLoading = audioIsLoading;
+  const duration = audioDuration;
+  const getPosition = audioGetPosition;
 
-  const isPlaying = isCurrentSpotify ? spotifyIsPlaying : audioIsPlaying;
-  const isLoading = isCurrentSpotify ? spotifyIsLoading : audioIsLoading;
-  const duration = isCurrentSpotify ? spotifyDuration : audioDuration;
-  const getPosition = isCurrentSpotify ? spotifyGetPosition : audioGetPosition;
-
-  const seek = useCallback(
-    (position: number) => {
-      if (isCurrentSpotify) void spotifySeek(position);
-      else audioSeek(position);
-    },
-    [isCurrentSpotify, spotifySeek, audioSeek],
-  );
+  const seek = useCallback((position: number) => {
+    audioSeek(position);
+  }, [audioSeek]);
 
   const play = useCallback(() => {
-    if (isCurrentSpotify) void spotifyResume();
-    else audioPlay();
-  }, [isCurrentSpotify, spotifyResume, audioPlay]);
+    audioPlay();
+  }, [audioPlay]);
 
   const pause = useCallback(() => {
-    if (isCurrentSpotify) void spotifyPause();
-    else audioPause();
-  }, [isCurrentSpotify, spotifyPause, audioPause]);
+    audioPause();
+  }, [audioPause]);
 
   const setVolume = useCallback(
     (v: number) => {
       volumeRef.current = v;
       setVolumeState(v);
       audioSetVolume(v);
-      void spotifySetVolume(v);
     },
-    [audioSetVolume, spotifySetVolume],
+    [audioSetVolume],
   );
 
   const toggleLoop = useCallback(() => {
@@ -139,68 +104,36 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (currentSong?.id === song.id) {
-        seek(0);
-        play();
+        audioSeek(0);
+        audioPlay();
         return;
       }
 
-      if (isCurrentSpotify) {
-        void spotifyPause().catch(() => {});
-      } else {
-        stop();
-      }
-
+      stop();
       setCurrentSong(song);
 
-      if (isSpotifyTrack(song)) {
-        // ── Spotify playback ─────────────────────────────────────────────────
-        if (!spotifyIsReady) {
-          console.error(
-            "spotify player is not ready. du må deaktivere ui-knappene når den laster.",
-          );
-          return;
-        }
-        await spotifyPlayTrack(toSpotifyUri(song.file_url));
+      const handlePlay = async () => {
         await logPlay(song.id);
         void queryClient.invalidateQueries({ queryKey: ["playHistory"] });
-      } else {
-        // ── HTML5 audio playback ──────────────────────────────────────────────
-        const handlePlay = async () => {
-          await logPlay(song.id);
-          void queryClient.invalidateQueries({ queryKey: ["playHistory"] });
-        };
+      };
 
-        load(song.file_url, {
-          autoplay: true,
-          format: "mp3",
-          html5: true,
-          initialVolume: volumeRef.current,
-          onend: () => {
-            if (isLoopingRef.current) {
-              audioSeek(0);
-              audioPlay();
-            } else {
-              void playNextRef.current?.();
-            }
-          },
-          onplay: () => void handlePlay(),
-        });
-      }
+      load(song.file_url, {
+        autoplay: true,
+        format: "mp3",
+        html5: true,
+        initialVolume: volumeRef.current,
+        onend: () => {
+          if (isLoopingRef.current) {
+            audioSeek(0);
+            audioPlay();
+          } else {
+            void playNextRef.current?.();
+          }
+        },
+        onplay: () => void handlePlay(),
+      });
     },
-    [
-      currentSong?.id,
-      isCurrentSpotify,
-      load,
-      play,
-      queryClient,
-      audioSeek,
-      audioPlay,
-      stop,
-      spotifyIsReady,
-      spotifyPlayTrack,
-      spotifyPause,
-      seek,
-    ],
+    [currentSong?.id, load, audioSeek, audioPlay, stop, queryClient],
   );
 
   const playPrev = useCallback(async (): Promise<void> => {
@@ -221,18 +154,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, [playNext]);
 
   useEffect(() => {
-    if (isCurrentSpotify) {
-      setOnTrackEnded(() => {
-        if (isLoopingRef.current) {
-          void spotifySeek(0).then(() => void spotifyResume());
-        } else {
-          void playNextRef.current?.();
-        }
-      });
-    } else {
-      setOnTrackEnded(null);
-    }
-  }, [isCurrentSpotify, setOnTrackEnded, spotifySeek, spotifyResume]);
+    // keep play-next ref up to date
+  }, [playNext]);
 
   const contextValue = useMemo(
     () => ({
