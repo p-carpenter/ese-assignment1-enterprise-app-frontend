@@ -9,6 +9,7 @@ import { TiHome } from "react-icons/ti";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const { user, setUser, logout } = useAuth();
   const [searchParams] = useSearchParams();
@@ -35,7 +36,6 @@ export const Header = (): JSX.Element => {
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      setUser(null);
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
