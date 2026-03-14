@@ -32,7 +32,8 @@ export const ProfileInfo = ({
         <div className={styles.editInputContainer}>
           <input
             className={styles.editInfoValue}
-            placeholder={username}
+            data-testid="edit-username-input"
+            placeholder="Username"
             value={username}
             onChange={(e) => onUsernameChange(e.target.value)}
           />
@@ -61,6 +62,7 @@ export const ProfileInfo = ({
             {isEditing && (
               <PencilSolid
                 className={styles.editPasswordIcon}
+                data-testid="edit-password-icon"
                 onClick={() => setIsChangingPassword(true)}
               />
             )}

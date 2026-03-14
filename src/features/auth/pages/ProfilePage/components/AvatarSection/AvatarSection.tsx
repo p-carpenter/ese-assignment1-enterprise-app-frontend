@@ -37,6 +37,7 @@ export const AvatarSection = ({
             <>
               <div
                 className={styles.editOverlay}
+                data-testid="edit-overlay"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <PencilSolid className={styles.editIcon} />
@@ -55,6 +56,7 @@ export const AvatarSection = ({
         {isEditing && (
           <div
             className={styles.editBadge}
+            data-testid="edit-badge"
             onClick={() => fileInputRef.current?.click()}
           >
             <PencilSolid />
