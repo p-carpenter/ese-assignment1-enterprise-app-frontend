@@ -1,20 +1,26 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { createPlaylist } from "../api";
 import { CreateNewPlaylistForm } from "./CreateNewPlaylistForm/CreateNewPlaylistForm";
 import { queryKeys } from "@/shared/lib/queryKeys";
+import { type Playlist } from "../types";
+import { ApiError } from "@/shared/api/errors";
 
 interface CreateNewPlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: (playlist: Playlist) => void;
 }
 
 export const CreateNewPlaylistModal = ({
   isOpen,
   onClose,
+  onSuccess,
 }: CreateNewPlaylistModalProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
 
   const createMutation = useMutation({
@@ -25,12 +31,21 @@ export const CreateNewPlaylistModal = ({
       is_collaborative: boolean;
       is_public: boolean;
     }) => createPlaylist(values),
-    onSuccess: () => {
+    onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
       onClose();
+      if (onSuccess) {
+        onSuccess(data);
+      } else {
+        navigate(`/playlists/${data.id}`);
+      }
     },
-    onError: () => {
-      setFormError("Failed to create playlist. Please try again.");
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setFormError(err.getReadableMessage());
+      } else {
+        setFormError("Failed to create playlist. Please try again.");
+      }
     },
   });
 

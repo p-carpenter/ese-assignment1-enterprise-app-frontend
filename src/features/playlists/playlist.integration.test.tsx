@@ -82,13 +82,6 @@ describe("Playlist integration tests", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create Playlist" }));
 
     expect(
-      await screen.findByText("My New Awesome Playlist"),
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("My New Awesome Playlist"));
-
-    // Check that we are on the detail page
-    expect(
       await screen.findByRole("heading", { name: "My New Awesome Playlist" }),
     ).toBeInTheDocument();
   });
