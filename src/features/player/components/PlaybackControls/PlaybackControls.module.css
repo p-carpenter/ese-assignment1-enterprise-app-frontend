@@ -11,7 +11,7 @@
   border-radius: 50%;
   border: none;
   background: none;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,7 +25,7 @@
 }
 
 .btn:hover:not(:disabled) {
-  color: var(--spotify-white);
+  color: var(--app-white);
   background: rgba(255, 255, 255, 0.08);
   transform: scale(1.1);
 }
@@ -40,8 +40,8 @@
   height: 34px;
   border-radius: 50%;
   border: none;
-  background: var(--spotify-white);
-  color: var(--spotify-black);
+  background: var(--app-white);
+  color: var(--app-black);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +54,7 @@
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background: var(--spotify-white);
+  background: var(--app-white);
   transform: scale(1.08);
 }
 

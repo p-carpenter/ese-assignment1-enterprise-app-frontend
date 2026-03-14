@@ -4,7 +4,7 @@
   letter-spacing: -0.03em;
   margin: 0 0 24px;
   text-align: center;
-  color: var(--spotify-white);
+  color: var(--app-white);
 }
 
 .form {
@@ -38,33 +38,33 @@
 .inputField {
   width: 100%;
   padding: 14px 16px;
-  background-color: var(--spotify-dark-highlight);
+  background-color: var(--app-dark-highlight);
   border: 1px solid transparent;
   border-radius: 4px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s ease;
 }
 
 .inputField:hover {
-  border-color: var(--spotify-gray-dark);
+  border-color: var(--app-gray-dark);
 }
 
 .inputField:focus {
   outline: none;
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
   background-color: #282828;
 }
 
 .inputField::placeholder {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 
 .submitButton {
   width: 100%;
-  background-color: var(--spotify-green);
-  color: var(--spotify-black);
+  background-color: var(--accent-green);
+  color: var(--app-black);
   border: none;
   padding: 16px;
   border-radius: 500px;
@@ -78,7 +78,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: var(--spotify-green-bright);
+  background-color: var(--accent-green-bright);
   transform: scale(1.04);
 }
 

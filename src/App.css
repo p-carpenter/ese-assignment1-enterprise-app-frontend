@@ -7,7 +7,7 @@
 .loading_text {
   text-align: center;
   padding: 60px;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 .app-container {
   padding: 24px;
@@ -77,10 +77,10 @@
 .input-field {
   width: 100%;
   padding: 14px 16px;
-  background-color: var(--spotify-dark-elevated);
+  background-color: var(--app-dark-elevated);
   border: 1px solid transparent;
   border-radius: 4px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-family: inherit;
   margin-bottom: 16px;
@@ -89,18 +89,18 @@
 
 .input-field:focus {
   outline: none;
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
   background-color: #282828;
 }
 
 .input-field::placeholder {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 
 .primary-button {
   width: 100%;
-  background-color: var(--spotify-green);
-  color: var(--spotify-black);
+  background-color: var(--accent-green);
+  color: var(--app-black);
   border: none;
   padding: 16px;
   border-radius: 500px;
@@ -113,7 +113,7 @@
 }
 
 .primary-button:hover:not(:disabled) {
-  background-color: var(--spotify-green-bright);
+  background-color: var(--accent-green-bright);
   transform: scale(1.04);
 }
 

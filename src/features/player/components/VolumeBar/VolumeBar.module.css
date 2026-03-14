@@ -15,10 +15,10 @@
   /* Filled portion = green, unfilled = dark gray using a gradient trick */
   background: linear-gradient(
     to right,
-    var(--spotify-green) 0%,
-    var(--spotify-green) calc(var(--vol) * 100%),
-    var(--spotify-gray-dark) calc(var(--vol) * 100%),
-    var(--spotify-gray-dark) 100%
+    var(--accent-green) 0%,
+    var(--accent-green) calc(var(--vol) * 100%),
+    var(--app-gray-dark) calc(var(--vol) * 100%),
+    var(--app-gray-dark) 100%
   );
   outline: none;
   border: none;
@@ -29,7 +29,7 @@
   appearance: none;
   width: 10px;
   height: 10px;
-  background: var(--spotify-white);
+  background: var(--app-white);
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.15s ease;
@@ -42,7 +42,7 @@
 .volumeBar::-moz-range-thumb {
   width: 10px;
   height: 10px;
-  background: var(--spotify-white);
+  background: var(--app-white);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -53,6 +53,6 @@
 }
 
 .icon {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   margin-right: 8px;
 }

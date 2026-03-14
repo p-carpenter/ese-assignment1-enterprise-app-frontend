@@ -4,7 +4,7 @@
 
 .infoLabel {
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 700;
@@ -13,7 +13,7 @@
 
 .infoValue {
   font-size: 1rem;
-  color: var(--spotify-white);
+  color: var(--app-white);
   margin-bottom: 24px;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.05);
@@ -33,7 +33,7 @@
 }
 
 .editPasswordIcon {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   cursor: pointer;
   transition: color 0.2s ease;
   width: 24px;
@@ -41,7 +41,7 @@
 }
 
 .editPasswordIcon:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
 }
 
 .editInputContainer {
@@ -77,7 +77,7 @@
 .inputIcon {
   position: absolute;
   right: 14px;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   width: 18px;
   height: 18px;
   pointer-events: none;

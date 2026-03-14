@@ -1,5 +1,9 @@
 .songList {
-  background: var(--spotify-dark-elevated);
+  border-radius: 8px;
+  padding: 24px;
+}
+.songList {
+  background: var(--app-dark-elevated);
   border-radius: 8px;
   padding: 24px;
 }
@@ -8,7 +12,7 @@
   margin: 0 0 20px 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--spotify-white);
+  color: var(--app-white);
   letter-spacing: -0.04em;
 }
 
@@ -74,7 +78,7 @@
 
 .songArtist {
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-weight: 400;
 }
 
@@ -82,14 +86,14 @@
   width: 150px;
   flex-shrink: 0;
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-weight: 400;
 }
 
 .songTitle {
   font-weight: 400;
   font-size: 16px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   display: block;
 }
 
@@ -100,7 +104,7 @@
 
 .duration {
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-weight: 400;
   padding: 0;
   background: none;

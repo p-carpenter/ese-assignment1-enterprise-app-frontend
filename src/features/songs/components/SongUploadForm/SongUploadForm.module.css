@@ -1,12 +1,12 @@
 .container {
-  background-color: var(--spotify-dark-elevated);
+  background-color: var(--app-dark-elevated);
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 24px;
 }
 
 .title {
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 20px 0;
@@ -16,10 +16,10 @@
 .inputField {
   width: 100%;
   padding: 14px 16px;
-  background-color: var(--spotify-dark-highlight);
+  background-color: var(--app-dark-highlight);
   border: 1px solid transparent;
   border-radius: 4px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 14px;
   font-family: inherit;
   margin-bottom: 16px;
@@ -27,17 +27,17 @@
 }
 
 .inputField:hover {
-  border-color: var(--spotify-gray-dark);
+  border-color: var(--app-gray-dark);
 }
 
 .inputField:focus {
   outline: none;
-  border-color: var(--spotify-white);
+  border-color: var(--app-white);
   background-color: #282828;
 }
 
 .inputField::placeholder {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 
 /* ── File upload ─────────────────────────────────────────────────────────── */
@@ -66,7 +66,7 @@
   border-radius: 500px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.08);
-  color: var(--spotify-white);
+  color: var(--app-white);
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
@@ -91,7 +91,7 @@
 
 .fileStatusText {
   font-size: 13px;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -99,15 +99,15 @@
 }
 
 .fileStatusText.ready {
-  color: var(--spotify-green);
+  color: var(--accent-green);
   font-weight: 600;
 }
 
 /* ── Submit / action buttons ─────────────────────────────────────────────── */
 .uploadButton {
   width: 100%;
-  background-color: var(--spotify-green);
-  color: var(--spotify-black);
+  background-color: var(--accent-green);
+  color: var(--app-black);
   border: none;
   padding: 14px 24px;
   border-radius: 500px;
@@ -121,7 +121,7 @@
 }
 
 .uploadButton:hover:not(:disabled) {
-  background-color: var(--spotify-green-bright);
+  background-color: var(--accent-green-bright);
   transform: scale(1.04);
 }
 
@@ -133,8 +133,8 @@
 
 .submitButton {
   width: 100%;
-  background-color: var(--spotify-green);
-  color: var(--spotify-black);
+  background-color: var(--accent-green);
+  color: var(--app-black);
   border: none;
   padding: 14px 24px;
   border-radius: 500px;
@@ -148,7 +148,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: var(--spotify-green-bright);
+  background-color: var(--accent-green-bright);
   transform: scale(1.04);
 }
 
@@ -159,7 +159,7 @@
 }
 
 .success {
-  color: var(--spotify-green);
+  color: var(--accent-green);
   font-size: 0.9rem;
   margin: 10px 0;
 }

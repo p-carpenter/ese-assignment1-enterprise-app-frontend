@@ -13,19 +13,19 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   text-decoration: none;
   flex: 1;
 }
 .title:hover {
-  color: var(--spotify-white);
+  color: var(--app-white);
 }
 
 .addButton {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,7 +34,7 @@
   transition: color 0.15s;
 }
 .addButton:hover {
-  color: var(--spotify-green);
+  color: var(--accent-green);
 }
 
 .playlist {
@@ -90,7 +90,7 @@
 .name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--spotify-white);
+  color: var(--app-white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,13 +105,13 @@
 .songCount {
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   opacity: 0.75;
 }

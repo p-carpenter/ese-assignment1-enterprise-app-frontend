@@ -1,16 +1,15 @@
 :root {
-  /* Spotify Color Palette */
-  --spotify-black: #000000;
-  --spotify-dark: #121212;
-  --spotify-dark-elevated: #181818;
-  --spotify-dark-base: #121212;
-  --spotify-dark-highlight: #1a1a1a;
-  --spotify-green: #1db954;
-  --spotify-green-bright: #1ed760;
-  --spotify-white: #ffffff;
-  --spotify-gray: #b3b3b3;
-  --spotify-gray-dark: #535353;
-  --spotify-light-gray: #a7a7a7;
+  --app-black: #000000;
+  --app-dark: #121212;
+  --app-dark-elevated: #181818;
+  --app-dark-base: #121212;
+  --app-dark-highlight: #1a1a1a;
+  --accent-green: #1db954;
+  --accent-green-bright: #1ed760;
+  --app-white: #ffffff;
+  --app-gray: #b3b3b3;
+  --app-gray-dark: #535353;
+  --app-light-gray: #a7a7a7;
 
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
@@ -18,8 +17,8 @@
   line-height: 1.6;
   font-weight: 400;
 
-  color: var(--spotify-white);
-  background-color: var(--spotify-black);
+  color: var(--app-white);
+  background-color: var(--app-black);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -33,13 +32,13 @@
 
 a {
   font-weight: 500;
-  color: var(--spotify-white);
+  color: var(--app-white);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover {
-  color: var(--spotify-green);
+  color: var(--accent-green);
 }
 
 html {
@@ -48,12 +47,12 @@ html {
 }
 
 body {
-  margin: 0;
+margin: 0;
   min-width: 320px;
   height: 100%;
   overflow: hidden;
-  background-color: var(--spotify-black);
-  color: var(--spotify-white);
+  background-color: var(--app-black);
+  color: var(--app-white);
 }
 
 h1 {
@@ -83,8 +82,8 @@ button {
   font-size: 14px;
   font-weight: 700;
   font-family: inherit;
-  background-color: var(--spotify-green);
-  color: var(--spotify-black);
+  background-color: var(--accent-green);
+  color: var(--app-black);
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
@@ -92,7 +91,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--spotify-green-bright);
+  background-color: var(--accent-green-bright);
   transform: scale(1.04);
 }
 
@@ -107,7 +106,7 @@ button:disabled {
 }
 
 button:focus-visible {
-  outline: 3px solid var(--spotify-white);
+  outline: 3px solid var(--app-white);
   outline-offset: 2px;
 }
 

@@ -8,7 +8,7 @@
 }
 
 .songList {
-  background: var(--spotify-dark-elevated);
+  background: var(--app-dark-elevated);
   border-radius: 8px;
   padding: 24px;
 }
@@ -23,17 +23,17 @@
   margin: 0 0 20px 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--spotify-white);
+  color: var(--app-white);
   letter-spacing: -0.04em;
 }
 
 .orderingSelect {
   margin-left: 1rem;
   padding: 6px 12px;
-  background: var(--spotify-dark-elevated);
-  border: 1px solid var(--spotify-gray-dark);
+  background: var(--app-dark-elevated);
+  border: 1px solid var(--app-gray-dark);
   border-radius: 4px;
-  color: var(--spotify-white);
+  color: var(--app-white);
 }
 
 .songItem,
@@ -68,14 +68,14 @@
 .songTitle {
   font-weight: 400;
   font-size: 16px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   display: block;
   margin-bottom: 4px;
 }
 
 .duration {
   font-size: 0.875rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-weight: 400;
   padding: 0;
   background: none;
@@ -96,7 +96,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 4px;
-  color: var(--spotify-white);
+  color: var(--app-white);
   cursor: pointer;
   font-size: 0.875rem;
   padding: 6px 14px;
@@ -108,12 +108,12 @@
 }
 
 .pageButton:disabled {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   cursor: default;
 }
 
 .pageInfo {
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   font-size: 0.875rem;
   min-width: 56px;
   text-align: center;

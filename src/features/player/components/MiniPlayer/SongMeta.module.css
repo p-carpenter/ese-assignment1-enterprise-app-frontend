@@ -12,7 +12,7 @@
 .trackTitle {
   font-weight: 700;
   font-size: 0.8rem;
-  color: var(--spotify-white);
+  color: var(--app-white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -41,7 +41,7 @@
 
 .trackArtist {
   font-size: 0.75rem;
-  color: var(--spotify-gray);
+  color: var(--app-gray);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

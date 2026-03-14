@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PlaylistsPage } from "@/features/playlists/pages";
@@ -7,25 +7,6 @@ import { PlaylistDetailPage } from "@/features/playlists/pages";
 import { AuthContext } from "@/shared/context/AuthContext";
 import { type UserProfile } from "@/features/auth/types";
 import { PlayerProvider } from "@/shared/context/PlayerContext";
-
-// PlayerProvider calls useSpotify() internally; stub it so no SpotifyProvider is needed.
-vi.mock("@/features/spotify/context", () => ({
-  useSpotify: vi.fn(() => ({
-    isReady: false,
-    isLoading: false,
-    isPlaying: false,
-    duration: 0,
-    getPosition: () => 0,
-    playTrack: vi.fn(),
-    setOnTrackEnded: vi.fn(),
-    pause: vi.fn(),
-    resume: vi.fn(),
-    seek: vi.fn(),
-    setVolume: vi.fn(),
-    nextTrack: vi.fn(),
-    prevTrack: vi.fn(),
-  })),
-}));
 
 const mockUser: UserProfile = {
   id: 1,
