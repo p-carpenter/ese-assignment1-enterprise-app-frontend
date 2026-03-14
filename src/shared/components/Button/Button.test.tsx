@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Button } from "./Button";
 import "@testing-library/jest-dom/vitest";
 
@@ -11,10 +12,11 @@ describe("Button", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onClick when clicked", () => {
+  it("calls onClick when clicked", async () => {
+    const user = userEvent.setup();
     const onClick = vi.fn();
     render(<Button onClick={onClick}>Click</Button>);
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
@@ -23,14 +25,15 @@ describe("Button", () => {
     expect(screen.getByRole("button")).toBeDisabled();
   });
 
-  it("does not fire onClick when disabled", () => {
+  it("does not fire onClick when disabled", async () => {
+    const user = userEvent.setup();
     const onClick = vi.fn();
     render(
       <Button disabled onClick={onClick}>
         Click
       </Button>,
     );
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
     expect(onClick).not.toHaveBeenCalled();
   });
 
@@ -64,5 +67,16 @@ describe("Button", () => {
     const btn = screen.getByRole("button");
     expect(btn.className).toMatch(/my-custom/);
     expect(btn.className).toMatch(/outlined/);
+  });
+
+  it("renders as a different element when 'as' prop is provided", () => {
+    render(
+      <Button as="a" href="/somewhere">
+        Link button
+      </Button>,
+    );
+    expect(
+      screen.getByRole("link", { name: "Link button" }),
+    ).toBeInTheDocument();
   });
 });

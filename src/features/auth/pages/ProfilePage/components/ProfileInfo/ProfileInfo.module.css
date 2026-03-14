@@ -1,0 +1,84 @@
+.infoSection {
+  text-align: left;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: var(--spotify-gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: var(--spotify-white);
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.changePasswordContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%; /* force full width so the form doesn't squish */
+}
+
+.changePasswordContainer .infoValue {
+  margin-bottom: 0; /* remove bottom margin when side-by-side with icon */
+  flex-grow: 1;
+}
+
+.editPasswordIcon {
+  color: var(--spotify-gray);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  width: 24px;
+  height: 24px;
+}
+
+.editPasswordIcon:hover {
+  color: var(--spotify-white);
+}
+
+.editInputContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.editInfoValue {
+  width: 100%;
+  padding: 12px 40px 12px 16px; /* space for the icon on the right */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.editInfoValue:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.editInfoValue:focus {
+  outline: none;
+  border-color: #1db954;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.inputIcon {
+  position: absolute;
+  right: 14px;
+  color: var(--spotify-gray);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}

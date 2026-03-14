@@ -4,67 +4,12 @@
 }
 
 .card {
-  background: var(--spotify-dark-elevated);
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
   padding: 40px;
   text-align: center;
-}
-
-.avatarSection {
-  margin-bottom: 32px;
-}
-
-.avatar {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: var(--spotify-dark-highlight);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--spotify-white);
-  overflow: hidden;
-  position: relative;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar .editOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  color: #fff;
-}
-.avatar:hover .editOverlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
-}
-
-.displayName {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--spotify-white);
-  margin: 0 0 8px 0;
-  letter-spacing: -0.04em;
-}
-
-.username {
-  font-size: 1rem;
-  color: var(--spotify-gray);
-  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .divider {
@@ -73,46 +18,11 @@
   margin: 32px 0;
 }
 
-.infoSection {
-  text-align: left;
-}
-
-.infoLabel {
-  font-size: 0.875rem;
-  color: var(--spotify-gray);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.infoValue {
-  font-size: 1rem;
-  color: var(--spotify-white);
-  margin-bottom: 24px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-
-.changePasswordContainer {
+.editActions {
   display: flex;
-  align-items: center;
   gap: 16px;
-}
-.editPasswordIcon {
-  color: var(--spotify-gray);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-.editPasswordIcon:hover {
-  color: var(--spotify-white);
-}
-
-.loading {
-  text-align: center;
-  padding: 60px;
-  color: var(--spotify-gray);
+  justify-content: center;
+  margin-top: 24px;
 }
 
 .error {
@@ -124,35 +34,15 @@
   text-align: center;
 }
 
-.editActions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 24px;
-}
-
-.editInfoValue {
-  width: 100%;
-  padding: 14px 16px;
-  background-color: #282828;
-  border: 1px solid transparent;
+.success {
+  background-color: rgba(0, 200, 0, 0.15);
+  border: 1px solid #00c800;
+  color: #ffffff;
+  padding: 16px;
   border-radius: 4px;
-  color: var(--spotify-white);
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s ease;
+  text-align: center;
 }
 
-.editInfoValue:hover {
-  border-color: var(--spotify-gray-dark);
-}
-
-.editInfoValue:focus {
-  outline: none;
-  border-color: var(--spotify-white);
-  background-color: #282828;
-}
-
-.editInfoValue::placeholder {
-  color: var(--spotify-gray);
+.backButton {
+  margin-top: 24px;
 }
