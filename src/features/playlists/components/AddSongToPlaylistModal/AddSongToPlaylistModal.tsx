@@ -8,6 +8,7 @@ import { addSongToPlaylist } from "@/features/playlists/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import { usePlayer } from "@/shared/context/PlayerContext";
 import { type Song } from "@/features/songs/types";
+import { ApiError } from "@/shared/api/errors";
 
 const ALL_SONGS_KEY = ["songs"] as const;
 import styles from "./AddSongToPlaylistModal.module.css";
@@ -29,6 +30,7 @@ export const AddSongToPlaylistModal = ({
   const { currentSong } = usePlayer();
   const [search, setSearch] = useState("");
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const {
     data: allSongs = [],
@@ -44,6 +46,7 @@ export const AddSongToPlaylistModal = ({
     mutationFn: (song: Song) => addSongToPlaylist(playlistId, song.id),
     onSuccess: (_data, song) => {
       setAddedIds((prev) => new Set(prev).add(song.id));
+      setError(null);
 
       // Update the playlist details in the cache to reflect the new song.
       void queryClient.invalidateQueries({
@@ -54,6 +57,13 @@ export const AddSongToPlaylistModal = ({
       void queryClient.invalidateQueries({
         queryKey: queryKeys.playlists,
       });
+    },
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setError(err.getReadableMessage());
+      } else {
+        setError("An unexpected error occurred while adding the song.");
+      }
     },
   });
 
@@ -72,6 +82,7 @@ export const AddSongToPlaylistModal = ({
   const handleClose = () => {
     setSearch("");
     setAddedIds(new Set());
+    setError(null);
     onClose();
   };
 
@@ -87,6 +98,7 @@ export const AddSongToPlaylistModal = ({
         />
       </div>
 
+      {error && <AlertMessage message={error} variant="error" />}
       {isLoading && <p className={styles.hint}>Loading songs…</p>}
       {isError && <AlertMessage message="Failed to load songs." />}
 
