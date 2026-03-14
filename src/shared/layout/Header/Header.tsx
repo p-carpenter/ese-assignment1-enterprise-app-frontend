@@ -1,41 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { useAuth } from "@/shared/context/AuthContext";
-import { useDebounce } from "use-debounce";
 import { TiHome } from "react-icons/ti";
+import { SearchBar } from "./SearchBar/SearchBar";
 
 export const Header = (): JSX.Element => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, setUser, logout } = useAuth();
-  const [searchParams] = useSearchParams();
-  const [searchInput, setSearchInput] = useState(
-    () => searchParams.get("q") ?? "",
-  );
-  const [debouncedSearch] = useDebounce(searchInput, 300);
-
-  // Sync debounced search value to URL
-  useEffect(() => {
-    if (location.pathname === "/") {
-      const current = searchParams.get("q") ?? "";
-      if (debouncedSearch !== current) {
-        navigate(
-          debouncedSearch ? `/?q=${encodeURIComponent(debouncedSearch)}` : "/",
-          { replace: true },
-        );
-      }
-    } else if (debouncedSearch) {
-      navigate(`/?q=${encodeURIComponent(debouncedSearch)}`);
-    }
-  }, [debouncedSearch, location.pathname, searchParams, navigate]);
+  const { user, logout } = useAuth();
 
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      setUser(null);
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -46,36 +23,20 @@ export const Header = (): JSX.Element => {
 
   return (
     <div className={styles.header}>
-      <h1
-        className={styles.title}
-        onClick={() => {
-          setSearchInput("");
-          navigate("/");
-        }}
-      >
-        Music Player
-      </h1>
+      <Link to="/" className={styles.titleLink}>
+        <h1 className={styles.title}>Music Player</h1>
+      </Link>
+
       <div className={styles.centreActions}>
         <div className={styles.homeButton}>
-          <TiHome
-            size={28}
-            onClick={() => {
-              setSearchInput("");
-              navigate("/");
-            }}
-          />
+          <Link to="/" aria-label="Home" title="Go to homepage">
+            <TiHome size={28} aria-hidden="true" />
+          </Link>
         </div>
-        <div className={styles.searchWrapper}>
-          <input
-            type="search"
-            placeholder="Search songs..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className={styles.searchInput}
-            aria-label="Search songs"
-          />
-        </div>
+
+        <SearchBar />
       </div>
+
       <div className={styles.actions}>
         <Button
           variant="primary"

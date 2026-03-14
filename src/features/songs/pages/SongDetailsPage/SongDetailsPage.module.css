@@ -14,7 +14,6 @@
   gap: 40px;
 }
 
-
 /* ── Player card ─────────────────────────────────────────────────────────── */
 .playerCard {
   background: rgba(0, 0, 0, 0.35);
@@ -38,7 +37,9 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.loadBtn:hover { background: #1ed760; }
+.loadBtn:hover {
+  background: #1ed760;
+}
 
 /* ── Columns (lyrics + stats) ────────────────────────────────────────────── */
 .columns {
@@ -49,7 +50,9 @@
 }
 
 @media (max-width: 700px) {
-  .columns { grid-template-columns: 1fr; }
+  .columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sectionTitle {

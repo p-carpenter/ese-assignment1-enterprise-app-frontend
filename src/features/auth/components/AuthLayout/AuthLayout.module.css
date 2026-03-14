@@ -19,8 +19,16 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(29, 185, 84, 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 80% 70%, rgba(80, 60, 160, 0.15) 0%, transparent 60%),
+    radial-gradient(
+      ellipse 80% 60% at 20% 30%,
+      rgba(29, 185, 84, 0.14) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 80% at 80% 70%,
+      rgba(80, 60, 160, 0.15) 0%,
+      transparent 60%
+    ),
     linear-gradient(160deg, #1a1a2e 0%, #0f0f1a 50%, #0a0a0a 100%);
 }
 

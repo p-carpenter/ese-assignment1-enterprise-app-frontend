@@ -1,0 +1,54 @@
+.searchWrapper {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 40px 10px 16px;
+  background: var(--spotify-dark-elevated);
+  border: 1px solid var(--spotify-gray-dark);
+  border-radius: 500px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background: #282828;
+}
+
+.searchInput::placeholder {
+  color: var(--spotify-gray);
+}
+
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--spotify-gray);
+  transition: color 0.2s ease;
+}
+
+.clearButton:hover {
+  color: var(--spotify-white);
+  background-color: transparent;
+}

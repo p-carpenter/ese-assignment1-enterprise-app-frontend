@@ -3,7 +3,7 @@
   overflow-y: auto;
   padding: 0 8px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 .line {
@@ -12,7 +12,9 @@
   color: rgba(255, 255, 255, 0.35);
   margin: 0;
   padding: 4px 0;
-  transition: color 0.3s ease, font-size 0.3s ease;
+  transition:
+    color 0.3s ease,
+    font-size 0.3s ease;
   cursor: default;
 }
 

@@ -62,7 +62,9 @@
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.8rem;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 .editBtn:hover {
   border-color: #fff;
