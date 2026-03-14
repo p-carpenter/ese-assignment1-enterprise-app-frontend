@@ -38,9 +38,30 @@ vi.mock("@/features/player/api", () => ({
 
 const mockedLogPlay = vi.mocked(logPlay);
 
-const songA: Song = { id: 1, title: "Song A", artist: "Artist A", file_url: "https://songs/a.mp3", duration: 120, uploaded_at: "2024-01-01T00:00:00Z" };
-const songB: Song = { id: 2, title: "Song B", artist: "Artist B", file_url: "https://songs/b.mp3", duration: 130, uploaded_at: "2024-01-01T00:00:00Z" };
-const songC: Song = { id: 3, title: "Song C", artist: "Artist C", file_url: "https://songs/c.mp3", duration: 140, uploaded_at: "2024-01-01T00:00:00Z" };
+const songA: Song = {
+  id: 1,
+  title: "Song A",
+  artist: "Artist A",
+  file_url: "https://songs/a.mp3",
+  duration: 120,
+  uploaded_at: "2024-01-01T00:00:00Z",
+};
+const songB: Song = {
+  id: 2,
+  title: "Song B",
+  artist: "Artist B",
+  file_url: "https://songs/b.mp3",
+  duration: 130,
+  uploaded_at: "2024-01-01T00:00:00Z",
+};
+const songC: Song = {
+  id: 3,
+  title: "Song C",
+  artist: "Artist C",
+  file_url: "https://songs/c.mp3",
+  duration: 140,
+  uploaded_at: "2024-01-01T00:00:00Z",
+};
 
 const setup = () => {
   const queryClient = new QueryClient({
@@ -67,7 +88,9 @@ describe("PlayerContext", () => {
 
   describe("Provider guard", () => {
     it("throws if usePlayer is used outside provider", () => {
-      expect(() => renderHook(() => usePlayer())).toThrow("usePlayer must be used within PlayerProvider");
+      expect(() => renderHook(() => usePlayer())).toThrow(
+        "usePlayer must be used within PlayerProvider",
+      );
     });
   });
 
@@ -88,7 +111,9 @@ describe("PlayerContext", () => {
       expect(mockSetVolume).toHaveBeenCalledWith(0.4);
       expect(result.current.volume).toBe(0.4);
 
-      act(() => { result.current.getPosition(); });
+      act(() => {
+        result.current.getPosition();
+      });
       expect(mockGetPosition).toHaveBeenCalled();
     });
 
@@ -113,10 +138,17 @@ describe("PlayerContext", () => {
       expect(mockStop).toHaveBeenCalled();
       expect(mockLoad).toHaveBeenCalledWith(
         "https://songs/a.mp3",
-        expect.objectContaining({ autoplay: true, format: "mp3", html5: true, initialVolume: 1 })
+        expect.objectContaining({
+          autoplay: true,
+          format: "mp3",
+          html5: true,
+          initialVolume: 1,
+        }),
       );
 
-      act(() => { loadCallbacks.onplay?.(); });
+      act(() => {
+        loadCallbacks.onplay?.();
+      });
 
       await waitFor(() => {
         expect(mockedLogPlay).toHaveBeenCalledWith(1);
@@ -131,7 +163,7 @@ describe("PlayerContext", () => {
       await act(async () => {
         await result.current.playSong(songA);
       });
-      
+
       mockStop.mockClear();
       mockLoad.mockClear();
       mockSeek.mockClear();
@@ -158,13 +190,19 @@ describe("PlayerContext", () => {
       await act(async () => {
         await result.current.playPrev();
       });
-      expect(mockLoad).toHaveBeenCalledWith("https://songs/c.mp3", expect.any(Object));
+      expect(mockLoad).toHaveBeenCalledWith(
+        "https://songs/c.mp3",
+        expect.any(Object),
+      );
 
       mockLoad.mockClear();
       await act(async () => {
         await result.current.playNext();
       });
-      expect(mockLoad).toHaveBeenCalledWith("https://songs/a.mp3", expect.any(Object));
+      expect(mockLoad).toHaveBeenCalledWith(
+        "https://songs/a.mp3",
+        expect.any(Object),
+      );
     });
   });
 
@@ -181,7 +219,9 @@ describe("PlayerContext", () => {
       mockAudioPlay.mockClear();
       mockLoad.mockClear();
 
-      act(() => { loadCallbacks.onend?.(); });
+      act(() => {
+        loadCallbacks.onend?.();
+      });
 
       expect(mockSeek).toHaveBeenCalledWith(0);
       expect(mockAudioPlay).toHaveBeenCalled();
@@ -196,12 +236,15 @@ describe("PlayerContext", () => {
       });
 
       mockLoad.mockClear();
-      
+
       await act(async () => {
         loadCallbacks.onend?.();
       });
 
-      expect(mockLoad).toHaveBeenCalledWith("https://songs/b.mp3", expect.any(Object));
+      expect(mockLoad).toHaveBeenCalledWith(
+        "https://songs/b.mp3",
+        expect.any(Object),
+      );
     });
   });
 });

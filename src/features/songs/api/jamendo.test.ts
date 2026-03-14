@@ -43,7 +43,9 @@ describe("jamendo API", () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.stringContaining("limit=10"),
       );
-      expect(result).toEqual([{ id: "1", name: "Song", artist_name: "Artist" }]);
+      expect(result).toEqual([
+        { id: "1", name: "Song", artist_name: "Artist" },
+      ]);
     });
 
     it("uses explicit limit argument in request", async () => {
@@ -56,7 +58,9 @@ describe("jamendo API", () => {
 
       await searchJamendoTracks("jazz", 25);
 
-      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("limit=25"));
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("limit=25"),
+      );
     });
 
     it("throws when Jamendo response is not ok", async () => {

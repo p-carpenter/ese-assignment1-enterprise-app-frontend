@@ -142,7 +142,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "mapped");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "mapped",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Mapped Song");
@@ -183,7 +186,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "stream");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "stream",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Stream Only");
@@ -217,7 +223,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "defaults");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "defaults",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Defaults Track");
@@ -254,7 +263,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "broken");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "broken",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Broken URL");
@@ -285,7 +297,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "failing");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "failing",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Failing Import");
@@ -321,7 +336,10 @@ describe("JamendoSongSearch", () => {
         </MemoryRouter>,
       );
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "pending");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "pending",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       await screen.findByText("Pending Failure Song");
@@ -329,13 +347,13 @@ describe("JamendoSongSearch", () => {
       const importButton = screen.getByRole("button", { name: /^import$/i });
       await user.click(importButton);
 
-      expect(
-        screen.getByRole("button", { name: /importing/i }),
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: /importing/i })).toBeDisabled();
 
       rejectImport(new Error("Import failed later"));
 
-      expect(await screen.findByText("Import failed later")).toBeInTheDocument();
+      expect(
+        await screen.findByText("Import failed later"),
+      ).toBeInTheDocument();
       await waitFor(() => {
         expect(screen.getByRole("button", { name: /^import$/i })).toBeEnabled();
       });

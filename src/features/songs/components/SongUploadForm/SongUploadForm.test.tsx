@@ -15,7 +15,10 @@ const mockNavigate = vi.fn();
 const mockInvalidateQueries = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return { ...actual, useNavigate: vi.fn() };
 });
 
@@ -73,9 +76,17 @@ describe("SongUploadForm", () => {
     mockedUseCloudinaryUpload.mockImplementation(() => {
       callIndex += 1;
       if (callIndex % 2 === 1) {
-        return { upload: mp3Upload, isUploading: isMp3Uploading, error: mp3Error } as never;
+        return {
+          upload: mp3Upload,
+          isUploading: isMp3Uploading,
+          error: mp3Error,
+        } as never;
       }
-      return { upload: coverUpload, isUploading: isCoverUploading, error: coverError } as never;
+      return {
+        upload: coverUpload,
+        isUploading: isCoverUploading,
+        error: coverError,
+      } as never;
     });
 
     return { mp3Upload, coverUpload };
@@ -87,11 +98,18 @@ describe("SongUploadForm", () => {
 
   describe("Upload state and validation", () => {
     it("shows combined MP3 and cover upload errors", () => {
-      setupCloudinaryMocks({ mp3Error: "mp3 failed", coverError: "cover failed" });
+      setupCloudinaryMocks({
+        mp3Error: "mp3 failed",
+        coverError: "cover failed",
+      });
       render(<SongUploadForm />);
-      
-      expect(screen.getByText(/MP3 Upload Error: mp3 failed/i)).toBeInTheDocument();
-      expect(screen.getByText(/Cover Art Error: cover failed/i)).toBeInTheDocument();
+
+      expect(
+        screen.getByText(/MP3 Upload Error: mp3 failed/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Cover Art Error: cover failed/i),
+      ).toBeInTheDocument();
     });
 
     it("shows submit error when submitting before MP3 is uploaded", async () => {
@@ -99,10 +117,17 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       act(() => {
-        getFormProps().onSubmit({ title: "", artist: "", album: "", releaseYear: "" });
+        getFormProps().onSubmit({
+          title: "",
+          artist: "",
+          album: "",
+          releaseYear: "",
+        });
       });
 
-      expect(await screen.findByText(/please select an mp3 file/i)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/please select an mp3 file/i),
+      ).toBeInTheDocument();
       expect(mockedUploadSong).not.toHaveBeenCalled();
     });
   });
@@ -110,16 +135,24 @@ describe("SongUploadForm", () => {
   describe("MP3 and metadata handling", () => {
     it("uploads MP3, reads ID3 tags, and passes them as initialValues", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/audio.mp3", duration: 123.8 }),
+        mp3Upload: vi
+          .fn()
+          .mockResolvedValue({
+            secure_url: "https://cdn/audio.mp3",
+            duration: 123.8,
+          }),
       });
       mockedReadId3Tags.mockResolvedValueOnce({
-        title: "ID3 Title", artist: "ID3 Artist", album: "ID3 Album", year: "2001",
+        title: "ID3 Title",
+        artist: "ID3 Artist",
+        album: "ID3 Album",
+        year: "2001",
       });
 
       render(<SongUploadForm />);
 
       const file = new File(["audio"], "picked.mp3", { type: "audio/mp3" });
-      
+
       await act(async () => {
         getFormProps().onMp3Upload!(file);
       });
@@ -146,10 +179,22 @@ describe("SongUploadForm", () => {
   describe("Submit behavior", () => {
     it("saves song, invalidates cache, and navigates on success", async () => {
       const { mp3Upload, coverUpload } = setupCloudinaryMocks({
-        mp3Upload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/audio.mp3", duration: 181 }),
-        coverUpload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
+        mp3Upload: vi
+          .fn()
+          .mockResolvedValue({
+            secure_url: "https://cdn/audio.mp3",
+            duration: 181,
+          }),
+        coverUpload: vi
+          .fn()
+          .mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
       });
-      mockedReadId3Tags.mockResolvedValueOnce({ title: "ID3 Title", artist: "ID3 Artist", album: "ID3 Album", year: "1999" });
+      mockedReadId3Tags.mockResolvedValueOnce({
+        title: "ID3 Title",
+        artist: "ID3 Artist",
+        album: "ID3 Album",
+        year: "1999",
+      });
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
       render(<SongUploadForm />);
@@ -158,12 +203,17 @@ describe("SongUploadForm", () => {
         getFormProps().onMp3Upload!(new File([""], "test.mp3"));
         getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
       });
-      
+
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
       await waitFor(() => expect(coverUpload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({ title: "", artist: "", album: "", releaseYear: "" });
+        getFormProps().onSubmit({
+          title: "",
+          artist: "",
+          album: "",
+          releaseYear: "",
+        });
       });
 
       expect(mockedUploadSong).toHaveBeenCalledWith({
@@ -176,15 +226,25 @@ describe("SongUploadForm", () => {
         release_year: "1999",
       });
 
-      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.allSongs });
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: queryKeys.allSongs,
+      });
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
 
     it("uses manual form values over ID3 fallback values", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/audio.mp3", duration: 200 }),
+        mp3Upload: vi
+          .fn()
+          .mockResolvedValue({
+            secure_url: "https://cdn/audio.mp3",
+            duration: 200,
+          }),
       });
-      mockedReadId3Tags.mockResolvedValueOnce({ title: "ID3 Title", artist: "ID3 Artist" });
+      mockedReadId3Tags.mockResolvedValueOnce({
+        title: "ID3 Title",
+        artist: "ID3 Artist",
+      });
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
       render(<SongUploadForm />);
@@ -209,23 +269,37 @@ describe("SongUploadForm", () => {
           artist: "Manual Artist",
           album: "Manual Album",
           release_year: "2024",
-        })
+        }),
       );
     });
 
     it("shows readable ApiError message when save fails", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/audio.mp3", duration: 90 }),
+        mp3Upload: vi
+          .fn()
+          .mockResolvedValue({
+            secure_url: "https://cdn/audio.mp3",
+            duration: 90,
+          }),
       });
-      mockedUploadSong.mockRejectedValueOnce(new ApiError(400, { detail: "Validation failed" }));
+      mockedUploadSong.mockRejectedValueOnce(
+        new ApiError(400, { detail: "Validation failed" }),
+      );
 
       render(<SongUploadForm />);
 
-      await act(async () => { getFormProps().onMp3Upload!(new File([""], "t")); });
+      await act(async () => {
+        getFormProps().onMp3Upload!(new File([""], "t"));
+      });
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({ title: "", artist: "", album: "", releaseYear: "" });
+        getFormProps().onSubmit({
+          title: "",
+          artist: "",
+          album: "",
+          releaseYear: "",
+        });
       });
 
       expect(await screen.findByText(/validation failed/i)).toBeInTheDocument();

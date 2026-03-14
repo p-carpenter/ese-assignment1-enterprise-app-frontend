@@ -66,9 +66,7 @@ describe("UploadPage", () => {
         </MemoryRouter>,
       );
 
-      await user.click(
-        screen.getByRole("button", { name: /import jamendo/i }),
-      );
+      await user.click(screen.getByRole("button", { name: /import jamendo/i }));
 
       expect(
         screen.getByRole("heading", { name: /import from jamendo/i }),
@@ -84,9 +82,7 @@ describe("UploadPage", () => {
         </MemoryRouter>,
       );
 
-      await user.click(
-        screen.getByRole("button", { name: /import jamendo/i }),
-      );
+      await user.click(screen.getByRole("button", { name: /import jamendo/i }));
       expect(
         screen.getByRole("heading", { name: /import from jamendo/i }),
       ).toBeInTheDocument();
@@ -148,9 +144,7 @@ describe("UploadPage", () => {
         </MemoryRouter>,
       );
 
-      await user.click(
-        screen.getByRole("button", { name: /import jamendo/i }),
-      );
+      await user.click(screen.getByRole("button", { name: /import jamendo/i }));
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -196,11 +190,12 @@ describe("UploadPage", () => {
         </MemoryRouter>,
       );
 
-      await user.click(
-        screen.getByRole("button", { name: /import jamendo/i }),
-      );
+      await user.click(screen.getByRole("button", { name: /import jamendo/i }));
 
-      await user.type(screen.getByLabelText(/search jamendo tracks/i), "broken");
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "broken",
+      );
       await user.click(screen.getByRole("button", { name: /search/i }));
 
       expect(
