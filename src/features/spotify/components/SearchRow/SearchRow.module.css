@@ -52,7 +52,9 @@
   font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .addBtn:hover {

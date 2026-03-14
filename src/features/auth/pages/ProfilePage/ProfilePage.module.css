@@ -37,20 +37,20 @@
 }
 
 .avatar .editOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    color: #FFF;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  color: #fff;
 }
 .avatar:hover .editOverlay {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
 }
 
 .displayName {
@@ -134,7 +134,7 @@
 .editInfoValue {
   width: 100%;
   padding: 14px 16px;
-  background-color: #282828;;
+  background-color: #282828;
   border: 1px solid transparent;
   border-radius: 4px;
   color: var(--spotify-white);

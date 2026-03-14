@@ -14,8 +14,12 @@
   outline: none;
   font-family: inherit;
 }
-.searchInput::placeholder { color: rgba(255, 255, 255, 0.4); }
-.searchInput:focus { border-color: #1db954; }
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.searchInput:focus {
+  border-color: #1db954;
+}
 
 .list {
   list-style: none;

@@ -30,7 +30,9 @@
   cursor: pointer;
   color: var(--spotify-white);
   flex-shrink: 0;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .playerButton {
@@ -148,7 +150,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
   padding: 0;
 }
 
@@ -177,8 +181,8 @@
   box-shadow: -4px -4px 16px rgba(0, 0, 0, 0.4);
   animation: panelIn 0.2s ease;
   position-anchor: --history-btn;
-  top: auto; 
-  left: auto; 
+  top: auto;
+  left: auto;
   bottom: calc(anchor(top) + 8px);
   right: anchor(right);
 }
@@ -214,7 +218,9 @@
   color: var(--spotify-gray);
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .historyPanelClose:hover {
@@ -253,7 +259,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
   padding: 0;
   anchor-name: --history-btn;
 }

@@ -14,8 +14,12 @@
   padding: 8px 12px;
   outline: none;
 }
-.editInput::placeholder { color: rgba(255,255,255,0.4); }
-.editInput:focus { border-color: #1db954; }
+.editInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.editInput:focus {
+  border-color: #1db954;
+}
 
 .editActions {
   display: flex;
@@ -36,5 +40,10 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.iconBtn:hover { background: rgba(255,255,255,0.1); }
-.iconBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

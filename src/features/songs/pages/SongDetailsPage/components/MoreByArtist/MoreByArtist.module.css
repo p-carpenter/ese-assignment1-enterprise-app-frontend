@@ -25,7 +25,9 @@
   transition: background 0.2s;
   color: #fff;
 }
-.moreCard:hover { background: rgba(255, 255, 255, 0.12); }
+.moreCard:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 .moreArt {
   width: 72px;

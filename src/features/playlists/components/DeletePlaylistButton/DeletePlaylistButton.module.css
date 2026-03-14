@@ -16,11 +16,18 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.iconBtn:hover { background: rgba(255, 255, 255, 0.1); }
-.iconBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .deleteBtn {
   border-color: rgba(255, 80, 80, 0.35);
   color: rgba(255, 120, 120, 0.9);
 }
-.deleteBtn:hover { background: rgba(255, 60, 60, 0.15); }
+.deleteBtn:hover {
+  background: rgba(255, 60, 60, 0.15);
+}

@@ -18,7 +18,10 @@
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .btn:hover:not(:disabled) {
@@ -45,7 +48,9 @@
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .btnPrimary:hover:not(:disabled) {

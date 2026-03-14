@@ -17,7 +17,9 @@
   text-decoration: none;
   flex: 1;
 }
-.title:hover { color: var(--spotify-white); }
+.title:hover {
+  color: var(--spotify-white);
+}
 
 .addButton {
   background: none;
@@ -31,7 +33,9 @@
   border-radius: 4px;
   transition: color 0.15s;
 }
-.addButton:hover { color: var(--spotify-green); }
+.addButton:hover {
+  color: var(--spotify-green);
+}
 
 .playlist {
   list-style: none;
@@ -49,7 +53,9 @@
   color: inherit;
   transition: background 0.15s;
 }
-.playlistLink:hover { background: rgba(255, 255, 255, 0.07); }
+.playlistLink:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
 
 /* Thumbnail */
 .thumb {
