@@ -42,6 +42,8 @@ const baseSong: Song = {
 };
 
 describe("SongHero", () => {
+  const mockOnPlayClick = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuthState.user = {
@@ -52,7 +54,7 @@ describe("SongHero", () => {
   });
 
   it("renders fallback cover art and formatted duration", () => {
-    render(<SongHero song={baseSong} />);
+    render(<SongHero song={baseSong} onPlayClick={mockOnPlayClick} />);
 
     const cover = screen.getByRole("img", { name: "Test Song" });
     expect(cover).toHaveAttribute("src", "https://placehold.co/400");
@@ -60,7 +62,7 @@ describe("SongHero", () => {
   });
 
   it("renders album and release year metadata when available", () => {
-    render(<SongHero song={baseSong} />);
+    render(<SongHero song={baseSong} onPlayClick={mockOnPlayClick} />);
 
     expect(screen.getByText("Test Album · 2024")).toBeInTheDocument();
   });
@@ -72,13 +74,13 @@ describe("SongHero", () => {
       release_year: undefined,
     };
 
-    render(<SongHero song={songWithoutMeta} />);
+    render(<SongHero song={songWithoutMeta} onPlayClick={mockOnPlayClick} />);
 
     expect(screen.queryByText(/·/)).not.toBeInTheDocument();
   });
 
   it("shows edit button only for the uploader", () => {
-    render(<SongHero song={baseSong} />);
+    render(<SongHero song={baseSong} onPlayClick={mockOnPlayClick} />);
     expect(
       screen.queryByRole("button", { name: "Edit song" }),
     ).not.toBeInTheDocument();
@@ -91,7 +93,7 @@ describe("SongHero", () => {
       cover_art_url: "https://example.com/cover.jpg",
     };
 
-    render(<SongHero song={ownedSong} />);
+    render(<SongHero song={ownedSong} onPlayClick={mockOnPlayClick} />);
 
     expect(screen.getByRole("img", { name: "Test Song" })).toHaveAttribute(
       "src",
@@ -108,7 +110,7 @@ describe("SongHero", () => {
       uploaded_by: { id: 10, username: "owner" },
     };
 
-    render(<SongHero song={ownedSong} />);
+    render(<SongHero song={ownedSong} onPlayClick={mockOnPlayClick} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Edit song" }));
     expect(screen.getByTestId("song-edit-form")).toBeInTheDocument();
@@ -121,5 +123,12 @@ describe("SongHero", () => {
     expect(
       screen.getByRole("heading", { name: "Test Song" }),
     ).toBeInTheDocument();
+  });
+
+  it("calls onPlayClick when play button is clicked", () => {
+    render(<SongHero song={baseSong} onPlayClick={mockOnPlayClick} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Play song" }));
+    expect(mockOnPlayClick).toHaveBeenCalledOnce();
   });
 });

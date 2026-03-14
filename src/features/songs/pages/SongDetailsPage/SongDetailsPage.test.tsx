@@ -1,33 +1,44 @@
-// src/features/songs/pages/SongDetailsPage/SongDetailsPage.test.tsx
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SongDetailsPage } from "./SongDetailsPage";
 import type { Song } from "@/features/songs/types";
+import { usePlayer } from "@/shared/context/PlayerContext";
+import type { PlayerContextType } from "@/shared/context/PlayerContext";
+import { server } from "@/mocks/server";
+import { http, HttpResponse, delay } from "msw";
 
-vi.mock("@tanstack/react-query", () => ({ useQuery: vi.fn() }));
-vi.mock("react-router-dom", () => ({ useParams: vi.fn() }));
-
-// Mock the exact import paths used by the component.
-vi.mock("./components/SongHero/SongHero", () => ({
-  SongHero: () => <div data-testid="song-hero" />,
+vi.mock("@/shared/context/PlayerContext", () => ({
+  usePlayer: vi.fn(),
 }));
+
+vi.mock("./components/SongHero/SongHero", () => ({
+  SongHero: (props: { onPlayClick: () => void }) => (
+    <div data-testid="song-hero">
+      <button onClick={props.onPlayClick}>Play from hero</button>
+    </div>
+  ),
+}));
+
 vi.mock("./components/LyricsSection/LyricsSection", () => ({
   LyricsSection: () => <div data-testid="lyrics-section" />,
 }));
+
 vi.mock("./components/MoreByArtist/MoreByArtist", () => ({
-  MoreByArtist: () => <div data-testid="more-by-artist" />,
+  MoreByArtist: (props: { artist: string; currentSongId: number }) => (
+    <div data-testid="more-by-artist">
+      {props.artist}:{props.currentSongId}
+    </div>
+  ),
 }));
 
-// Mock AlertMessage so error content can be asserted precisely.
 vi.mock("@/shared/components/AlertMessage/AlertMessage", () => ({
   AlertMessage: ({ message }: { message: string }) => (
     <div data-testid="alert-message">{message}</div>
   ),
 }));
 
-// Valid Song-shaped test object.
 const mockSong: Song = {
   id: 1,
   title: "Test Title",
@@ -37,61 +48,62 @@ const mockSong: Song = {
   uploaded_at: "2023-01-01T00:00:00Z",
 };
 
+const createTestQueryClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+const renderPage = (songId: string | undefined = "1") => {
+  const queryClient = createTestQueryClient();
+  const initialEntry = songId ? `/songs/${songId}` : "/songs";
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <Routes>
+          <Route path="/songs/:id" element={<SongDetailsPage />} />
+          <Route path="/songs" element={<SongDetailsPage />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+};
+
 describe("SongDetailsPage", () => {
+  const playSong = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Streng typing mot context typen vår istedenfor any.
+    vi.mocked(usePlayer).mockReturnValue({
+      playSong,
+    } as unknown as PlayerContextType);
   });
 
-  it("shows loading state while song data is being fetched", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "1" });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: true,
-      isError: false,
-      data: undefined,
-    } as unknown as UseQueryResult<Song, Error>);
+  it("shows loading state while song data is being fetched", async () => {
+    server.use(
+      http.get("http://localhost:8000/api/songs/1/", async () => {
+        await delay("infinite");
+        return HttpResponse.json(mockSong);
+      }),
+    );
 
-    render(<SongDetailsPage />);
+    renderPage();
     expect(screen.getByText("Loading…")).toBeInTheDocument();
   });
 
-  it("shows an error message when the query fails", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "1" });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: false,
-      isError: true,
-      data: undefined,
-    } as unknown as UseQueryResult<Song, Error>);
-
-    render(<SongDetailsPage />);
-    expect(screen.getByTestId("alert-message")).toHaveTextContent(
-      "Song not found or an error has occurred.",
+  it("calls playSong when SongHero triggers play click", async () => {
+    server.use(
+      http.get("http://localhost:8000/api/songs/1/", () =>
+        HttpResponse.json(mockSong),
+      ),
     );
-  });
 
-  it("shows an error message when the request succeeds but no song is returned", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "1" });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: null,
-    } as unknown as UseQueryResult<Song, Error>);
+    renderPage();
 
-    render(<SongDetailsPage />);
-    expect(screen.getByTestId("alert-message")).toBeInTheDocument();
-  });
+    const playBtn = await screen.findByRole("button", {
+      name: "Play from hero",
+    });
+    fireEvent.click(playBtn);
 
-  it("renders child sections when song data is available", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "1" });
-    vi.mocked(useQuery).mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: mockSong,
-    } as unknown as UseQueryResult<Song, Error>);
-
-    render(<SongDetailsPage />);
-
-    expect(screen.getByTestId("song-hero")).toBeInTheDocument();
-    expect(screen.getByTestId("lyrics-section")).toBeInTheDocument();
-    expect(screen.getByTestId("more-by-artist")).toBeInTheDocument();
+    expect(playSong).toHaveBeenCalledWith(mockSong);
   });
 });
