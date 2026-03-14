@@ -29,3 +29,15 @@ export interface PaginatedResponse<T> {
   previous: string | null;
   results: T[];
 }
+
+export interface JamendoTrack {
+  id: string;
+  name: string;
+  artist_name: string;
+  album_name?: string;
+  releasedate?: string;
+  duration: number;
+  audio: string;
+  audiodownload?: string;
+  image?: string;
+}
