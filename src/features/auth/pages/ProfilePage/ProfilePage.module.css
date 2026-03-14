@@ -45,7 +45,4 @@
 
 .backButton {
   margin-top: 24px;
-  border-color: rgba(255, 255, 255, 0.2);
-  color: var(--spotify-white);
-  transition: all 0.2s ease;
 }
