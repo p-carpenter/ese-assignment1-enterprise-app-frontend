@@ -1,0 +1,63 @@
+.infoSection {
+  text-align: left;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: var(--spotify-gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: var(--spotify-white);
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.changePasswordContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.editPasswordIcon {
+  color: var(--spotify-gray);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.editPasswordIcon:hover {
+  color: var(--spotify-white);
+}
+
+.editInfoValue {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #282828;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--spotify-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.editInfoValue:hover {
+  border-color: var(--spotify-gray-dark);
+}
+
+.editInfoValue:focus {
+  outline: none;
+  border-color: var(--spotify-white);
+  background-color: #282828;
+}
+
+.editInfoValue::placeholder {
+  color: var(--spotify-gray);
+}
