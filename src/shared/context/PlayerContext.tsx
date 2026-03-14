@@ -63,9 +63,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const duration = audioDuration;
   const getPosition = audioGetPosition;
 
-  const seek = useCallback((position: number) => {
-    audioSeek(position);
-  }, [audioSeek]);
+  const seek = useCallback(
+    (position: number) => {
+      audioSeek(position);
+    },
+    [audioSeek],
+  );
 
   const play = useCallback(() => {
     audioPlay();

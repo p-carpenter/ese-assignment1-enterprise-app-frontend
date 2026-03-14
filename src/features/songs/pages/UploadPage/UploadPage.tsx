@@ -8,7 +8,7 @@ export const UploadPage = () => {
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto" }}>
       <SongUploadForm />
-      <Button variant="outlined" size="large" onClick={() => navigate("/") }>
+      <Button variant="outlined" size="large" onClick={() => navigate("/")}>
         Cancel Upload
       </Button>
     </div>
