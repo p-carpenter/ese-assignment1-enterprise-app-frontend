@@ -1,5 +1,5 @@
 import { useState, type JSX } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Button, AlertMessage } from "@/shared/components";
 import { useCloudinaryUpload } from "@/shared/hooks";
@@ -72,7 +72,6 @@ export const ProfilePage = ({
           isEditing={isEditing}
           isUploading={isUploading}
           onAvatarChange={handleAvatarChange}
-          onEditClick={() => navigate("/profile/edit")}
         />
 
         <div className={styles.divider} />
@@ -117,7 +116,13 @@ export const ProfilePage = ({
             </Button>
           </div>
         ) : (
-          <Button variant="outlined" size="large" onClick={() => navigate("/")} className={styles.backButton}>
+          <Button
+            as={Link}
+            to="/"
+            variant="outlined"
+            size="large"
+            className={styles.backButton}
+          >
             Back to Home
           </Button>
         )}
