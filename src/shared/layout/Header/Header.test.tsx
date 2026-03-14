@@ -8,7 +8,10 @@ import { type UserProfile } from "@/features/auth/types";
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -42,7 +45,7 @@ const renderHeader = () =>
   render(
     <MemoryRouter>
       <Header />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe("Header", () => {
@@ -73,7 +76,9 @@ describe("Header", () => {
 
     it("renders the search bar", () => {
       renderHeader();
-      expect(screen.getByRole("searchbox", { name: /search songs/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("searchbox", { name: /search songs/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders an Upload button that navigates to /upload", async () => {
@@ -102,9 +107,15 @@ describe("Header", () => {
     });
 
     it("renders an avatar img when avatarUrl is provided", () => {
-      mockAuthState.user = { ...mockAuthState.user!, avatar_url: "http://example.com/avatar.jpg" };
+      mockAuthState.user = {
+        ...mockAuthState.user!,
+        avatar_url: "http://example.com/avatar.jpg",
+      };
       renderHeader();
-      expect(screen.getByAltText("Profile")).toHaveAttribute("src", "http://example.com/avatar.jpg");
+      expect(screen.getByAltText("Profile")).toHaveAttribute(
+        "src",
+        "http://example.com/avatar.jpg",
+      );
     });
 
     it("handles null user gracefully without crashing", () => {
@@ -130,14 +141,19 @@ describe("Header", () => {
 
     it("logs an error and does notnavigate when logout() rejects", async () => {
       const user = userEvent.setup();
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       mockAuthState.logout.mockRejectedValueOnce(new Error("network error"));
 
       renderHeader();
       await user.click(screen.getByRole("button", { name: /log out/i }));
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith("Logout failed:", expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith(
+          "Logout failed:",
+          expect.any(Error),
+        );
         expect(mockNavigate).not.toHaveBeenCalled();
       });
 
