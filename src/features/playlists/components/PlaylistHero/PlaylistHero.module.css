@@ -200,3 +200,13 @@
   border-color: #fff;
   color: #fff;
 }
+
+.playBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.playBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

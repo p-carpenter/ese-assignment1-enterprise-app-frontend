@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/context/AuthContext";
+import { usePlayer } from "@/shared/context/PlayerContext";
 import {
   getPlaylistDetails,
   removeSongFromPlaylist,
@@ -14,12 +15,15 @@ import { type Song } from "@/features/songs/types";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import { AddSongToPlaylistModal } from "../AddSongToPlaylistModal/AddSongToPlaylistModal";
 import { PlaylistHero } from "../PlaylistHero/PlaylistHero";
+import { ApiError } from "@/shared/api/errors";
 
 export const PlaylistDetail = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { playSong } = usePlayer();
   const parsedId = parseInt(playlistId ?? "0", 10);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     data: playlist,
@@ -46,6 +50,13 @@ export const PlaylistDetail = () => {
         queryKey: queryKeys.playlists,
       });
     },
+    onError: (err) => {
+      if (err instanceof ApiError) {
+        setError(err.getReadableMessage());
+      } else {
+        setError("An unexpected error occurred while removing the song.");
+      }
+    },
   });
 
   const getPlaylistSongDropdownItems = useCallback(
@@ -57,6 +68,13 @@ export const PlaylistDetail = () => {
     ],
     [removeSongMutation],
   );
+
+  const handlePlayPlaylist = useCallback(() => {
+    if (playlist && playlist.songs.length > 0) {
+      const songs = playlist.songs.map((item) => item.song);
+      playSong(songs[0], songs);
+    }
+  }, [playlist, playSong]);
 
   if (isLoading)
     return <div className={styles.statusPage}>Loading playlist…</div>;
@@ -95,6 +113,7 @@ export const PlaylistDetail = () => {
           songsCount={songs.length}
           contributors={contributors}
           onAddSongClick={() => setIsAddSongOpen(true)}
+          onPlayClick={handlePlayPlaylist}
         />
 
         <AddSongToPlaylistModal
@@ -106,6 +125,7 @@ export const PlaylistDetail = () => {
 
         <section className={styles.songSection}>
           <h2 className={styles.sectionTitle}>Songs</h2>
+          {error && <AlertMessage message={error} variant="error" />}
           {songs.length === 0 ? (
             <p className={styles.dim}>No songs in this playlist yet.</p>
           ) : (

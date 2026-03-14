@@ -2,7 +2,11 @@ import { useState } from "react";
 import styles from "./PlaylistHero.module.css";
 import { EditPlaylistForm } from "../EditPlaylistForm/EditPlaylistForm";
 import { DeletePlaylistButton } from "../DeletePlaylistButton/DeletePlaylistButton";
-import { IoPencilOutline, IoAddOutline } from "react-icons/io5";
+import {
+  IoPencilOutline,
+  IoAddOutline,
+  IoPlayCircleOutline,
+} from "react-icons/io5";
 import { type Playlist } from "@/features/playlists/types";
 import { type UserMini } from "@/features/auth/types";
 import { UserAvatar } from "@/shared/components/UserAvatar/UserAvatar";
@@ -14,6 +18,7 @@ interface PlaylistHeroProps {
   songsCount: number;
   contributors: UserMini[];
   onAddSongClick: () => void;
+  onPlayClick?: () => void;
 }
 
 export const PlaylistHero = ({
@@ -23,6 +28,7 @@ export const PlaylistHero = ({
   songsCount,
   contributors,
   onAddSongClick,
+  onPlayClick,
 }: PlaylistHeroProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -96,6 +102,15 @@ export const PlaylistHero = ({
               )}
             </div>
             <div className={styles.heroActions}>
+              {songsCount > 0 && onPlayClick && (
+                <button
+                  className={`${styles.editBtn} ${styles.playBtn}`}
+                  onClick={onPlayClick}
+                  aria-label="Play playlist"
+                >
+                  <IoPlayCircleOutline size={16} /> Play
+                </button>
+              )}
               {canAddSongs && (
                 <button
                   className={styles.editBtn}
