@@ -23,7 +23,11 @@ export const ProfilePage = ({
 
   const { upload, isUploading, error: uploadError } = useCloudinaryUpload();
 
-  const { mutate: saveProfile, isPending: isSaving, error: saveError } = useMutation({
+  const {
+    mutate: saveProfile,
+    isPending: isSaving,
+    error: saveError,
+  } = useMutation({
     mutationFn: () => updateProfile(newUsername, newAvatarUrl),
     onSuccess: (updatedUser) => {
       setUser(updatedUser);
@@ -83,13 +87,19 @@ export const ProfilePage = ({
         />
 
         {passwordChanged && (
-          <AlertMessage variant="success" message="Password changed successfully." />
+          <AlertMessage
+            variant="success"
+            message="Password changed successfully."
+          />
         )}
         {uploadError && (
           <AlertMessage variant="error" message={String(uploadError)} />
         )}
         {saveError && (
-          <AlertMessage variant="error" message="Failed to save profile. Please try again." />
+          <AlertMessage
+            variant="error"
+            message="Failed to save profile. Please try again."
+          />
         )}
 
         {isEditing ? (
