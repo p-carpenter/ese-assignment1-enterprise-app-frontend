@@ -107,7 +107,7 @@ export const ProfilePage = ({
             </Button>
           </div>
         ) : (
-          <Button variant="outlined" size="large" onClick={() => navigate("/")}>
+          <Button variant="outlined" size="large" onClick={() => navigate("/")} className={styles.backButton}>
             Back to Home
           </Button>
         )}

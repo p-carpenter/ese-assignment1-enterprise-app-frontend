@@ -30,27 +30,32 @@ export const AvatarSection = ({
 
     return (
         <div className={styles.avatarSection}>
-            <div
-                className={styles.avatar}
-            >
+            <div className={styles.avatarWrapper}>
+                <div className={`${styles.avatar} ${isEditing ? styles.avatarEditing : ""}`}>
+                    {isEditing && (
+                        <>
+                            <div
+                                className={styles.editOverlay}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <PencilSolid className={styles.editIcon} />
+                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ display: "none" }}
+                            />
+                        </>
+                    )}
+                    <img src={avatarUrl || defaultAvatar} alt="Profile" />
+                </div>
                 {isEditing && (
-                    <>
-                        <div
-                            className={styles.editOverlay}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <PencilSolid className={styles.editIcon} />
-                        </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            style={{ display: "none" }}
-                        />
-                    </>
+                    <div className={styles.editBadge} onClick={() => fileInputRef.current?.click()}>
+                        <PencilSolid />
+                    </div>
                 )}
-                <img src={avatarUrl || defaultAvatar} alt="Profile" />
             </div>
 
             <h1 className={styles.displayName}>{username}</h1>

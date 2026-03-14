@@ -1,57 +1,103 @@
 .avatarSection {
-  margin-bottom: 32px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatarWrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 16px;
 }
 
 .avatar {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: var(--spotify-dark-highlight);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--spotify-white);
-  overflow: hidden;
-  position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--spotify-dark-highlight);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--spotify-white);
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.avatarEditing {
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .editOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    color: #fff;
 }
 
 .avatar:hover .editOverlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.editBadge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--spotify-white);
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.editBadge:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.editBadge svg {
+    width: 18px;
+    height: 18px;
 }
 
 .displayName {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--spotify-white);
-  margin: 0 0 8px 0;
-  letter-spacing: -0.04em;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--spotify-white);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.04em;
 }
 
 .uploadingText {
-  font-size: 0.875rem;
-  color: var(--spotify-gray);
-  margin-top: 8px;
+    font-size: 0.875rem;
+    color: var(--spotify-gray);
+    margin-top: 8px;
 }
