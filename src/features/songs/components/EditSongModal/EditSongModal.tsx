@@ -2,10 +2,11 @@ import { useState, type JSX } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
+import { type SongDetailsValues } from "../SongDetailsForm/schema";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { type Song } from "../../types";
 import { updateSong } from "../../api";
-import { ApiError } from "@/shared/api/errors"; // Husk denne!
+import { ApiError } from "@/shared/api/errors";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
 interface EditSongModalProps {
@@ -69,15 +70,7 @@ export const EditSongModal = ({
     }
   };
 
-  const handleSubmit = ({
-    title,
-    artist,
-  }: {
-    title: string;
-    artist: string;
-    album: string;
-    releaseYear: string;
-  }) => {
+  const handleSubmit = ({ title, artist }: SongDetailsValues) => {
     updateMutation.mutate({ title, artist, url: coverArtUrl });
   };
 
@@ -95,7 +88,6 @@ export const EditSongModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Song">
       <SongDetailsForm
-        key={song.id}
         initialValues={{
           title: song.title,
           artist: song.artist,
