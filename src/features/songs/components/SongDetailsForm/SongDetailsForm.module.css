@@ -1,0 +1,145 @@
+.container {
+  background-color: var(--app-dark-elevated);
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: var(--app-white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.04em;
+}
+
+/* ── Form Inputs & Validation ────────────────────────────────────────────── */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: var(--app-dark-highlight);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--app-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.inputField:hover {
+  border-color: var(--app-gray-dark);
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: var(--app-white);
+  background-color: #282828;
+}
+
+.inputField::placeholder {
+  color: var(--app-gray);
+}
+
+.errorText {
+  color: #e22134; /* Spotify red */
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ── File upload ─────────────────────────────────────────────────────────── */
+.fileUploadWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/** Hide the native input visually but keep it accessible */
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/** Styled label that acts as the visible button */
+.uploadLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--app-white);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.uploadLabel:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.uploadLabel.uploading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fileStatusText {
+  font-size: 13px;
+  color: var(--app-gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.fileStatusText.ready {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* ── Submit / action buttons ─────────────────────────────────────────────── */
+.submitButton {
+  width: 100%;
+  background-color: var(--accent-green);
+  color: var(--app-black);
+  border: none;
+  padding: 14px 24px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 8px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--accent-green-bright);
+  transform: scale(1.04);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
