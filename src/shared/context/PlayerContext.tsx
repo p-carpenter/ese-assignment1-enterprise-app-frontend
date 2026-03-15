@@ -156,10 +156,6 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     playNextRef.current = playNext;
   }, [playNext]);
 
-  useEffect(() => {
-    // keep play-next ref up to date
-  }, [playNext]);
-
   const contextValue = useMemo(
     () => ({
       currentSong,
