@@ -55,6 +55,7 @@ describe("SongUploadForm", () => {
     mockedUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
     } as never);
+    mockedReadId3Tags.mockResolvedValue({});
   });
 
   const setupCloudinaryMocks = ({
