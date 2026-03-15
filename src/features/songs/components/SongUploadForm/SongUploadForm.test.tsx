@@ -135,12 +135,10 @@ describe("SongUploadForm", () => {
   describe("MP3 and metadata handling", () => {
     it("uploads MP3, reads ID3 tags, and passes them as initialValues", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi
-          .fn()
-          .mockResolvedValue({
-            secure_url: "https://cdn/audio.mp3",
-            duration: 123.8,
-          }),
+        mp3Upload: vi.fn().mockResolvedValue({
+          secure_url: "https://cdn/audio.mp3",
+          duration: 123.8,
+        }),
       });
       mockedReadId3Tags.mockResolvedValueOnce({
         title: "ID3 Title",
@@ -179,12 +177,10 @@ describe("SongUploadForm", () => {
   describe("Submit behavior", () => {
     it("saves song, invalidates cache, and navigates on success", async () => {
       const { mp3Upload, coverUpload } = setupCloudinaryMocks({
-        mp3Upload: vi
-          .fn()
-          .mockResolvedValue({
-            secure_url: "https://cdn/audio.mp3",
-            duration: 181,
-          }),
+        mp3Upload: vi.fn().mockResolvedValue({
+          secure_url: "https://cdn/audio.mp3",
+          duration: 181,
+        }),
         coverUpload: vi
           .fn()
           .mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
@@ -234,12 +230,10 @@ describe("SongUploadForm", () => {
 
     it("uses manual form values over ID3 fallback values", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi
-          .fn()
-          .mockResolvedValue({
-            secure_url: "https://cdn/audio.mp3",
-            duration: 200,
-          }),
+        mp3Upload: vi.fn().mockResolvedValue({
+          secure_url: "https://cdn/audio.mp3",
+          duration: 200,
+        }),
       });
       mockedReadId3Tags.mockResolvedValueOnce({
         title: "ID3 Title",
@@ -275,12 +269,10 @@ describe("SongUploadForm", () => {
 
     it("shows readable ApiError message when save fails", async () => {
       const { mp3Upload } = setupCloudinaryMocks({
-        mp3Upload: vi
-          .fn()
-          .mockResolvedValue({
-            secure_url: "https://cdn/audio.mp3",
-            duration: 90,
-          }),
+        mp3Upload: vi.fn().mockResolvedValue({
+          secure_url: "https://cdn/audio.mp3",
+          duration: 90,
+        }),
       });
       mockedUploadSong.mockRejectedValueOnce(
         new ApiError(400, { detail: "Validation failed" }),
