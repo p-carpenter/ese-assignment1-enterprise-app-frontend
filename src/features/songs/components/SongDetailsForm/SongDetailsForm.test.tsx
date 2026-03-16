@@ -116,78 +116,84 @@ describe("SongDetailsForm", () => {
   });
 
   describe("form submission and validation", () => {
-    it("shows validation errors when submitting empty required fields", async () => {
-      const user = userEvent.setup();
-      const onSubmit = vi.fn();
-      render(<SongDetailsForm onSubmit={onSubmit} />);
+    describe("validation", () => {
+      it("shows validation errors when submitting empty required fields", async () => {
+        const user = userEvent.setup();
+        const onSubmit = vi.fn();
+        render(<SongDetailsForm onSubmit={onSubmit} />);
 
-      await user.click(screen.getByRole("button", { name: /save song/i }));
+        await user.click(screen.getByRole("button", { name: /save song/i }));
 
-      expect(await screen.findByText(/title is required/i)).toBeInTheDocument();
-      expect(
-        await screen.findByText(/artist is required/i),
-      ).toBeInTheDocument();
-      expect(onSubmit).not.toHaveBeenCalled();
-    });
-
-    it("calls onSubmit with populated values if validation passes", async () => {
-      const user = userEvent.setup();
-      const onSubmit = vi.fn();
-      render(<SongDetailsForm onSubmit={onSubmit} />);
-
-      await user.type(screen.getByPlaceholderText("Title"), "Test Song");
-      await user.type(screen.getByPlaceholderText("Artist"), "Test Artist");
-      await user.click(screen.getByRole("button", { name: /save song/i }));
-
-      await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith(
-          {
-            title: "Test Song",
-            artist: "Test Artist",
-            album: "",
-            releaseYear: "",
-          },
-          expect.anything(), // <--- Ignorerer Event-objektet som RHF sender med
-        );
+        expect(await screen.findByText(/title is required/i)).toBeInTheDocument();
+        expect(
+          await screen.findByText(/artist is required/i),
+        ).toBeInTheDocument();
+        expect(onSubmit).not.toHaveBeenCalled();
       });
     });
 
-    it("calls onCoverArtUpload when an image file is selected", async () => {
-      const user = userEvent.setup();
-      const onCoverArtUpload = vi.fn();
-      render(
-        <SongDetailsForm onSubmit={noop} onCoverArtUpload={onCoverArtUpload} />,
-      );
+    describe("submit payload", () => {
+      it("calls onSubmit with populated values if validation passes", async () => {
+        const user = userEvent.setup();
+        const onSubmit = vi.fn();
+        render(<SongDetailsForm onSubmit={onSubmit} />);
 
-      const imageFile = new File(["img"], "cover.jpg", { type: "image/jpeg" });
-      const imageInput = document.querySelector(
-        'input[accept="image/*"]',
-      ) as HTMLInputElement;
+        await user.type(screen.getByPlaceholderText("Title"), "Test Song");
+        await user.type(screen.getByPlaceholderText("Artist"), "Test Artist");
+        await user.click(screen.getByRole("button", { name: /save song/i }));
 
-      await user.upload(imageInput, imageFile);
-
-      expect(onCoverArtUpload).toHaveBeenCalledWith(imageFile);
+        await waitFor(() => {
+          expect(onSubmit).toHaveBeenCalledWith(
+            {
+              title: "Test Song",
+              artist: "Test Artist",
+              album: "",
+              releaseYear: "",
+            },
+            expect.anything(),
+          );
+        });
+      });
     });
 
-    it("calls onMp3Upload when an audio file is selected", async () => {
-      const user = userEvent.setup();
-      const onMp3Upload = vi.fn();
-      render(
-        <SongDetailsForm
-          onSubmit={noop}
-          showMp3Upload={true}
-          onMp3Upload={onMp3Upload}
-        />,
-      );
+    describe("file uploads", () => {
+      it("calls onCoverArtUpload when an image file is selected", async () => {
+        const user = userEvent.setup();
+        const onCoverArtUpload = vi.fn();
+        render(
+          <SongDetailsForm onSubmit={noop} onCoverArtUpload={onCoverArtUpload} />,
+        );
 
-      const audioFile = new File(["audio"], "song.mp3", { type: "audio/mp3" });
-      const audioInput = document.querySelector(
-        'input[accept="audio/*"]',
-      ) as HTMLInputElement;
+        const imageFile = new File(["img"], "cover.jpg", { type: "image/jpeg" });
+        const imageInput = document.querySelector(
+          'input[accept="image/*"]',
+        ) as HTMLInputElement;
 
-      await user.upload(audioInput, audioFile);
+        await user.upload(imageInput, imageFile);
 
-      expect(onMp3Upload).toHaveBeenCalledWith(audioFile);
+        expect(onCoverArtUpload).toHaveBeenCalledWith(imageFile);
+      });
+
+      it("calls onMp3Upload when an audio file is selected", async () => {
+        const user = userEvent.setup();
+        const onMp3Upload = vi.fn();
+        render(
+          <SongDetailsForm
+            onSubmit={noop}
+            showMp3Upload={true}
+            onMp3Upload={onMp3Upload}
+          />,
+        );
+
+        const audioFile = new File(["audio"], "song.mp3", { type: "audio/mp3" });
+        const audioInput = document.querySelector(
+          'input[accept="audio/*"]',
+        ) as HTMLInputElement;
+
+        await user.upload(audioInput, audioFile);
+
+        expect(onMp3Upload).toHaveBeenCalledWith(audioFile);
+      });
     });
   });
 });

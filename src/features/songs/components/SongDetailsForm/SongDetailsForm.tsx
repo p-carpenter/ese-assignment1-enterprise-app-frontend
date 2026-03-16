@@ -117,44 +117,56 @@ export const SongDetailsForm = ({
       <div className={styles.inputGroup}>
         <input
           placeholder="Title"
+          aria-label="Title"
           className={styles.inputField}
           {...register("title")}
         />
         {errors.title && (
-          <span className={styles.errorText}>{errors.title.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.title.message}
+          </span>
         )}
       </div>
 
       <div className={styles.inputGroup}>
         <input
           placeholder="Artist"
+          aria-label="Artist"
           className={styles.inputField}
           {...register("artist")}
         />
         {errors.artist && (
-          <span className={styles.errorText}>{errors.artist.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.artist.message}
+          </span>
         )}
       </div>
 
       <div className={styles.inputGroup}>
         <input
           placeholder="Album"
+          aria-label="Album"
           className={styles.inputField}
           {...register("album")}
         />
         {errors.album && (
-          <span className={styles.errorText}>{errors.album.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.album.message}
+          </span>
         )}
       </div>
 
       <div className={styles.inputGroup}>
         <input
           placeholder="Release Year"
+          aria-label="Release Year"
           className={styles.inputField}
           {...register("releaseYear")}
         />
         {errors.releaseYear && (
-          <span className={styles.errorText}>{errors.releaseYear.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.releaseYear.message}
+          </span>
         )}
       </div>
 
