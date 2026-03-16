@@ -15,7 +15,10 @@ const mockNavigate = vi.fn();
 const mockInvalidateQueries = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return { ...actual, useNavigate: vi.fn() };
 });
 
@@ -102,8 +105,12 @@ describe("SongUploadForm", () => {
       });
       render(<SongUploadForm />);
 
-      expect(screen.getByText(/MP3 Upload Error: mp3 failed/i)).toBeInTheDocument();
-      expect(screen.getByText(/Cover Art Error: cover failed/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/MP3 Upload Error: mp3 failed/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Cover Art Error: cover failed/i),
+      ).toBeInTheDocument();
     });
 
     it("shows submit error when submitting before MP3 is uploaded", async () => {
@@ -119,7 +126,9 @@ describe("SongUploadForm", () => {
         });
       });
 
-      expect(await screen.findByText(/please select an mp3 file/i)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/please select an mp3 file/i),
+      ).toBeInTheDocument();
       expect(mockedUploadSong).not.toHaveBeenCalled();
     });
   });
@@ -173,7 +182,9 @@ describe("SongUploadForm", () => {
           secure_url: "https://cdn/audio.mp3",
           duration: 181,
         }),
-        coverUpload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
+        coverUpload: vi
+          .fn()
+          .mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
       });
       mockedReadId3Tags.mockResolvedValueOnce({
         title: "ID3 Title",

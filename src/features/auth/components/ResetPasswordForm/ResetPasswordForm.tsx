@@ -35,7 +35,12 @@ export const ResetPasswordForm = () => {
     setApiError("");
 
     try {
-      await confirmPasswordReset(uid, token, data.password, data.confirmPassword);
+      await confirmPasswordReset(
+        uid,
+        token,
+        data.password,
+        data.confirmPassword,
+      );
       setSuccess(true);
     } catch (err) {
       setApiError(

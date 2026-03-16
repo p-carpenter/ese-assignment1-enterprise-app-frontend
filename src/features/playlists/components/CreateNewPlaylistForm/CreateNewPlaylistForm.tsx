@@ -74,7 +74,9 @@ export const CreateNewPlaylistForm = ({
     <form className={styles.container} onSubmit={handleSubmit(onFormSubmit)}>
       <h3 className={styles.title}>Playlist Details</h3>
       <AlertMessage message={error} />
-      <AlertMessage message={coverError ? `Cover Art Error: ${coverError}` : null} />
+      <AlertMessage
+        message={coverError ? `Cover Art Error: ${coverError}` : null}
+      />
 
       <div className={styles.fileUploadWrapper}>
         <label
@@ -108,7 +110,9 @@ export const CreateNewPlaylistForm = ({
           className={styles.inputField}
           {...register("title")}
         />
-        {errors.title && <span className={styles.errorText}>{errors.title.message}</span>}
+        {errors.title && (
+          <span className={styles.errorText}>{errors.title.message}</span>
+        )}
       </div>
 
       <div className={styles.inputGroup}>

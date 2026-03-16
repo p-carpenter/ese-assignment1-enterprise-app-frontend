@@ -40,7 +40,9 @@ describe("CreateNewPlaylistForm", () => {
 
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
-      expect(await screen.findByText(/playlist name is required/i)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/playlist name is required/i),
+      ).toBeInTheDocument();
       expect(onSubmit).not.toHaveBeenCalled();
     });
   });
@@ -55,21 +57,19 @@ describe("CreateNewPlaylistForm", () => {
       await user.type(screen.getByLabelText("Description"), "Coding playlist");
 
       await user.click(screen.getByLabelText("Public"));
-      
+
       await user.click(screen.getByLabelText("Collaborative"));
 
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
       await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith(
-          {
-            title: "Focus Flow",
-            description: "Coding playlist",
-            cover_art_url: "",
-            is_public: false,
-            is_collaborative: true,
-          },
-        );
+        expect(onSubmit).toHaveBeenCalledWith({
+          title: "Focus Flow",
+          description: "Coding playlist",
+          cover_art_url: "",
+          is_public: false,
+          is_collaborative: true,
+        });
       });
     });
   });
@@ -107,11 +107,13 @@ describe("CreateNewPlaylistForm", () => {
         <CreateNewPlaylistForm
           onSubmit={vi.fn()}
           error="Could not save playlist"
-        />
+        />,
       );
 
       expect(screen.getByText("Could not save playlist")).toBeInTheDocument();
-      expect(screen.getByText("Cover Art Error: Upload failed")).toBeInTheDocument();
+      expect(
+        screen.getByText("Cover Art Error: Upload failed"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -125,9 +127,11 @@ describe("CreateNewPlaylistForm", () => {
 
       render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
 
-      const fileInput = screen.getByLabelText("Upload Cover Art") as HTMLInputElement;
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
       const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
-      
+
       await user.upload(fileInput, file);
 
       await waitFor(() => {
@@ -150,8 +154,10 @@ describe("CreateNewPlaylistForm", () => {
     it("does not call upload when no file is selected", () => {
       render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
 
-      const fileInput = screen.getByLabelText("Upload Cover Art") as HTMLInputElement;
-      
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
+
       fireEvent.change(fileInput, { target: { files: [] } });
 
       expect(mockUpload).not.toHaveBeenCalled();
@@ -164,9 +170,11 @@ describe("CreateNewPlaylistForm", () => {
 
       render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
 
-      const fileInput = screen.getByLabelText("Upload Cover Art") as HTMLInputElement;
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
       const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
-      
+
       await user.upload(fileInput, file);
 
       await waitFor(() => {
@@ -175,7 +183,7 @@ describe("CreateNewPlaylistForm", () => {
 
       await user.type(screen.getByLabelText("Title"), "Fallback Playlist");
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
-      
+
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith(
           expect.objectContaining({ cover_art_url: "" }),

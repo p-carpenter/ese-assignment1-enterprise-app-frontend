@@ -68,25 +68,32 @@ describe("EditPlaylistForm", () => {
   describe("initial state", () => {
     it("pre-fills the title input with the playlist title", () => {
       renderForm();
-      expect(screen.getByRole("textbox", { name: /playlist title/i })).toHaveValue("My Playlist");
+      expect(
+        screen.getByRole("textbox", { name: /playlist title/i }),
+      ).toHaveValue("My Playlist");
     });
 
     it("pre-fills the description textarea with the playlist description", () => {
       renderForm();
-      expect(screen.getByRole("textbox", { name: /playlist description/i })).toHaveValue(
-        "Original description",
-      );
+      expect(
+        screen.getByRole("textbox", { name: /playlist description/i }),
+      ).toHaveValue("Original description");
     });
 
     it("shows an empty description textarea when description is null", () => {
       renderForm({ ...basePlaylist, description: null as unknown as string });
-      expect(screen.getByRole("textbox", { name: /playlist description/i })).toHaveValue("");
+      expect(
+        screen.getByRole("textbox", { name: /playlist description/i }),
+      ).toHaveValue("");
     });
 
     it("shows the cover art image with the current cover_art_url", () => {
       renderForm();
       const img = screen.getByRole("img", { name: /playlist cover art/i });
-      expect(img).toHaveAttribute("src", "https://example.com/original-cover.png");
+      expect(img).toHaveAttribute(
+        "src",
+        "https://example.com/original-cover.png",
+      );
     });
 
     it("shows a placeholder image when cover_art_url is null", () => {
@@ -97,13 +104,17 @@ describe("EditPlaylistForm", () => {
 
     it("renders the Public toggle showing the initial state (on)", () => {
       renderForm();
-      const publicSwitch = screen.getByRole("switch", { name: /toggle public visibility/i });
+      const publicSwitch = screen.getByRole("switch", {
+        name: /toggle public visibility/i,
+      });
       expect(publicSwitch).toHaveAttribute("aria-checked", "true");
     });
 
     it("renders the Collaborative toggle (initially off)", () => {
       renderForm();
-      const collabSwitch = screen.getByRole("switch", { name: /toggle collaborative mode/i });
+      const collabSwitch = screen.getByRole("switch", {
+        name: /toggle collaborative mode/i,
+      });
       expect(collabSwitch).toHaveAttribute("aria-checked", "false");
     });
   });
@@ -121,7 +132,9 @@ describe("EditPlaylistForm", () => {
     it("allows editing the description", async () => {
       const user = userEvent.setup();
       renderForm();
-      const textarea = screen.getByRole("textbox", { name: /playlist description/i });
+      const textarea = screen.getByRole("textbox", {
+        name: /playlist description/i,
+      });
       await user.clear(textarea);
       await user.type(textarea, "New description");
       expect(textarea).toHaveValue("New description");
@@ -142,10 +155,14 @@ describe("EditPlaylistForm", () => {
 
       renderForm();
 
-      const publicToggle = screen.getByRole("switch", { name: /toggle public visibility/i });
+      const publicToggle = screen.getByRole("switch", {
+        name: /toggle public visibility/i,
+      });
       await user.click(publicToggle);
 
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(patchBody.is_public).toBe(false);
@@ -167,10 +184,14 @@ describe("EditPlaylistForm", () => {
 
       renderForm();
 
-      const collabToggle = screen.getByRole("switch", { name: /toggle collaborative mode/i });
+      const collabToggle = screen.getByRole("switch", {
+        name: /toggle collaborative mode/i,
+      });
       await user.click(collabToggle);
 
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(patchBody.is_collaborative).toBe(true);
@@ -181,7 +202,9 @@ describe("EditPlaylistForm", () => {
   describe("cover upload", () => {
     it("the 'Change cover' button is present", () => {
       renderForm();
-      expect(screen.getByRole("button", { name: /change playlist cover/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /change playlist cover/i }),
+      ).toBeInTheDocument();
     });
 
     it("updates the cover image to the newly uploaded URL on success", async () => {
@@ -216,7 +239,10 @@ describe("EditPlaylistForm", () => {
 
       await waitFor(() => {
         const img = screen.getByRole("img", { name: /playlist cover art/i });
-        expect(img).toHaveAttribute("src", "https://example.com/original-cover.png");
+        expect(img).toHaveAttribute(
+          "src",
+          "https://example.com/original-cover.png",
+        );
       });
     });
 
@@ -245,7 +271,9 @@ describe("EditPlaylistForm", () => {
       const onClose = vi.fn();
       renderForm(basePlaylist, onClose);
 
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(onClose).toHaveBeenCalledOnce();
@@ -269,11 +297,15 @@ describe("EditPlaylistForm", () => {
       const onClose = vi.fn();
       renderForm(basePlaylist, onClose);
 
-      const titleInput = screen.getByRole("textbox", { name: /playlist title/i });
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
       await user.clear(titleInput);
       await user.type(titleInput, "Renamed Playlist");
 
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(patchBody.title).toBe("Renamed Playlist");
@@ -290,7 +322,9 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm();
-      const saveBtn = screen.getByRole("button", { name: /save playlist changes/i });
+      const saveBtn = screen.getByRole("button", {
+        name: /save playlist changes/i,
+      });
       await user.click(saveBtn);
 
       await waitFor(() => expect(saveBtn).toBeDisabled());
@@ -306,7 +340,9 @@ describe("EditPlaylistForm", () => {
 
       const onClose = vi.fn();
       renderForm(basePlaylist, onClose);
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
@@ -355,7 +391,9 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm({ ...basePlaylist, cover_art_url: null });
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
         expect(patchBody).toHaveProperty("title");
@@ -377,10 +415,14 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm();
-      await user.click(screen.getByRole("button", { name: /save playlist changes/i }));
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
 
       await waitFor(() => {
-        expect(patchBody.cover_art_url).toBe("https://example.com/original-cover.png");
+        expect(patchBody.cover_art_url).toBe(
+          "https://example.com/original-cover.png",
+        );
       });
     });
   });

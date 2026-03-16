@@ -29,7 +29,12 @@ export const RegistrationForm = () => {
     setApiError("");
 
     try {
-      await registerUser(data.username, data.email, data.password, data.password2);
+      await registerUser(
+        data.username,
+        data.email,
+        data.password,
+        data.password2,
+      );
       setSuccess(true);
     } catch (err) {
       setApiError(

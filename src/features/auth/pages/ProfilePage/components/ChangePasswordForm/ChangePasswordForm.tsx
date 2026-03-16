@@ -3,10 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button, AlertMessage } from "@/shared/components";
 import { changePassword } from "@/features/auth/api";
-import {
-  changePasswordSchema,
-  type ChangePasswordValues,
-} from "./schema.ts";
+import { changePasswordSchema, type ChangePasswordValues } from "./schema.ts";
 import styles from "./ChangePasswordForm.module.css";
 import { ApiError } from "@/shared/api/errors";
 
@@ -38,7 +35,11 @@ export const ChangePasswordForm = ({
     error: saveError,
   } = useMutation({
     mutationFn: (data: ChangePasswordValues) =>
-      changePassword(data.currentPassword, data.newPassword, data.confirmNewPassword),
+      changePassword(
+        data.currentPassword,
+        data.newPassword,
+        data.confirmNewPassword,
+      ),
     onSuccess,
   });
 
@@ -52,9 +53,12 @@ export const ChangePasswordForm = ({
       : saveError?.message || "An unexpected error occurred.";
 
   return (
-    <form className={styles.changePasswordForm} onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={styles.changePasswordForm}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       {saveError && <AlertMessage variant="error" message={saveErrorMessage} />}
-      
+
       <div className={styles.inputGroup}>
         <input
           type="password"
@@ -63,7 +67,9 @@ export const ChangePasswordForm = ({
           className={styles.passwordInput}
         />
         {errors.currentPassword && (
-          <span className={styles.errorText} role="alert">{errors.currentPassword.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.currentPassword.message}
+          </span>
         )}
       </div>
 
@@ -75,7 +81,9 @@ export const ChangePasswordForm = ({
           className={styles.passwordInput}
         />
         {errors.newPassword && (
-          <span className={styles.errorText} role="alert">{errors.newPassword.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.newPassword.message}
+          </span>
         )}
       </div>
 
@@ -87,7 +95,9 @@ export const ChangePasswordForm = ({
           className={styles.passwordInput}
         />
         {errors.confirmNewPassword && (
-          <span className={styles.errorText} role="alert">{errors.confirmNewPassword.message}</span>
+          <span className={styles.errorText} role="alert">
+            {errors.confirmNewPassword.message}
+          </span>
         )}
       </div>
 
@@ -100,7 +110,12 @@ export const ChangePasswordForm = ({
         >
           {isPending ? "Saving..." : "Change Password"}
         </Button>
-        <Button type="button" variant="outlined" size="small" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="outlined"
+          size="small"
+          onClick={onCancel}
+        >
           Cancel
         </Button>
       </div>

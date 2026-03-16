@@ -17,26 +17,38 @@ describe("ResetPasswordForm validation", () => {
             <Route path="/reset/:uid/:token" element={<ResetPasswordForm />} />
           </Routes>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     // Try to submit with empty fields.
     await user.click(screen.getByRole("button", { name: /reset password/i }));
 
-    expect(await screen.findByText("Password must be at least 8 characters")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Password must be at least 8 characters"),
+    ).toBeInTheDocument();
 
     // Try a short password and empty confirmation.
     await user.type(screen.getByPlaceholderText("New password"), "short");
     await user.click(screen.getByRole("button", { name: /reset password/i }));
 
-    expect(await screen.findByText("Password must be at least 8 characters")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Password must be at least 8 characters"),
+    ).toBeInTheDocument();
 
     // Try mismatched passwords
     await user.clear(screen.getByPlaceholderText("New password"));
-    await user.type(screen.getByPlaceholderText("New password"), "validpassword123");
-    await user.type(screen.getByPlaceholderText("Confirm new password"), "mismatch");
+    await user.type(
+      screen.getByPlaceholderText("New password"),
+      "validpassword123",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Confirm new password"),
+      "mismatch",
+    );
     await user.click(screen.getByRole("button", { name: /reset password/i }));
 
-    expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Passwords do not match"),
+    ).toBeInTheDocument();
   });
 });

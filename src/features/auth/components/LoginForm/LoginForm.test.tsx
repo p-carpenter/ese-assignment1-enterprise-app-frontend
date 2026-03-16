@@ -18,22 +18,38 @@ describe("LoginForm validation", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
-          <AuthContext.Provider value={{ user: null, loading: false, setUser: vi.fn(), refreshUser: vi.fn(), login: vi.fn(), logout: vi.fn() }}>
+          <AuthContext.Provider
+            value={{
+              user: null,
+              loading: false,
+              setUser: vi.fn(),
+              refreshUser: vi.fn(),
+              login: vi.fn(),
+              logout: vi.fn(),
+            }}
+          >
             <LoginForm />
           </AuthContext.Provider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     // Try to submit without filling out any fields
     await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText("Please enter a valid email address")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Please enter a valid email address"),
+    ).toBeInTheDocument();
     expect(await screen.findByText("Password is required")).toBeInTheDocument();
-    
+
     // Type an invalid email
-    await user.type(screen.getByPlaceholderText("Email address"), "not-an-email");
+    await user.type(
+      screen.getByPlaceholderText("Email address"),
+      "not-an-email",
+    );
     await user.click(screen.getByRole("button", { name: /log in/i }));
-    expect(await screen.findByText("Please enter a valid email address")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Please enter a valid email address"),
+    ).toBeInTheDocument();
   });
 });

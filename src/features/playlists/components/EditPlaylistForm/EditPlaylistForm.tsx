@@ -61,7 +61,11 @@ export const EditPlaylistForm = ({
     if (res) setEditCoverUrl(res.secure_url);
   };
 
-  const { mutate: saveEdit, isPending: isSaving, error: saveError } = useMutation({
+  const {
+    mutate: saveEdit,
+    isPending: isSaving,
+    error: saveError,
+  } = useMutation({
     mutationFn: (data: EditPlaylistFormValues) => {
       const payload = {
         title: data.title,
@@ -105,7 +109,9 @@ export const EditPlaylistForm = ({
           className={styles.coverEditBtn}
           onClick={() => coverInputRef.current?.click()}
           disabled={isCoverUploading}
-          aria-label={isCoverUploading ? "Uploading cover image" : "Change playlist cover"}
+          aria-label={
+            isCoverUploading ? "Uploading cover image" : "Change playlist cover"
+          }
         >
           <IoImageOutline size={18} aria-hidden="true" />
           {isCoverUploading ? "Uploading…" : "Change cover"}

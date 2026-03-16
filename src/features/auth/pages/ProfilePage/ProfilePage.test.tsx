@@ -259,7 +259,10 @@ describe("ProfilePage", () => {
         await user.click(icon);
 
         await user.type(screen.getByPlaceholderText("Current Password"), "old");
-        await user.type(screen.getByPlaceholderText("New Password"), "new8chars");
+        await user.type(
+          screen.getByPlaceholderText("New Password"),
+          "new8chars",
+        );
         await user.type(
           screen.getByPlaceholderText("Confirm New Password"),
           "new8chars",

@@ -3,7 +3,10 @@ import styles from "../AuthForm.module.css";
 import { requestPasswordReset } from "../../api";
 import { AlertMessage } from "@/shared/components";
 import { ApiError } from "@/shared/api/errors";
-import { requestResetPasswordSchema, type RequestResetPasswordFormValues } from "./schema";
+import {
+  requestResetPasswordSchema,
+  type RequestResetPasswordFormValues,
+} from "./schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -24,7 +27,7 @@ export const RequestResetPasswordForm = () => {
 
   const onFormSubmit = async (data: RequestResetPasswordFormValues) => {
     setApiError("");
-    
+
     try {
       await requestPasswordReset(data.email);
       setSuccess(true);
@@ -52,7 +55,7 @@ export const RequestResetPasswordForm = () => {
           }
           variant="success"
         />
-        
+
         <div className={styles.inputGroup}>
           <input
             placeholder="Email address"

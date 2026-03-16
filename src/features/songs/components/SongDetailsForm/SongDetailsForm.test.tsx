@@ -124,7 +124,9 @@ describe("SongDetailsForm", () => {
 
         await user.click(screen.getByRole("button", { name: /save song/i }));
 
-        expect(await screen.findByText(/title is required/i)).toBeInTheDocument();
+        expect(
+          await screen.findByText(/title is required/i),
+        ).toBeInTheDocument();
         expect(
           await screen.findByText(/artist is required/i),
         ).toBeInTheDocument();
@@ -161,10 +163,15 @@ describe("SongDetailsForm", () => {
         const user = userEvent.setup();
         const onCoverArtUpload = vi.fn();
         render(
-          <SongDetailsForm onSubmit={noop} onCoverArtUpload={onCoverArtUpload} />,
+          <SongDetailsForm
+            onSubmit={noop}
+            onCoverArtUpload={onCoverArtUpload}
+          />,
         );
 
-        const imageFile = new File(["img"], "cover.jpg", { type: "image/jpeg" });
+        const imageFile = new File(["img"], "cover.jpg", {
+          type: "image/jpeg",
+        });
         const imageInput = document.querySelector(
           'input[accept="image/*"]',
         ) as HTMLInputElement;
@@ -185,7 +192,9 @@ describe("SongDetailsForm", () => {
           />,
         );
 
-        const audioFile = new File(["audio"], "song.mp3", { type: "audio/mp3" });
+        const audioFile = new File(["audio"], "song.mp3", {
+          type: "audio/mp3",
+        });
         const audioInput = document.querySelector(
           'input[accept="audio/*"]',
         ) as HTMLInputElement;

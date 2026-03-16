@@ -49,7 +49,10 @@ describe("ChangePasswordForm", () => {
       <ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />,
     );
 
-    await user.type(screen.getByPlaceholderText("Current Password"), "oldpass123");
+    await user.type(
+      screen.getByPlaceholderText("Current Password"),
+      "oldpass123",
+    );
     await user.type(screen.getByPlaceholderText("New Password"), "newpass123");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
@@ -57,7 +60,9 @@ describe("ChangePasswordForm", () => {
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
-    expect(await screen.findByText("New passwords do not match")).toBeInTheDocument();
+    expect(
+      await screen.findByText("New passwords do not match"),
+    ).toBeInTheDocument();
     expect(mockChangePassword).not.toHaveBeenCalled();
   });
 

@@ -161,7 +161,9 @@ describe("SongEditForm", () => {
 
       render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
 
-      expect(screen.getByText("Could not save Invalid data")).toBeInTheDocument();
+      expect(
+        screen.getByText("Could not save Invalid data"),
+      ).toBeInTheDocument();
     });
 
     it("shows generic error message when save fails with unknown error", () => {

@@ -46,7 +46,7 @@ export const LoginForm = () => {
       <h2 className={styles.title}>Log in to Spotify</h2>
       <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
         <AlertMessage message={apiError} onDismiss={() => setApiError("")} />
-        
+
         <div className={styles.inputGroup}>
           <input
             placeholder="Email address"
