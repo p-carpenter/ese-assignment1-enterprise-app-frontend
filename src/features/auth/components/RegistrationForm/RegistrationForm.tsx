@@ -1,44 +1,52 @@
 import { useState } from "react";
-import { register } from "../../api";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { register as registerUser } from "../../api";
 import styles from "../AuthForm.module.css";
 import { AlertMessage } from "@/shared/components";
 import { ApiError } from "@/shared/api/errors";
+import { registrationSchema, type RegistrationFormValues } from "./schema";
 
 export const RegistrationForm = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegistrationFormValues>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      password2: "",
+    },
+  });
+
+  const onFormSubmit = async (data: RegistrationFormValues) => {
+    setApiError("");
 
     try {
-      await register(username, email, password, password2);
+      await registerUser(data.username, data.email, data.password, data.password2);
       setSuccess(true);
     } catch (err) {
-      setError(
+      setApiError(
         err instanceof ApiError
           ? err.getReadableMessage("Registration failed")
           : err instanceof Error
             ? err.message
             : "Registration failed",
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <>
       <h2 className={styles.title}>Sign up for Spotify</h2>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <AlertMessage message={error} onDismiss={() => setError("")} />
+      <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
+        <AlertMessage message={apiError} onDismiss={() => setApiError("")} />
         <AlertMessage
           message={
             success
@@ -47,43 +55,73 @@ export const RegistrationForm = () => {
           }
           variant="success"
         />
-        <input
-          placeholder="Username"
-          className={styles.inputField}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Email address"
-          className={styles.inputField}
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Password"
-          type="password"
-          className={styles.inputField}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Confirm Password"
-          type="password"
-          className={styles.inputField}
-          value={password2}
-          onChange={(e) => setPassword2(e.target.value)}
-          required
-        />
+
+        <div className={styles.inputGroup}>
+          <input
+            placeholder="Username"
+            aria-label="Username"
+            className={styles.inputField}
+            {...register("username")}
+          />
+          {errors.username && (
+            <span className={styles.errorText} role="alert">
+              {errors.username.message}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.inputGroup}>
+          <input
+            placeholder="Email address"
+            aria-label="Email address"
+            className={styles.inputField}
+            type="email"
+            {...register("email")}
+          />
+          {errors.email && (
+            <span className={styles.errorText} role="alert">
+              {errors.email.message}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.inputGroup}>
+          <input
+            placeholder="Password"
+            aria-label="Password"
+            className={styles.inputField}
+            type="password"
+            {...register("password")}
+          />
+          {errors.password && (
+            <span className={styles.errorText} role="alert">
+              {errors.password.message}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.inputGroup}>
+          <input
+            placeholder="Confirm Password"
+            aria-label="Confirm Password"
+            className={styles.inputField}
+            type="password"
+            {...register("password2")}
+          />
+          {errors.password2 && (
+            <span className={styles.errorText} role="alert">
+              {errors.password2.message}
+            </span>
+          )}
+        </div>
+
         <button
           className={styles.submitButton}
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting || success}
+          aria-label={isSubmitting ? "Signing up..." : "Sign Up"}
         >
-          {isLoading ? "Signing up..." : "Sign Up"}
+          {isSubmitting ? "Signing up..." : "Sign Up"}
         </button>
       </form>
     </>
