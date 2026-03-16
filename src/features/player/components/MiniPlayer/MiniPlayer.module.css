@@ -9,77 +9,6 @@
   min-width: 100%;
 }
 
-/* ── Controls ─────────────────────────── */
-.playerControls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-
-.playerButton,
-.playerButtonPrimary {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--app-white);
-  flex-shrink: 0;
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease;
-}
-
-.playerButton {
-  background: var(--app-gray-dark);
-}
-
-.playerButtonPrimary {
-  background: var(--accent-green);
-}
-
-.playerButton:disabled,
-.playerButtonPrimary:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.playerButton:not(:disabled):hover {
-  opacity: 0.8;
-  transform: scale(1.08);
-}
-
-.playerButtonPrimary:not(:disabled):hover {
-  transform: scale(1.08);
-  background: var(--accent-green-bright);
-}
-
-/* ── Album art ────────────────────────── */
-.albumArt {
-  width: 48px;
-  height: 48px;
-  border-radius: 4px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-@media (max-width: 1200px) {
-  .timeDisplay {
-    display: none;
-  }
-}
-
-@media (max-width: 1080px) {
-  .trackMeta {
-    display: none;
-  }
-}
-
 @media (max-width: 920px) {
   .miniPlayer {
     display: none;
@@ -97,7 +26,8 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  min-width: 0;
+  /* Hard-coded total width to prevent layout shifting */
+  width: 13.875rem; /* 222px */
   flex-shrink: 0;
   text-align: left;
 }
@@ -108,63 +38,6 @@
 
 .metaButton:disabled {
   cursor: default;
-}
-
-/* Now Playing full-screen overlay */
-.nowPlayingOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: linear-gradient(to bottom, #282828 0%, #121212 60%, #000000 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow-y: auto;
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.nowPlayingClose {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  background: none;
-  border: none;
-  color: var(--app-gray);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-  padding: 0;
-}
-
-.nowPlayingClose:hover {
-  color: var(--app-white);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.nowPlayingContent {
-  width: 100%;
-  max-width: 480px;
-  padding: 24px;
 }
 
 .historyPanel {
