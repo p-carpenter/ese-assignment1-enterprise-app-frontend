@@ -15,10 +15,7 @@ const mockNavigate = vi.fn();
 const mockInvalidateQueries = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual =
-    await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom",
-    );
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return { ...actual, useNavigate: vi.fn() };
 });
 
@@ -105,20 +102,16 @@ describe("SongUploadForm", () => {
       });
       render(<SongUploadForm />);
 
-      expect(
-        screen.getByText(/MP3 Upload Error: mp3 failed/i),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/Cover Art Error: cover failed/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/MP3 Upload Error: mp3 failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/Cover Art Error: cover failed/i)).toBeInTheDocument();
     });
 
     it("shows submit error when submitting before MP3 is uploaded", async () => {
       setupCloudinaryMocks();
       render(<SongUploadForm />);
 
-      act(() => {
-        getFormProps().onSubmit({
+      await act(async () => {
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",
@@ -126,9 +119,7 @@ describe("SongUploadForm", () => {
         });
       });
 
-      expect(
-        await screen.findByText(/please select an mp3 file/i),
-      ).toBeInTheDocument();
+      expect(await screen.findByText(/please select an mp3 file/i)).toBeInTheDocument();
       expect(mockedUploadSong).not.toHaveBeenCalled();
     });
   });
@@ -153,7 +144,7 @@ describe("SongUploadForm", () => {
       const file = new File(["audio"], "picked.mp3", { type: "audio/mp3" });
 
       await act(async () => {
-        getFormProps().onMp3Upload!(file);
+        await getFormProps().onMp3Upload!(file);
       });
 
       expect(mp3Upload).toHaveBeenCalledTimes(1);
@@ -182,9 +173,7 @@ describe("SongUploadForm", () => {
           secure_url: "https://cdn/audio.mp3",
           duration: 181,
         }),
-        coverUpload: vi
-          .fn()
-          .mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
+        coverUpload: vi.fn().mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
       });
       mockedReadId3Tags.mockResolvedValueOnce({
         title: "ID3 Title",
@@ -197,15 +186,15 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "test.mp3"));
-        getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
+        await getFormProps().onMp3Upload!(new File([""], "test.mp3"));
+        await getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
       });
 
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
       await waitFor(() => expect(coverUpload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",
@@ -245,12 +234,12 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "test.mp3"));
+        await getFormProps().onMp3Upload!(new File([""], "test.mp3"));
       });
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "Manual Title",
           artist: "Manual Artist",
           album: "Manual Album",
@@ -282,12 +271,12 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "t"));
+        await getFormProps().onMp3Upload!(new File([""], "t"));
       });
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",
