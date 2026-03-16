@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SongEditForm } from "./SongEditForm";
@@ -16,7 +17,12 @@ vi.mock("@/features/songs/api", () => ({
 }));
 
 type MutationOptionsShape = {
-  mutationFn: () => Promise<unknown>;
+  mutationFn: (data: {
+    title: string;
+    artist: string;
+    album: string;
+    releaseYear: string;
+  }) => Promise<unknown>;
   onSuccess?: () => void;
 };
 
@@ -64,110 +70,117 @@ describe("SongEditForm", () => {
     return latestCallArg as MutationOptionsShape;
   };
 
-  it("updates input state and calls save on submit", () => {
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+  describe("form submission", () => {
+    it("updates input state and calls save on submit", async () => {
+      const user = userEvent.setup();
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
 
-    const titleInput = screen.getByPlaceholderText("Title");
-    fireEvent.change(titleInput, { target: { value: "New Title" } });
+      const titleInput = screen.getByPlaceholderText("Title");
+      await user.clear(titleInput);
+      await user.type(titleInput, "New Title");
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(mockMutate).toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Save" }));
+
+      await waitFor(() => {
+        expect(mockMutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "New Title",
+          }),
+        );
+      });
+    });
+
+    it("calls updateSong with edited values from the mutationFn", async () => {
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+
+      const options = getMutationOptions();
+      await options.mutationFn({
+        title: "New Title",
+        artist: "New Artist",
+        album: "New Album",
+        releaseYear: "2024",
+      });
+
+      expect(updateSong).toHaveBeenCalledWith(1, {
+        title: "New Title",
+        artist: "New Artist",
+        album: "New Album",
+        release_year: "2024",
+        file_url: "https://example.com/song.mp3",
+        duration: 100,
+        cover_art_url: "https://example.com/cover.jpg",
+      });
+    });
   });
 
-  it("calls updateSong with edited values from the mutationFn", async () => {
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+  describe("mutation lifecycle", () => {
+    it("invalidates song and songs queries and closes on mutation success", () => {
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Title"), {
-      target: { value: "New Title" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Artist"), {
-      target: { value: "New Artist" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Album"), {
-      target: { value: "New Album" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Release year"), {
-      target: { value: "2024" },
+      const options = getMutationOptions();
+      options.onSuccess?.();
+
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: queryKeys.song(dummySong.id),
+      });
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: queryKeys.allSongs,
+      });
+      expect(mockOnClose).toHaveBeenCalled();
     });
 
-    const options = getMutationOptions();
-    await options.mutationFn();
+    it("disables save button and shows saving label while mutation is pending", () => {
+      vi.mocked(useMutation).mockReturnValue({
+        mutate: mockMutate,
+        isPending: true,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useMutation>);
 
-    expect(updateSong).toHaveBeenCalledWith(1, {
-      title: "New Title",
-      artist: "New Artist",
-      album: "New Album",
-      release_year: "2024",
-      file_url: "https://example.com/song.mp3",
-      duration: 100,
-      cover_art_url: "https://example.com/cover.jpg",
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+
+      const saveButton = screen.getByRole("button", { name: "Save" });
+      expect(saveButton).toBeDisabled();
+      expect(saveButton).toHaveTextContent("Saving…");
     });
   });
 
-  it("invalidates song and songs queries and closes on mutation success", () => {
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+  describe("errors and cancellation", () => {
+    it("shows readable API error message when save fails with ApiError", () => {
+      const apiError = new ApiError(400, {
+        detail: "Invalid data",
+        non_field_errors: ["Could not save"],
+      });
 
-    const options = getMutationOptions();
-    options.onSuccess?.();
+      vi.mocked(useMutation).mockReturnValue({
+        mutate: mockMutate,
+        isPending: false,
+        isError: true,
+        error: apiError,
+      } as unknown as ReturnType<typeof useMutation>);
 
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: queryKeys.song(dummySong.id),
-    });
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: queryKeys.allSongs,
-    });
-    expect(mockOnClose).toHaveBeenCalled();
-  });
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
 
-  it("disables save button and shows saving label while mutation is pending", () => {
-    vi.mocked(useMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: true,
-      isError: false,
-      error: null,
-    } as unknown as ReturnType<typeof useMutation>);
-
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
-
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    expect(saveButton).toBeDisabled();
-    expect(saveButton).toHaveTextContent("Saving…");
-  });
-
-  it("shows readable API error message when save fails with ApiError", () => {
-    const apiError = new ApiError(400, {
-      detail: "Invalid data",
-      non_field_errors: ["Could not save"],
+      expect(screen.getByText("Could not save Invalid data")).toBeInTheDocument();
     });
 
-    vi.mocked(useMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-      isError: true,
-      error: apiError,
-    } as unknown as ReturnType<typeof useMutation>);
+    it("shows generic error message when save fails with unknown error", () => {
+      vi.mocked(useMutation).mockReturnValue({
+        mutate: mockMutate,
+        isPending: false,
+        isError: true,
+        error: new Error("Unexpected failure"),
+      } as unknown as ReturnType<typeof useMutation>);
 
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
 
-    expect(screen.getByText("Could not save Invalid data")).toBeInTheDocument();
-  });
+      expect(screen.getByText("Unexpected failure")).toBeInTheDocument();
+    });
 
-  it("shows generic error message when save fails with unknown error", () => {
-    vi.mocked(useMutation).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-      isError: true,
-      error: new Error("Unexpected failure"),
-    } as unknown as ReturnType<typeof useMutation>);
-
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
-
-    expect(screen.getByText("Unexpected failure")).toBeInTheDocument();
-  });
-
-  it("calls onClose when cancel is clicked", () => {
-    render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(mockOnClose).toHaveBeenCalled();
+    it("calls onClose when cancel is clicked", () => {
+      render(<SongEditForm song={dummySong} onClose={mockOnClose} />);
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 });
