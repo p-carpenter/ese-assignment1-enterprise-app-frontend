@@ -2,10 +2,8 @@
 .trackMeta {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  max-width: 150px;
+  width: 9.375rem; /* 150px */
   flex-shrink: 0;
-  margin-left: 8px;
   overflow: hidden;
 }
 
