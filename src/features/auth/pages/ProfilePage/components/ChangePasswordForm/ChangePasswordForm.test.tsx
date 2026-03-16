@@ -49,14 +49,15 @@ describe("ChangePasswordForm", () => {
       <ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />,
     );
 
+    await user.type(screen.getByPlaceholderText("Current Password"), "oldpass123");
     await user.type(screen.getByPlaceholderText("New Password"), "newpass123");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
-      "mismatch",
+      "mismatch123",
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
-    expect(screen.getByText("New passwords do not match.")).toBeInTheDocument();
+    expect(await screen.findByText("New passwords do not match")).toBeInTheDocument();
     expect(mockChangePassword).not.toHaveBeenCalled();
   });
 
@@ -94,10 +95,10 @@ describe("ChangePasswordForm", () => {
     );
 
     await user.type(screen.getByPlaceholderText("Current Password"), "wrong");
-    await user.type(screen.getByPlaceholderText("New Password"), "newpass");
+    await user.type(screen.getByPlaceholderText("New Password"), "newpass8");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
-      "newpass",
+      "newpass8",
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
@@ -117,10 +118,10 @@ describe("ChangePasswordForm", () => {
     );
 
     await user.type(screen.getByPlaceholderText("Current Password"), "wrong");
-    await user.type(screen.getByPlaceholderText("New Password"), "newpass");
+    await user.type(screen.getByPlaceholderText("New Password"), "newpass8");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
-      "newpass",
+      "newpass8",
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
@@ -137,10 +138,10 @@ describe("ChangePasswordForm", () => {
     );
 
     await user.type(screen.getByPlaceholderText("Current Password"), "wrong");
-    await user.type(screen.getByPlaceholderText("New Password"), "newpass");
+    await user.type(screen.getByPlaceholderText("New Password"), "newpass8");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
-      "newpass",
+      "newpass8",
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
@@ -166,10 +167,10 @@ describe("ChangePasswordForm", () => {
     );
 
     await user.type(screen.getByPlaceholderText("Current Password"), "pass");
-    await user.type(screen.getByPlaceholderText("New Password"), "newpass");
+    await user.type(screen.getByPlaceholderText("New Password"), "newpass8");
     await user.type(
       screen.getByPlaceholderText("Confirm New Password"),
-      "newpass",
+      "newpass8",
     );
     await user.click(screen.getByRole("button", { name: "Change Password" }));
 
