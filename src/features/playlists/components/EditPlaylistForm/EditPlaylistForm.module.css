@@ -7,6 +7,22 @@
   gap: 10px;
 }
 
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.errorMessage {
+  color: #e22134;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hiddenInput {
+  display: none;
+}
+
 /* ── Cover art ────────────────────────────────────────────────── */
 .coverWrap {
   position: relative;

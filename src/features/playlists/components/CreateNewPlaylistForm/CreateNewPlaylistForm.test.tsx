@@ -1,6 +1,8 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CreateNewPlaylistForm } from "./CreateNewPlaylistForm";
+import "@testing-library/jest-dom/vitest";
 
 const { mockUseCloudinaryUpload, mockUpload } = vi.hoisted(() => ({
   mockUseCloudinaryUpload: vi.fn(),
@@ -10,6 +12,15 @@ const { mockUseCloudinaryUpload, mockUpload } = vi.hoisted(() => ({
 vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
   useCloudinaryUpload: mockUseCloudinaryUpload,
 }));
+
+vi.mock("@/shared/components", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/shared/components")>();
+  return {
+    ...actual,
+    AlertMessage: ({ message }: { message?: string | null }) =>
+      message ? <div>{message}</div> : null,
+  };
+});
 
 describe("CreateNewPlaylistForm", () => {
   beforeEach(() => {
@@ -21,119 +32,163 @@ describe("CreateNewPlaylistForm", () => {
     });
   });
 
-  it("submits the expected payload with updated fields", () => {
-    const onSubmit = vi.fn();
-    render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+  describe("Validation", () => {
+    it("shows validation error when submitting without a title", async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
 
-    fireEvent.change(screen.getByLabelText("Title"), {
-      target: { value: "Focus Flow" },
-    });
-    fireEvent.change(screen.getByLabelText("Description"), {
-      target: { value: "Coding playlist" },
-    });
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
-    fireEvent.click(screen.getByLabelText("Public"));
-    fireEvent.click(screen.getByLabelText("Collaborative"));
-
-    fireEvent.click(screen.getByRole("button", { name: "Create Playlist" }));
-
-    expect(onSubmit).toHaveBeenCalledWith({
-      title: "Focus Flow",
-      description: "Coding playlist",
-      cover_art_url: "",
-      is_public: false,
-      is_collaborative: true,
+      expect(
+        await screen.findByText(/playlist name is required/i),
+      ).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
   });
 
-  it("disables submit and changes button text while submitting", () => {
-    render(<CreateNewPlaylistForm onSubmit={vi.fn()} isSubmitting={true} />);
+  describe("Form Submission", () => {
+    it("submits the expected payload with updated fields", async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
 
-    const button = screen.getByRole("button", { name: "Creating..." });
-    expect(button).toBeDisabled();
+      await user.type(screen.getByLabelText("Title"), "Focus Flow");
+      await user.type(screen.getByLabelText("Description"), "Coding playlist");
+
+      await user.click(screen.getByLabelText("Public"));
+
+      await user.click(screen.getByLabelText("Collaborative"));
+
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          title: "Focus Flow",
+          description: "Coding playlist",
+          cover_art_url: "",
+          is_public: false,
+          is_collaborative: true,
+        });
+      });
+    });
   });
 
-  it("shows both form error and cover upload error", () => {
-    mockUseCloudinaryUpload.mockReturnValue({
-      upload: mockUpload,
-      isUploading: false,
-      error: "Upload failed",
+  describe("UI States", () => {
+    it("disables submit and changes button text while submitting", () => {
+      render(<CreateNewPlaylistForm onSubmit={vi.fn()} isSubmitting={true} />);
+
+      const button = screen.getByRole("button", { name: "Creating..." });
+      expect(button).toBeDisabled();
     });
 
-    render(
-      <CreateNewPlaylistForm
-        onSubmit={vi.fn()}
-        error="Could not save playlist"
-      />,
-    );
+    it("disables submit while cover is uploading", () => {
+      mockUseCloudinaryUpload.mockReturnValue({
+        upload: mockUpload,
+        isUploading: true,
+        error: null,
+      });
 
-    expect(screen.getByText("Could not save playlist")).toBeInTheDocument();
-    expect(
-      screen.getByText("Cover Art Error: Upload failed"),
-    ).toBeInTheDocument();
+      render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
+
+      const button = screen.getByRole("button", { name: "Create Playlist" });
+      expect(button).toBeDisabled();
+      expect(screen.getByText("Uploading…")).toBeInTheDocument();
+    });
+
+    it("shows both form error and cover upload error", () => {
+      mockUseCloudinaryUpload.mockReturnValue({
+        upload: mockUpload,
+        isUploading: false,
+        error: "Upload failed",
+      });
+
+      render(
+        <CreateNewPlaylistForm
+          onSubmit={vi.fn()}
+          error="Could not save playlist"
+        />,
+      );
+
+      expect(screen.getByText("Could not save playlist")).toBeInTheDocument();
+      expect(
+        screen.getByText("Cover Art Error: Upload failed"),
+      ).toBeInTheDocument();
+    });
   });
 
-  it("uploads cover art and includes secure_url in submit payload", async () => {
-    mockUpload.mockResolvedValue({
-      secure_url: "https://img.example.com/cover.png",
-    });
-    const onSubmit = vi.fn();
+  describe("Cover Art Upload", () => {
+    it("uploads cover art and includes secure_url in submit payload", async () => {
+      const user = userEvent.setup();
+      mockUpload.mockResolvedValue({
+        secure_url: "https://img.example.com/cover.png",
+      });
+      const onSubmit = vi.fn();
 
-    render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
 
-    const fileInput = screen.getByLabelText(
-      "Upload Cover Art",
-    ) as HTMLInputElement;
-    const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
-    fireEvent.change(fileInput, { target: { files: [file] } });
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
+      const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
 
-    await waitFor(() => {
-      expect(mockUpload).toHaveBeenCalledWith(file);
-    });
+      await user.upload(fileInput, file);
 
-    fireEvent.change(screen.getByLabelText("Title"), {
-      target: { value: "Artful Mix" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Create Playlist" }));
+      await waitFor(() => {
+        expect(mockUpload).toHaveBeenCalledWith(file);
+      });
 
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Artful Mix",
-        cover_art_url: "https://img.example.com/cover.png",
-      }),
-    );
-  });
+      await user.type(screen.getByLabelText("Title"), "Artful Mix");
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
-  it("does not call upload when no file is selected", () => {
-    render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
-
-    const fileInput = screen.getByLabelText(
-      "Upload Cover Art",
-    ) as HTMLInputElement;
-    fireEvent.change(fileInput, { target: { files: [] } });
-
-    expect(mockUpload).not.toHaveBeenCalled();
-  });
-
-  it("keeps cover URL empty if upload resolves null", async () => {
-    mockUpload.mockResolvedValue(null);
-    const onSubmit = vi.fn();
-
-    render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
-
-    const fileInput = screen.getByLabelText(
-      "Upload Cover Art",
-    ) as HTMLInputElement;
-    const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
-    fireEvent.change(fileInput, { target: { files: [file] } });
-
-    await waitFor(() => {
-      expect(mockUpload).toHaveBeenCalledWith(file);
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Artful Mix",
+            cover_art_url: "https://img.example.com/cover.png",
+          }),
+        );
+      });
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Playlist" }));
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ cover_art_url: "" }),
-    );
+    it("does not call upload when no file is selected", () => {
+      render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
+
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
+
+      fireEvent.change(fileInput, { target: { files: [] } });
+
+      expect(mockUpload).not.toHaveBeenCalled();
+    });
+
+    it("keeps cover URL empty if upload resolves null", async () => {
+      const user = userEvent.setup();
+      mockUpload.mockResolvedValue(null);
+      const onSubmit = vi.fn();
+
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
+      const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
+
+      await user.upload(fileInput, file);
+
+      await waitFor(() => {
+        expect(mockUpload).toHaveBeenCalledWith(file);
+      });
+
+      await user.type(screen.getByLabelText("Title"), "Fallback Playlist");
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({ cover_art_url: "" }),
+        );
+      });
+    });
   });
 });

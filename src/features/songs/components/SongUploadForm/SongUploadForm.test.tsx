@@ -117,8 +117,8 @@ describe("SongUploadForm", () => {
       setupCloudinaryMocks();
       render(<SongUploadForm />);
 
-      act(() => {
-        getFormProps().onSubmit({
+      await act(async () => {
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",
@@ -153,7 +153,7 @@ describe("SongUploadForm", () => {
       const file = new File(["audio"], "picked.mp3", { type: "audio/mp3" });
 
       await act(async () => {
-        getFormProps().onMp3Upload!(file);
+        await getFormProps().onMp3Upload!(file);
       });
 
       expect(mp3Upload).toHaveBeenCalledTimes(1);
@@ -197,15 +197,15 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "test.mp3"));
-        getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
+        await getFormProps().onMp3Upload!(new File([""], "test.mp3"));
+        await getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
       });
 
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
       await waitFor(() => expect(coverUpload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",
@@ -245,12 +245,12 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "test.mp3"));
+        await getFormProps().onMp3Upload!(new File([""], "test.mp3"));
       });
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "Manual Title",
           artist: "Manual Artist",
           album: "Manual Album",
@@ -282,12 +282,12 @@ describe("SongUploadForm", () => {
       render(<SongUploadForm />);
 
       await act(async () => {
-        getFormProps().onMp3Upload!(new File([""], "t"));
+        await getFormProps().onMp3Upload!(new File([""], "t"));
       });
       await waitFor(() => expect(mp3Upload).toHaveBeenCalled());
 
       await act(async () => {
-        getFormProps().onSubmit({
+        await getFormProps().onSubmit({
           title: "",
           artist: "",
           album: "",

@@ -5,6 +5,13 @@
   max-width: 420px;
 }
 
+/* Ny wrapper for input og feilmelding */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .editInput {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -14,11 +21,21 @@
   padding: 8px 12px;
   outline: none;
 }
+
 .editInput::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
+
 .editInput:focus {
-  border-color: #1db954;
+  border-color: #1db954; /* Spotify green */
+}
+
+/* Ny feiltekst for Zod */
+.errorText {
+  color: #e22134;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 2px;
 }
 
 .editActions {
@@ -40,9 +57,11 @@
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .iconBtn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
+
 .iconBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

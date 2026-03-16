@@ -35,6 +35,13 @@
   text-align: center;
 }
 
+/* ── Form Inputs & Validation ────────────────────────────────────────────── */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
 .inputField {
   width: 100%;
   padding: 14px 16px;
@@ -59,6 +66,13 @@
 
 .inputField::placeholder {
   color: var(--app-gray);
+}
+
+.errorText {
+  color: #e22134;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
 }
 
 .submitButton {

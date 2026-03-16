@@ -1,11 +1,13 @@
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { updateSong } from "@/features/songs/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import { IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
 import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 import { ApiError } from "@/shared/api/errors";
 import styles from "./SongEditForm.module.css";
+import { songEditSchema, type SongEditFormValues } from "./schema";
 
 interface SongEditFormProps {
   song: {
@@ -24,10 +26,19 @@ interface SongEditFormProps {
 export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
   const queryClient = useQueryClient();
 
-  const [editTitle, setEditTitle] = useState(song.title);
-  const [editArtist, setEditArtist] = useState(song.artist);
-  const [editAlbum, setEditAlbum] = useState(song.album ?? "");
-  const [editYear, setEditYear] = useState(song.release_year ?? "");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SongEditFormValues>({
+    resolver: zodResolver(songEditSchema),
+    defaultValues: {
+      title: song.title,
+      artist: song.artist,
+      album: song.album ?? "",
+      releaseYear: song.release_year ?? "",
+    },
+  });
 
   const {
     mutate: saveEdit,
@@ -35,12 +46,12 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     isError: isSaveError,
     error: saveError,
   } = useMutation({
-    mutationFn: () =>
+    mutationFn: (data: SongEditFormValues) =>
       updateSong(song.id, {
-        title: editTitle,
-        artist: editArtist,
-        album: editAlbum,
-        release_year: editYear,
+        title: data.title,
+        artist: data.artist,
+        album: data.album,
+        release_year: data.releaseYear,
         file_url: song.file_url,
         duration: song.duration,
         cover_art_url: song.cover_art_url,
@@ -54,44 +65,79 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     },
   });
 
+  const onFormSubmit = (data: SongEditFormValues) => {
+    saveEdit(data);
+  };
+
   const editErrorMessage =
     saveError instanceof ApiError
       ? saveError.getReadableMessage()
       : saveError?.message || "An unexpected error occurred.";
 
   return (
-    <div className={styles.editFields}>
+    <form className={styles.editFields} onSubmit={handleSubmit(onFormSubmit)}>
       {isSaveError && <AlertMessage message={editErrorMessage} />}
 
-      <input
-        className={styles.editInput}
-        value={editTitle}
-        onChange={(e) => setEditTitle(e.target.value)}
-        placeholder="Title"
-      />
-      <input
-        className={styles.editInput}
-        value={editArtist}
-        onChange={(e) => setEditArtist(e.target.value)}
-        placeholder="Artist"
-      />
-      <input
-        className={styles.editInput}
-        value={editAlbum}
-        onChange={(e) => setEditAlbum(e.target.value)}
-        placeholder="Album"
-      />
-      <input
-        className={styles.editInput}
-        value={editYear}
-        onChange={(e) => setEditYear(e.target.value)}
-        placeholder="Release year"
-      />
+      <div className={styles.inputGroup}>
+        <input
+          className={styles.editInput}
+          placeholder="Title"
+          aria-label="Title"
+          {...register("title")}
+        />
+        {errors.title && (
+          <span className={styles.errorText} role="alert">
+            {errors.title.message}
+          </span>
+        )}
+      </div>
+
+      <div className={styles.inputGroup}>
+        <input
+          className={styles.editInput}
+          placeholder="Artist"
+          aria-label="Artist"
+          {...register("artist")}
+        />
+        {errors.artist && (
+          <span className={styles.errorText} role="alert">
+            {errors.artist.message}
+          </span>
+        )}
+      </div>
+
+      <div className={styles.inputGroup}>
+        <input
+          className={styles.editInput}
+          placeholder="Album"
+          aria-label="Album"
+          {...register("album")}
+        />
+        {errors.album && (
+          <span className={styles.errorText} role="alert">
+            {errors.album.message}
+          </span>
+        )}
+      </div>
+
+      <div className={styles.inputGroup}>
+        <input
+          className={styles.editInput}
+          placeholder="Release year"
+          aria-label="Release year"
+          {...register("releaseYear")}
+        />
+        {errors.releaseYear && (
+          <span className={styles.errorText} role="alert">
+            {errors.releaseYear.message}
+          </span>
+        )}
+      </div>
 
       <div className={styles.editActions}>
         <button
+          type="submit"
           className={styles.iconBtn}
-          onClick={() => saveEdit()}
           disabled={isSaving}
           aria-label="Save"
         >
@@ -99,6 +145,7 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
           {isSaving ? "Saving…" : "Save"}
         </button>
         <button
+          type="button"
           className={styles.iconBtn}
           onClick={onClose}
           aria-label="Cancel"
@@ -107,6 +154,6 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
           Cancel
         </button>
       </div>
-    </div>
+    </form>
   );
 };

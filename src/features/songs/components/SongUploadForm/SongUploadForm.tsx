@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
 import { readId3Tags, type Id3Tags } from "@/shared/hooks/useId3Tags";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
+import { type SongDetailsValues } from "../SongDetailsForm/schema";
 import { uploadSong } from "../../api";
 import { useNavigate } from "react-router-dom";
 import styles from "./SongUploadForm.module.css";
@@ -14,7 +15,6 @@ export const SongUploadForm = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Instantiate the hook twice to completely isolate their loading/error states.
   const {
     upload: uploadMp3,
     isUploading: isMp3Uploading,
@@ -32,7 +32,6 @@ export const SongUploadForm = () => {
   const [songFileName, setSongFileName] = useState<string>("");
   const [id3Tags, setId3Tags] = useState<Id3Tags>({});
 
-  // Dedicated state for the database submission
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -51,7 +50,6 @@ export const SongUploadForm = () => {
   const handleMp3Upload = async (file: File | null) => {
     if (!file) return;
     try {
-      // Read ID3 tags and upload to Cloudinary in parallel
       const [cloudData, tags] = await Promise.all([
         uploadMp3(file),
         readId3Tags(file),
@@ -61,24 +59,13 @@ export const SongUploadForm = () => {
         setSongDuration(Math.round(cloudData.duration || 0));
         setSongFileName(file.name);
       }
-      // Pre-fill form with whatever ID3 tags we found
       setId3Tags(tags);
     } catch (err) {
       console.error("MP3 upload failed:", err);
     }
   };
 
-  const handleSubmit = async ({
-    title,
-    artist,
-    album,
-    releaseYear,
-  }: {
-    title: string;
-    artist: string;
-    album: string;
-    releaseYear: string;
-  }) => {
+  const handleSubmit = async (data: SongDetailsValues) => {
     if (!songUrl) {
       setSubmitError("Please select an MP3 file.");
       return;
@@ -89,18 +76,16 @@ export const SongUploadForm = () => {
 
     try {
       await uploadSong({
-        title: title || id3Tags.title || songFileName,
-        artist: artist || id3Tags.artist || "Unknown Artist",
+        title: data.title || id3Tags.title || songFileName,
+        artist: data.artist || id3Tags.artist || "Unknown Artist",
         file_url: songUrl,
         cover_art_url: coverArtUrl,
         duration: songDuration,
-        album: album || id3Tags.album || "Unknown Album",
-        release_year: releaseYear || id3Tags.year || "Unknown Year",
+        album: data.album || id3Tags.album || "Unknown Album",
+        release_year: data.releaseYear || id3Tags.year || "Unknown Year",
       });
 
-      // Refresh the song library so the new track appears immediately
       void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
-
       navigate("/");
     } catch (err) {
       console.error("Failed to save song:", err);
@@ -136,7 +121,6 @@ export const SongUploadForm = () => {
       />
 
       <SongDetailsForm
-        key={JSON.stringify(id3Tags)}
         initialValues={{
           title: id3Tags.title || "",
           artist: id3Tags.artist || "",
@@ -145,7 +129,6 @@ export const SongUploadForm = () => {
         }}
         onSubmit={handleSubmit}
         isSubmitting={isSaving}
-        error={submitError}
         showMp3Upload={true}
         onMp3Upload={handleMp3Upload}
         mp3Uploaded={!!songUrl}

@@ -1,20 +1,12 @@
-import { useId, useState } from "react";
-import styles from "../SongUploadForm/SongUploadForm.module.css";
-import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
+import { useId, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import styles from "./SongDetailsForm.module.css";
+import { type SongDetailsValues, songDetailsSchema } from "./schema";
 
 interface SongDetailsFormProps {
-  initialValues?: {
-    title?: string;
-    artist?: string;
-    album?: string;
-    releaseYear?: string;
-  };
-  onSubmit: (values: {
-    title: string;
-    artist: string;
-    album: string;
-    releaseYear: string;
-  }) => void;
+  initialValues?: Partial<SongDetailsValues>;
+  onSubmit: (values: SongDetailsValues) => void;
   isSubmitting?: boolean;
   error?: string | null;
   onErrorDismiss?: () => void;
@@ -32,8 +24,6 @@ export const SongDetailsForm = ({
   initialValues = {},
   onSubmit,
   isSubmitting = false,
-  error,
-  onErrorDismiss,
   showMp3Upload = false,
   onMp3Upload,
   mp3Uploaded = false,
@@ -43,25 +33,45 @@ export const SongDetailsForm = ({
   onCoverArtUpload,
   coverArtLabel = "Select Cover Art",
 }: SongDetailsFormProps) => {
-  const [title, setTitle] = useState(initialValues.title || "");
-  const [artist, setArtist] = useState(initialValues.artist || "");
-  const [album, setAlbum] = useState(initialValues.album || "");
-  const [releaseYear, setReleaseYear] = useState(
-    initialValues.releaseYear || "",
-  );
   const [mp3FileName, setMp3FileName] = useState<string>("");
   const [coverFileName, setCoverFileName] = useState<string>("");
 
   const mp3InputId = useId();
   const coverInputId = useId();
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit({ title, artist, album, releaseYear });
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<SongDetailsValues>({
+    resolver: zodResolver(songDetailsSchema),
+    defaultValues: {
+      title: initialValues.title || "",
+      artist: initialValues.artist || "",
+      album: initialValues.album || "",
+      releaseYear: initialValues.releaseYear || "",
+    },
+  });
+
+  // Sync incoming ID3 tags.
+  useEffect(() => {
+    reset({
+      title: initialValues.title || "",
+      artist: initialValues.artist || "",
+      album: initialValues.album || "",
+      releaseYear: initialValues.releaseYear || "",
+    });
+  }, [
+    initialValues.title,
+    initialValues.artist,
+    initialValues.album,
+    initialValues.releaseYear,
+    reset,
+  ]);
 
   return (
-    <form className={styles.container} onSubmit={handleSubmit}>
+    <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
       <h3 className={styles.title}>Song Details</h3>
 
       {showMp3Upload && onMp3Upload && (
@@ -104,33 +114,61 @@ export const SongDetailsForm = ({
         </div>
       )}
 
-      <input
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className={styles.inputField}
-      />
+      <div className={styles.inputGroup}>
+        <input
+          placeholder="Title"
+          aria-label="Title"
+          className={styles.inputField}
+          {...register("title")}
+        />
+        {errors.title && (
+          <span className={styles.errorText} role="alert">
+            {errors.title.message}
+          </span>
+        )}
+      </div>
 
-      <input
-        placeholder="Album"
-        value={album}
-        onChange={(e) => setAlbum(e.target.value)}
-        className={styles.inputField}
-      />
+      <div className={styles.inputGroup}>
+        <input
+          placeholder="Artist"
+          aria-label="Artist"
+          className={styles.inputField}
+          {...register("artist")}
+        />
+        {errors.artist && (
+          <span className={styles.errorText} role="alert">
+            {errors.artist.message}
+          </span>
+        )}
+      </div>
 
-      <input
-        placeholder="Artist"
-        value={artist}
-        onChange={(e) => setArtist(e.target.value)}
-        className={styles.inputField}
-      />
+      <div className={styles.inputGroup}>
+        <input
+          placeholder="Album"
+          aria-label="Album"
+          className={styles.inputField}
+          {...register("album")}
+        />
+        {errors.album && (
+          <span className={styles.errorText} role="alert">
+            {errors.album.message}
+          </span>
+        )}
+      </div>
 
-      <input
-        placeholder="Release Year"
-        value={releaseYear}
-        onChange={(e) => setReleaseYear(e.target.value)}
-        className={styles.inputField}
-      />
+      <div className={styles.inputGroup}>
+        <input
+          placeholder="Release Year"
+          aria-label="Release Year"
+          className={styles.inputField}
+          {...register("releaseYear")}
+        />
+        {errors.releaseYear && (
+          <span className={styles.errorText} role="alert">
+            {errors.releaseYear.message}
+          </span>
+        )}
+      </div>
 
       {onCoverArtUpload && (
         <div className={styles.fileUploadWrapper}>
@@ -164,12 +202,6 @@ export const SongDetailsForm = ({
           )}
         </div>
       )}
-
-      <AlertMessage
-        message={error}
-        variant="error"
-        onDismiss={onErrorDismiss}
-      />
 
       <button
         type="submit"
