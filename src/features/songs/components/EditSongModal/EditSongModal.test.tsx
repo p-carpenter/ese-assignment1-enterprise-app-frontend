@@ -34,8 +34,9 @@ vi.mock("../SongDetailsForm/SongDetailsForm", () => ({
           props.onSubmit({
             title: "Updated title",
             artist: "Updated artist",
-            album: "",
-            releaseYear: "",
+            album: "Updated album",
+            release_year: 2023,
+            cover_art_url: props.initialValues?.cover_art_url || "",
           })
         }
       >
@@ -122,6 +123,8 @@ describe("EditSongModal", () => {
       expect(api.updateSong).toHaveBeenCalledWith(7, {
         title: "Updated title",
         artist: "Updated artist",
+        album: "Updated album",
+        release_year: 2023,
         file_url: baseSong.file_url,
         duration: baseSong.duration,
         cover_art_url: "https://example.com/old-cover.jpg",

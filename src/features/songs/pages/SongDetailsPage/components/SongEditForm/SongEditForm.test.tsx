@@ -20,8 +20,8 @@ type MutationOptionsShape = {
   mutationFn: (data: {
     title: string;
     artist: string;
-    album: string;
-    releaseYear: string;
+    album?: string | undefined;
+    release_year?: number | undefined;
   }) => Promise<unknown>;
   onSuccess?: () => void;
 };
@@ -37,7 +37,7 @@ describe("SongEditForm", () => {
     title: "Old Title",
     artist: "Old Artist",
     album: "Old Album",
-    release_year: "2001",
+    release_year: 2001,
     file_url: "https://example.com/song.mp3",
     duration: 100,
     cover_art_url: "https://example.com/cover.jpg",
@@ -98,14 +98,14 @@ describe("SongEditForm", () => {
         title: "New Title",
         artist: "New Artist",
         album: "New Album",
-        releaseYear: "2024",
+        release_year: 2024,
       });
 
       expect(updateSong).toHaveBeenCalledWith(1, {
         title: "New Title",
         artist: "New Artist",
         album: "New Album",
-        release_year: "2024",
+        release_year: 2024,
         file_url: "https://example.com/song.mp3",
         duration: 100,
         cover_art_url: "https://example.com/cover.jpg",

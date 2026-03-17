@@ -33,18 +33,24 @@ export const EditSongModal = ({
     mutationFn: ({
       title,
       artist,
-      url,
+      album,
+      release_year,
+      cover_art_url,
     }: {
       title: string;
       artist: string;
-      url: string;
+      album?: string;
+      release_year?: number;
+      cover_art_url: string;
     }) =>
       updateSong(song!.id, {
         title,
         artist,
+        album,
+        release_year: release_year,
         file_url: song!.file_url,
         duration: song!.duration,
-        cover_art_url: url,
+        cover_art_url,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
@@ -70,8 +76,19 @@ export const EditSongModal = ({
     }
   };
 
-  const handleSubmit = ({ title, artist }: SongDetailsValues) => {
-    updateMutation.mutate({ title, artist, url: coverArtUrl });
+  const handleSubmit = ({
+    title,
+    artist,
+    album,
+    release_year,
+  }: SongDetailsValues) => {
+    updateMutation.mutate({
+      title,
+      artist,
+      album,
+      release_year,
+      cover_art_url: coverArtUrl,
+    });
   };
 
   const activeError = updateMutation.error || uploadError;
@@ -91,6 +108,9 @@ export const EditSongModal = ({
         initialValues={{
           title: song.title,
           artist: song.artist,
+          album: song.album || "",
+          release_year: song.release_year || undefined,
+          cover_art_url: coverArtUrl,
         }}
         onSubmit={handleSubmit}
         isSubmitting={updateMutation.isPending || isUploading}
