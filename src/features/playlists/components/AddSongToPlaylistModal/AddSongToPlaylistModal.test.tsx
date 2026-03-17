@@ -42,6 +42,7 @@ const songs: Song[] = [
     artist: "Nova",
     file_url: "url1",
     duration: 160,
+    cover_art_url: "https://placehold.co/220",
     uploaded_at: "2024-01-01",
   },
   {
@@ -50,6 +51,7 @@ const songs: Song[] = [
     artist: "Wave",
     file_url: "url2",
     duration: 140,
+    cover_art_url: "https://placehold.co/220",
     uploaded_at: "2024-01-02",
   },
 ];

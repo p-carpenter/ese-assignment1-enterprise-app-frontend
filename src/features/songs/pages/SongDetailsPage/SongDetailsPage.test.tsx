@@ -44,6 +44,7 @@ const mockSong: Song = {
   title: "Test Title",
   artist: "Test Artist",
   file_url: "https://example.com/song.mp3",
+  cover_art_url: "https://placehold.co/220",
   duration: 180,
   uploaded_at: "2023-01-01T00:00:00Z",
 };

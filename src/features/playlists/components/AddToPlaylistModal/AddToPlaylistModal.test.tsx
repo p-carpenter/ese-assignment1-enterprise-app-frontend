@@ -51,6 +51,7 @@ const song: Song = {
   title: "City Lights",
   artist: "Aurora",
   file_url: "https://example.com/10.mp3",
+  cover_art_url: "https://placehold.co/220",
   duration: 200,
   uploaded_at: "2024-01-01T00:00:00Z",
 };

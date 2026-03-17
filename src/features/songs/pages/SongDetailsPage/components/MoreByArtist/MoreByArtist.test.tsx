@@ -37,7 +37,7 @@ describe("MoreByArtist", () => {
           id: 2,
           artist: "Artist",
           title: "Other Song",
-          release_year: "2023",
+          release_year: 2023,
         } as Song,
       ],
       isLoading: false,

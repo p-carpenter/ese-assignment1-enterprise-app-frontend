@@ -93,6 +93,7 @@ describe("LyricsSection", () => {
           artist: "A",
           file_url: "https://example.com/current.mp3",
           duration: 120,
+          cover_art_url: "https://placehold.co/220",
           uploaded_at: "2024-01-01T00:00:00Z",
         },
         getPosition: vi.fn(() => 10),

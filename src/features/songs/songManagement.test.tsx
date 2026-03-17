@@ -72,7 +72,7 @@ const mockSongs: Song[] = [
     cover_art_url: "http://example.com/cover1.jpg",
     album: "Album 1",
     uploaded_at: "2023-01-01T12:00:00.000Z",
-    release_year: "2023",
+    release_year: 2023,
   },
   {
     id: 2,
@@ -84,7 +84,7 @@ const mockSongs: Song[] = [
 
     album: "Album 2",
     uploaded_at: "2023-01-01T12:00:00.000Z",
-    release_year: "2024",
+    release_year: 2024,
   },
 ];
 
@@ -221,7 +221,7 @@ describe("Song management", () => {
           file_url: "http://audio.url/song.mp3",
           duration: 123,
           album: "Unknown Album",
-          release_year: "Unknown Year",
+          release_year: undefined,
         });
       });
     });
@@ -262,6 +262,8 @@ describe("Song management", () => {
         expect(mockUpdateSong).toHaveBeenCalledWith(mockSongs[0].id, {
           title: "New Title",
           artist: "New Artist",
+          album: "Album 1",
+          release_year: 2023,
           file_url: mockSongs[0].file_url,
           duration: mockSongs[0].duration,
           cover_art_url: mockSongs[0].cover_art_url,
