@@ -4,7 +4,7 @@ export interface Id3Tags {
   title?: string;
   artist?: string;
   album?: string;
-  year?: string;
+  year?: number;
 }
 
 /**
@@ -23,7 +23,7 @@ export const readId3Tags = async (file: File): Promise<Id3Tags> => {
       title: title || undefined,
       artist: artist || undefined,
       album: album || undefined,
-      year: year?.toString() || undefined,
+      year: year || undefined,
     };
   } catch {
     return {};

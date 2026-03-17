@@ -150,7 +150,8 @@ describe("SongDetailsForm", () => {
               title: "Test Song",
               artist: "Test Artist",
               album: "",
-              releaseYear: "",
+              cover_art_url: "",
+              release_year: undefined,
             },
             expect.anything(),
           );

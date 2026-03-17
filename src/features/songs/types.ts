@@ -5,9 +5,9 @@ export interface Song {
   title: string;
   artist: string;
   album?: string;
-  release_year?: string;
+  release_year?: number;
   file_url: string; // The MP3 URL from Cloudinary
-  cover_art_url?: string;
+  cover_art_url: string;
   duration: number; // In seconds
   uploaded_at: string; // ISO date string
   uploaded_by?: UserMini;
@@ -17,9 +17,9 @@ export interface SongUploadPayload {
   title: string;
   artist: string;
   album?: string;
-  release_year?: string;
+  release_year?: number;
   file_url: string;
-  cover_art_url?: string;
+  cover_art_url: string;
   duration: number;
 }
 
