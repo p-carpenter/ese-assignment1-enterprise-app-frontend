@@ -1,10 +1,16 @@
 import { z } from "zod";
 
-export const editPlaylistSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  is_public: z.boolean(),
-  is_collaborative: z.boolean(),
-});
+export const editPlaylistSchema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().optional(),
+    is_public: z.boolean(),
+    is_collaborative: z.boolean(),
+    cover_art_url: z.string().optional(),
+  })
+  .refine((data) => !(data.is_collaborative && !data.is_public), {
+    message: "Private playlists cannot be collaborative",
+    path: ["is_collaborative"],
+  });
 
 export type EditPlaylistFormValues = z.infer<typeof editPlaylistSchema>;

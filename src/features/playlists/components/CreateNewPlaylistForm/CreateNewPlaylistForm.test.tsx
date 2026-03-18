@@ -57,19 +57,21 @@ describe("CreateNewPlaylistForm", () => {
       await user.type(screen.getByLabelText("Description"), "Coding playlist");
 
       await user.click(screen.getByLabelText("Public"));
-
       await user.click(screen.getByLabelText("Collaborative"));
 
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
       await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith({
-          title: "Focus Flow",
-          description: "Coding playlist",
-          cover_art_url: "",
-          is_public: false,
-          is_collaborative: true,
-        });
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Focus Flow",
+            description: "Coding playlist",
+            cover_art_url: "",
+            is_public: true,
+            is_collaborative: true,
+          }),
+          expect.anything(),
+        );
       });
     });
   });
@@ -77,7 +79,6 @@ describe("CreateNewPlaylistForm", () => {
   describe("UI States", () => {
     it("disables submit and changes button text while submitting", () => {
       render(<CreateNewPlaylistForm onSubmit={vi.fn()} isSubmitting={true} />);
-
       const button = screen.getByRole("button", { name: "Creating..." });
       expect(button).toBeDisabled();
     });
@@ -88,9 +89,7 @@ describe("CreateNewPlaylistForm", () => {
         isUploading: true,
         error: null,
       });
-
       render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
-
       const button = screen.getByRole("button", { name: "Create Playlist" });
       expect(button).toBeDisabled();
       expect(screen.getByText("Uploading…")).toBeInTheDocument();
@@ -102,18 +101,47 @@ describe("CreateNewPlaylistForm", () => {
         isUploading: false,
         error: "Upload failed",
       });
-
       render(
         <CreateNewPlaylistForm
           onSubmit={vi.fn()}
           error="Could not save playlist"
         />,
       );
-
       expect(screen.getByText("Could not save playlist")).toBeInTheDocument();
       expect(
         screen.getByText("Cover Art Error: Upload failed"),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("Visibility and Toggles", () => {
+    it("hides the collaborative checkbox when public is false", () => {
+      render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
+      expect(screen.queryByLabelText("Collaborative")).not.toBeInTheDocument();
+    });
+
+    it("resets collaborative to false and hides it when public is unchecked", async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+
+      await user.type(screen.getByLabelText("Title"), "My Playlist");
+      await user.click(screen.getByLabelText("Public"));
+      await user.click(screen.getByLabelText("Collaborative"));
+      await user.click(screen.getByLabelText("Public"));
+
+      expect(screen.queryByLabelText("Collaborative")).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            is_public: false,
+            is_collaborative: false,
+          }),
+          expect.anything(),
+        );
+      });
     });
   });
 
@@ -126,17 +154,13 @@ describe("CreateNewPlaylistForm", () => {
       const onSubmit = vi.fn();
 
       render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
-
       const fileInput = screen.getByLabelText(
         "Upload Cover Art",
       ) as HTMLInputElement;
       const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
 
       await user.upload(fileInput, file);
-
-      await waitFor(() => {
-        expect(mockUpload).toHaveBeenCalledWith(file);
-      });
+      await waitFor(() => expect(mockUpload).toHaveBeenCalledWith(file));
 
       await user.type(screen.getByLabelText("Title"), "Artful Mix");
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
@@ -147,19 +171,17 @@ describe("CreateNewPlaylistForm", () => {
             title: "Artful Mix",
             cover_art_url: "https://img.example.com/cover.png",
           }),
+          expect.anything(),
         );
       });
     });
 
     it("does not call upload when no file is selected", () => {
       render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
-
       const fileInput = screen.getByLabelText(
         "Upload Cover Art",
       ) as HTMLInputElement;
-
       fireEvent.change(fileInput, { target: { files: [] } });
-
       expect(mockUpload).not.toHaveBeenCalled();
     });
 
@@ -169,17 +191,13 @@ describe("CreateNewPlaylistForm", () => {
       const onSubmit = vi.fn();
 
       render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
-
       const fileInput = screen.getByLabelText(
         "Upload Cover Art",
       ) as HTMLInputElement;
       const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
 
       await user.upload(fileInput, file);
-
-      await waitFor(() => {
-        expect(mockUpload).toHaveBeenCalledWith(file);
-      });
+      await waitFor(() => expect(mockUpload).toHaveBeenCalledWith(file));
 
       await user.type(screen.getByLabelText("Title"), "Fallback Playlist");
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
@@ -187,6 +205,7 @@ describe("CreateNewPlaylistForm", () => {
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith(
           expect.objectContaining({ cover_art_url: "" }),
+          expect.anything(),
         );
       });
     });
