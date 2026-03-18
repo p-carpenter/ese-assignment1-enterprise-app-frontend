@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useQuery } from "@tanstack/react-query";
 import { AddToPlaylistModal } from "./AddToPlaylistModal";
 import type { Song } from "@/features/songs/types";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 const { mockUseQuery, mockUseNavigate, mockCreateModal } = vi.hoisted(() => ({
   mockUseQuery: vi.fn(),
@@ -155,7 +157,8 @@ describe("AddToPlaylistModal", () => {
     );
 
     fireEvent.click(screen.getByText("+ Create New Playlist"));
-    fireEvent.click(screen.getByRole("button", { name: "Finish create" }));
+    // Use getByText for compatibility with react-aria-components
+    fireEvent.click(screen.getByText("Finish create"));
 
     expect(onSongAdded).toHaveBeenCalledWith(42);
     expect(onClose).toHaveBeenCalledOnce();
@@ -178,5 +181,18 @@ describe("AddToPlaylistModal", () => {
         queryKey: ["playlists"],
       }),
     );
+  });
+
+  it("should have no accessibility violations when open", async () => {
+    const { container } = render(
+      <AddToPlaylistModal
+        song={song}
+        isOpen={true}
+        onClose={vi.fn()}
+        onSongAdded={vi.fn()}
+      />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

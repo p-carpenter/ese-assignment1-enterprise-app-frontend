@@ -1,4 +1,5 @@
 import { type FC } from "react";
+import { Button } from "react-aria-components";
 import styles from "./PlaybackControls.module.css";
 import {
   IoPlaySkipBackSharp,
@@ -30,32 +31,32 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
 }) => {
   return (
     <div className={styles.buttons}>
-      <button
-        onClick={onPrev}
+      <Button
+        onPress={onPrev}
         className={styles.btn}
-        disabled={disablePrev || isLoading}
+        isDisabled={disablePrev || isLoading}
         aria-label="Previous"
       >
         <IoPlaySkipBackSharp size={16} />
-      </button>
+      </Button>
 
-      <button
-        onClick={() => (isPlaying ? onPause() : onPlay())}
+      <Button
+        onPress={() => (isPlaying ? onPause() : onPlay())}
         className={styles.btnPrimary}
-        disabled={isLoading}
+        isDisabled={isLoading}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? <IoPauseSharp size={16} /> : <IoPlaySharp size={16} />}
-      </button>
+      </Button>
 
-      <button
-        onClick={onNext}
+      <Button
+        onPress={onNext}
         className={styles.btn}
-        disabled={disableNext || isLoading}
+        isDisabled={disableNext || isLoading}
         aria-label="Next"
       >
         <IoPlaySkipForwardSharp size={16} />
-      </button>
+      </Button>
     </div>
   );
 };

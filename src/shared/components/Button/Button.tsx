@@ -1,29 +1,28 @@
-import { type ComponentPropsWithoutRef, type ElementType } from "react";
+import {
+  Button as AriaButton,
+  type ButtonProps as AriaButtonProps,
+} from "react-aria-components";
 import styles from "./Button.module.css";
 
-type ButtonProps<T extends ElementType = "button"> = {
-  as?: T;
+interface ButtonProps extends AriaButtonProps {
   variant?: "primary" | "outlined";
   size?: "small" | "large";
-  className?: string;
-} & Omit<ComponentPropsWithoutRef<T>, "as">;
+}
 
-export const Button = <T extends ElementType = "button">({
-  as,
+export const Button = ({
   variant = "outlined",
   size = "small",
   className = "",
   children,
   ...props
-}: ButtonProps<T>) => {
-  const Component = as ?? "button";
+}: ButtonProps) => {
   const classes = [styles.button, styles[variant], styles[size], className]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <Component className={classes} {...props}>
+    <AriaButton className={classes} {...props}>
       {children}
-    </Component>
+    </AriaButton>
   );
 };

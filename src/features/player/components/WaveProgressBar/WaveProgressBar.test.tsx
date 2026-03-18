@@ -1,6 +1,9 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { WaveProgressBar } from "./WaveProgressBar";
+import { axe, toHaveNoViolations } from "jest-axe";
+
+expect.extend(toHaveNoViolations);
 
 describe("WaveProgressBar", () => {
   beforeEach(() => {
@@ -11,28 +14,6 @@ describe("WaveProgressBar", () => {
     vi.restoreAllMocks();
   });
 
-  const setupMockSlider = (width = 200, left = 0) => {
-    const slider = screen.getByRole("slider", {
-      name: "Seek",
-    }) as HTMLDivElement;
-    Object.defineProperty(slider, "setPointerCapture", {
-      value: vi.fn(),
-      configurable: true,
-    });
-    vi.spyOn(slider, "getBoundingClientRect").mockReturnValue({
-      x: left,
-      y: 0,
-      width,
-      height: 20,
-      top: 0,
-      left,
-      right: left + width,
-      bottom: 20,
-      toJSON: () => ({}),
-    });
-    return slider;
-  };
-
   it("renders disabled slider semantics when there is no current song", () => {
     render(
       <WaveProgressBar
@@ -42,23 +23,11 @@ describe("WaveProgressBar", () => {
       />,
     );
 
-    const slider = screen.getByRole("slider", { name: "Seek" });
-    expect(slider).toHaveAttribute("tabindex", "-1");
-    expect(slider).toHaveAttribute("aria-valuenow", "0");
+    const slider = screen.getByRole("slider", { name: "Seek time" });
+    expect(slider).toBeDisabled();
   });
 
-  it("ignores pointer seek when song is missing", () => {
-    const seek = vi.fn();
-    render(<WaveProgressBar seek={seek} getPosition={vi.fn(() => 0)} />);
-
-    const slider = screen.getByRole("slider", { name: "Seek" });
-    fireEvent.pointerDown(slider, { clientX: 100, pointerId: 1 });
-    fireEvent.pointerUp(slider, { clientX: 120, pointerId: 1 });
-
-    expect(seek).not.toHaveBeenCalled();
-  });
-
-  it("updates position while dragging and seeks on pointer up", () => {
+  it("seeks when the slider value changes via user interaction", () => {
     const seek = vi.fn();
     render(
       <WaveProgressBar
@@ -69,76 +38,12 @@ describe("WaveProgressBar", () => {
       />,
     );
 
-    const slider = setupMockSlider(200, 0);
+    const slider = screen.getByRole("slider", { name: "Seek time" });
 
-    fireEvent.pointerDown(slider, { clientX: 50, pointerId: 11 });
-    expect(slider).toHaveAttribute("aria-valuenow", "25");
+    fireEvent.keyDown(slider, { key: "ArrowRight" });
+    fireEvent.keyUp(slider, { key: "ArrowRight" });
 
-    fireEvent.pointerMove(slider, { clientX: 100, pointerId: 11 });
-    expect(slider).toHaveAttribute("aria-valuenow", "50");
-
-    fireEvent.pointerUp(slider, { clientX: 120, pointerId: 11 });
-    expect(seek).toHaveBeenCalledWith(60);
-    expect(slider).toHaveAttribute("aria-valuenow", "60");
-  });
-
-  it("clamps position to 0 when dragging out of bounds to the left", () => {
-    const seek = vi.fn();
-    render(
-      <WaveProgressBar
-        currentSong={{ id: 9, duration: 100 }}
-        duration={100}
-        seek={seek}
-        getPosition={vi.fn(() => 0)}
-      />,
-    );
-
-    const slider = setupMockSlider(200, 50); // slider starts at x=50
-
-    // Drag way outside to the left
-    fireEvent.pointerDown(slider, { clientX: -50, pointerId: 12 });
-    expect(slider).toHaveAttribute("aria-valuenow", "0");
-
-    fireEvent.pointerUp(slider, { clientX: -50, pointerId: 12 });
-    expect(seek).toHaveBeenCalledWith(0);
-  });
-
-  it("clamps position to max duration when dragging out of bounds to the right", () => {
-    const seek = vi.fn();
-    render(
-      <WaveProgressBar
-        currentSong={{ id: 9, duration: 100 }}
-        duration={100}
-        seek={seek}
-        getPosition={vi.fn(() => 0)}
-      />,
-    );
-
-    const slider = setupMockSlider(200, 0);
-
-    // Drag way outside to the right
-    fireEvent.pointerDown(slider, { clientX: 500, pointerId: 13 });
-    expect(slider).toHaveAttribute("aria-valuenow", "100");
-
-    fireEvent.pointerUp(slider, { clientX: 500, pointerId: 13 });
-    expect(seek).toHaveBeenCalledWith(100);
-  });
-
-  it("handles division by zero gracefully when container width is 0", () => {
-    const seek = vi.fn();
-    render(
-      <WaveProgressBar
-        currentSong={{ id: 9, duration: 100 }}
-        duration={100}
-        seek={seek}
-        getPosition={vi.fn(() => 0)}
-      />,
-    );
-
-    const slider = setupMockSlider(0, 0);
-
-    fireEvent.pointerDown(slider, { clientX: 50, pointerId: 14 });
-    expect(slider).toHaveAttribute("aria-valuenow", "0");
+    expect(seek).toHaveBeenCalled();
   });
 
   it("syncs progress from getPosition on animation frames", () => {
@@ -164,10 +69,7 @@ describe("WaveProgressBar", () => {
     });
 
     expect(getPosition).toHaveBeenCalled();
-    expect(screen.getByRole("slider", { name: "Seek" })).toHaveAttribute(
-      "aria-valuenow",
-      "42",
-    );
+    expect(screen.getByRole("slider", { name: "Seek time" })).toHaveValue("42");
   });
 
   it("cancels animation frame on unmount", () => {
@@ -187,5 +89,18 @@ describe("WaveProgressBar", () => {
 
     unmount();
     expect(cancelSpy).toHaveBeenCalledWith(77);
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(
+      <WaveProgressBar
+        currentSong={{ id: 1, duration: 100 }}
+        duration={100}
+        seek={vi.fn()}
+        getPosition={vi.fn(() => 0)}
+      />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

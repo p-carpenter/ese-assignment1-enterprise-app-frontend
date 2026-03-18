@@ -1,9 +1,11 @@
 import type { JSX } from "react";
+import { FileTrigger } from "react-aria-components";
+import { Button } from "@/shared/components/Button/Button";
 import styles from "./FileSelect.module.css";
 
 interface FileSelectProps {
   onFileSelect: (file: File) => void;
-  accept: string; // "audio/*" or "image/*"
+  accept: string; // e.g., "audio/*" or "image/*"
   label?: string;
 }
 
@@ -12,23 +14,17 @@ export const FileSelect = ({
   accept,
   label = "Choose File",
 }: FileSelectProps): JSX.Element => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    if (e.target.files?.[0]) {
-      onFileSelect(e.target.files[0]);
+  const handleSelect = (e: FileList | null) => {
+    if (e && e.length > 0) {
+      onFileSelect(e[0]);
     }
   };
 
   return (
     <div className={styles.wrapper}>
-      <label className={styles.label}>
-        {label}
-        <input
-          type="file"
-          accept={accept}
-          className={styles.input}
-          onChange={handleChange}
-        />
-      </label>
+      <FileTrigger acceptedFileTypes={[accept]} onSelect={handleSelect}>
+        <Button variant="outlined">{label}</Button>
+      </FileTrigger>
     </div>
   );
 };

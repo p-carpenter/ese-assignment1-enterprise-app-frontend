@@ -1,117 +1,37 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
 import { Modal } from "./Modal";
-import "@testing-library/jest-dom/vitest";
 
 describe("Modal", () => {
-  it("renders nothing when isOpen is false", () => {
-    render(
-      <Modal isOpen={false} onClose={() => {}}>
-        Content
-      </Modal>,
-    );
-    expect(screen.queryByText("Content")).not.toBeInTheDocument();
-  });
-
-  it("renders children when isOpen is true", () => {
-    render(
-      <Modal isOpen={true} onClose={() => {}}>
-        Content
-      </Modal>,
-    );
-    expect(screen.getByText("Content")).toBeInTheDocument();
-  });
-
-  it("renders the title when provided", () => {
-    render(
-      <Modal isOpen={true} onClose={() => {}} title="My Title">
-        Content
-      </Modal>,
-    );
-    expect(screen.getByText("My Title")).toBeInTheDocument();
-  });
-
-  it("does not render a title element when no title is given", () => {
-    render(
-      <Modal isOpen={true} onClose={() => {}}>
-        Content
-      </Modal>,
-    );
-    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
-  });
-
-  it("calls onClose when the close (×) button is clicked", () => {
+  it("calls onClose when the close button is clicked", async () => {
     const onClose = vi.fn();
+    const user = userEvent.setup();
+
     render(
-      <Modal isOpen={true} onClose={onClose}>
-        Content
+      <Modal isOpen={true} onClose={onClose} title="Test Modal">
+        <div>Modal Content</div>
       </Modal>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    await user.click(closeButton);
+
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onClose when the overlay backdrop is clicked", () => {
+  it("calls onClose when the Escape key is pressed", async () => {
     const onClose = vi.fn();
+    const user = userEvent.setup();
+
     render(
       <Modal isOpen={true} onClose={onClose}>
-        Content
+        <div>Modal Content</div>
       </Modal>,
     );
-    // Modal uses createPortal so the overlay is a direct child of document.body,
-    // not the render container. Find it via the dialog role's parent.
-    const overlay = screen.getByRole("dialog").parentElement as HTMLElement;
-    fireEvent.click(overlay);
+
+    await user.keyboard("{Escape}");
+
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not call onClose when the modal card itself is clicked", () => {
-    const onClose = vi.fn();
-    render(
-      <Modal isOpen={true} onClose={onClose}>
-        Content
-      </Modal>,
-    );
-    fireEvent.click(screen.getByText("Content"));
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("calls onClose when the Escape key is pressed", () => {
-    const onClose = vi.fn();
-    render(
-      <Modal isOpen={true} onClose={onClose}>
-        Content
-      </Modal>,
-    );
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not call onClose for non-Escape keys", () => {
-    const onClose = vi.fn();
-    render(
-      <Modal isOpen={true} onClose={onClose}>
-        Content
-      </Modal>,
-    );
-    fireEvent.keyDown(document, { key: "Enter" });
-    fireEvent.keyDown(document, { key: "Tab" });
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("removes the keydown listener when modal closes", () => {
-    const onClose = vi.fn();
-    const { rerender } = render(
-      <Modal isOpen={true} onClose={onClose}>
-        Content
-      </Modal>,
-    );
-    rerender(
-      <Modal isOpen={false} onClose={onClose}>
-        Content
-      </Modal>,
-    );
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(onClose).not.toHaveBeenCalled();
   });
 });

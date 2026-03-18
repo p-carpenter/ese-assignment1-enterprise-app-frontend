@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { VolumeBar } from "./VolumeBar";
 import { usePlayer } from "@/shared/context/PlayerContext";
 import type { PlayerContextType } from "@/shared/context/PlayerContext";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 vi.mock("@/shared/context/PlayerContext", () => ({
   usePlayer: vi.fn(),
@@ -59,10 +61,14 @@ describe("VolumeBar", () => {
   it("writes css custom property used for progress styling", () => {
     render(<VolumeBar />);
 
-    const slider = screen.getByRole("slider", { name: "Volume" });
-    expect(slider).toHaveAttribute(
-      "style",
-      expect.stringContaining("--vol: 0.4"),
-    );
+    // Check the fill element's width style
+    const fill = screen.getByTestId("volume-fill");
+    expect(fill).toHaveStyle({ width: "40%" });
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(<VolumeBar />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

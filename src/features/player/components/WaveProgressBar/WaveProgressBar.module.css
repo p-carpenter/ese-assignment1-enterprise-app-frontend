@@ -2,20 +2,26 @@
   flex: 1;
   min-width: 0;
   display: flex;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
 }
 
 .wrapper {
   flex: 1;
   min-width: 0;
-  cursor: pointer;
-  overflow: hidden;
   height: 40px;
+  position: relative;
+}
+
+.waveLayer {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   gap: 1px;
   padding: 0 2px;
-  touch-action: none;
-  user-select: none;
+  pointer-events: none; /* Allow clicks to pass through to the container for scrubbing */
 }
 
 .bar {
@@ -33,10 +39,34 @@
   background: #535353;
 }
 
-.wrapper:hover .barPlayed {
+.container[data-hovered] .barPlayed,
+.container[data-dragging] .barPlayed {
   background: var(--accent-green, #1db954);
 }
 
-.wrapper:hover .barUnplayed {
+.container[data-hovered] .barUnplayed,
+.container[data-dragging] .barUnplayed {
   background: #6a6a6a;
+}
+
+.thumb {
+  top: 50%;
+  width: 2px;
+  height: 100%;
+  background: var(--app-white, #fff);
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  opacity: 0;
+  outline: none;
+  transition: opacity 0.15s;
+}
+
+/* Show a visible playhead line when scrubbing or using the keyboard */
+.thumb[data-dragging],
+.thumb[data-focus-visible] {
+  opacity: 1;
+}
+
+.thumb[data-focus-visible] {
+  box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.4);
 }

@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe, toHaveNoViolations } from "jest-axe";
 import { PlaybackControls } from "./PlaybackControls";
 import "@testing-library/jest-dom/vitest";
+
+expect.extend(toHaveNoViolations);
 
 const makeProps = (
   overrides: Partial<Parameters<typeof PlaybackControls>[0]> = {},
@@ -21,6 +24,14 @@ const makeProps = (
 describe("PlaybackControls", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("accessibility", () => {
+    it("should have no accessibility violations", async () => {
+      const { container } = render(<PlaybackControls {...makeProps()} />);
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
   });
 
   describe("rendering", () => {
@@ -86,33 +97,53 @@ describe("PlaybackControls", () => {
     });
   });
 
-  describe("disabled states", () => {
-    it("disables the Previous button when disablePrev=true", () => {
-      render(<PlaybackControls {...makeProps({ disablePrev: true })} />);
-      // userEvent vil kaste en feil hvis du prøver å klikke på et disabled element.
-      // Det er beviset på at komponenten fungerer. Vi sjekker attributtet her.
-      expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+  describe("disabled and loading edge cases", () => {
+    it("disables the Previous button and prevents callbacks when disablePrev=true", () => {
+      const onPrev = vi.fn();
+      render(
+        <PlaybackControls {...makeProps({ disablePrev: true, onPrev })} />,
+      );
+
+      const prevBtn = screen.getByRole("button", { name: "Previous" });
+      expect(prevBtn).toBeDisabled();
+
+      fireEvent.click(prevBtn);
+      expect(onPrev).not.toHaveBeenCalled();
     });
 
-    it("disables the Next button when disableNext=true", () => {
-      render(<PlaybackControls {...makeProps({ disableNext: true })} />);
-      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    it("disables the Next button and prevents callbacks when disableNext=true", () => {
+      const onNext = vi.fn();
+      render(
+        <PlaybackControls {...makeProps({ disableNext: true, onNext })} />,
+      );
+
+      const nextBtn = screen.getByRole("button", { name: "Next" });
+      expect(nextBtn).toBeDisabled();
+
+      fireEvent.click(nextBtn);
+      expect(onNext).not.toHaveBeenCalled();
     });
 
-    it("disables all three buttons when isLoading=true", () => {
-      render(<PlaybackControls {...makeProps({ isLoading: true })} />);
-      screen.getAllByRole("button").forEach((btn) => {
-        expect(btn).toBeDisabled();
-      });
-    });
+    it("disables all buttons and prevents callbacks when isLoading=true", () => {
+      const onPlay = vi.fn();
+      const onPrev = vi.fn();
+      const onNext = vi.fn();
 
-    it("disables Previous even when disablePrev=false but isLoading=true", () => {
       render(
         <PlaybackControls
-          {...makeProps({ isLoading: true, disablePrev: false })}
+          {...makeProps({ isLoading: true, onPlay, onPrev, onNext })}
         />,
       );
-      expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+
+      const buttons = screen.getAllByRole("button");
+      buttons.forEach((btn) => {
+        expect(btn).toBeDisabled();
+        fireEvent.click(btn);
+      });
+
+      expect(onPlay).not.toHaveBeenCalled();
+      expect(onPrev).not.toHaveBeenCalled();
+      expect(onNext).not.toHaveBeenCalled();
     });
   });
 });

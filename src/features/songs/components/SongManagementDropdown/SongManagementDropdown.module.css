@@ -1,8 +1,4 @@
-.container {
-  position: relative;
-  display: inline-block;
-}
-
+/* --- TRIGGER BUTTON --- */
 .button {
   background: none;
   border: none;
@@ -14,20 +10,26 @@
   border-radius: 50%;
   transition: background-color 0.2s ease;
   color: white;
+  outline: none;
 }
 
-.button:hover {
+.button:hover,
+.button[data-hovered] {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.button:active {
+.button:active,
+.button[data-pressed] {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+.button[data-focus-visible] {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* --- Popover --- */
 .dropdownMenu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
   min-width: 180px;
   background-color: #282828;
   border-radius: 4px;
@@ -35,21 +37,41 @@
     0 16px 24px rgba(0, 0, 0, 0.3),
     0 6px 8px rgba(0, 0, 0, 0.2);
   padding: 4px;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  outline: none;
+  transform-origin: top right;
 }
 
-@keyframes fadeIn {
+.dropdownMenu[data-entering] {
+  animation: menuFadeIn 0.2s ease-out forwards;
+}
+
+.dropdownMenu[data-exiting] {
+  animation: menuFadeOut 0.15s ease-in forwards;
+}
+
+@keyframes menuFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: scale(0.95) translateY(-8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
+@keyframes menuFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+}
+
+/* --- Menu items --- */
 .dropdownItem {
   background: none;
   border: none;
@@ -69,13 +91,19 @@
   transition: all 0.1s ease;
   white-space: nowrap;
   text-transform: none;
+  outline: none;
 }
 
-.dropdownItem:hover {
+.dropdownItem[data-hovered] {
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
 
-.dropdownItem:active {
+.dropdownItem[data-pressed] {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dropdownItem[data-focus-visible] {
+  outline: 2px solid white;
+  outline-offset: -2px;
 }

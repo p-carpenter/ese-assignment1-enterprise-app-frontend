@@ -106,7 +106,7 @@ export const ChangePasswordForm = ({
           type="submit"
           variant="outlined"
           size="small"
-          disabled={isPending}
+          isDisabled={isPending}
         >
           {isPending ? "Saving..." : "Change Password"}
         </Button>
