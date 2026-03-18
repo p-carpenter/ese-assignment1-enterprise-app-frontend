@@ -1,58 +1,65 @@
 .wrapper {
   display: flex;
   align-items: center;
-  width: 90px;
-  flex-shrink: 0;
-}
-
-.volumeBar {
-  -webkit-appearance: none;
-  appearance: none;
+  gap: 12px;
   width: 100%;
-  height: 4px;
-  border-radius: 2px;
-  cursor: pointer;
-  /* Filled portion = green, unfilled = dark gray using a gradient trick */
-  background: linear-gradient(
-    to right,
-    var(--accent-green) 0%,
-    var(--accent-green) calc(var(--vol) * 100%),
-    var(--app-gray-dark) calc(var(--vol) * 100%),
-    var(--app-gray-dark) 100%
-  );
-  outline: none;
-  border: none;
-}
-
-.volumeBar::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 10px;
-  height: 10px;
-  background: var(--app-white);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.volumeBar:hover::-webkit-slider-thumb {
-  transform: scale(1.3);
-}
-
-.volumeBar::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  background: var(--app-white);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.volumeBar::-moz-range-track {
-  background: transparent;
+  max-width: 150px;
 }
 
 .icon {
-  color: var(--app-gray);
-  margin-right: 8px;
+  color: #b3b3b3;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.slider {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.track {
+  position: relative;
+  height: 4px;
+  width: 100%;
+  background: #535353;
+  border-radius: 2px;
+}
+
+.fill {
+  position: absolute;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 2px;
+}
+
+.slider[data-hovered] .fill {
+  background: #1db954; /* Highlight color on hover */
+}
+
+.thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  transition: opacity 0.1s;
+}
+
+/* Show thumb when hovering the slider OR when focused/dragging */
+.slider[data-hovered] .thumb,
+.thumb[data-focus-visible],
+.thumb[data-dragging] {
+  opacity: 1;
+}
+
+.thumb[data-focus-visible] {
+  box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.4);
 }
