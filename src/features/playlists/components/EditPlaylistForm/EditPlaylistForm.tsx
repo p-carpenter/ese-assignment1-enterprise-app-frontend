@@ -131,139 +131,141 @@ export const EditPlaylistForm = ({
         <AlertMessage message={editErrorMessage} />
       )}
 
-      <div className={styles.coverWrap}>
-        <img
-          src={coverUrl || "https://placehold.co/220"}
-          alt="Playlist cover art"
-          className={styles.coverArt}
-        />
-        <button
-          type="button"
-          className={styles.coverEditBtn}
-          onClick={() => coverInputRef.current?.click()}
-          disabled={isCoverUploading}
-          aria-label={
-            isCoverUploading ? "Uploading cover image" : "Change playlist cover"
-          }
-        >
-          <IoImageOutline size={18} aria-hidden="true" />
-          {isCoverUploading ? "Uploading…" : "Change cover"}
-        </button>
-        <input
-          ref={coverInputRef}
-          type="file"
-          accept="image/*"
-          className={styles.hiddenInput}
-          onChange={handleCoverChange}
-          aria-label="Upload cover image file"
-          tabIndex={-1}
-        />
-      </div>
-
-      <div className={styles.editFields}>
-        <div className={styles.fieldGroup}>
-          <input
-            className={styles.editInput}
-            {...register("title")}
-            placeholder="Title"
-            aria-label="Playlist title"
+      <div className={styles.editFormRow}>
+        <div className={styles.coverWrap}>
+          <img
+            src={coverUrl || "https://placehold.co/220"}
+            alt="Playlist cover art"
+            className={styles.coverArt}
           />
-          {errors.title && (
-            <span className={styles.errorMessage} role="alert">
-              {errors.title.message}
-            </span>
-          )}
-        </div>
-
-        <textarea
-          className={styles.editTextarea}
-          {...register("description")}
-          placeholder="Description"
-          rows={3}
-          aria-label="Playlist description"
-        />
-
-        <div className={styles.toggleRow}>
-          <span aria-hidden="true">Public</span>
           <button
             type="button"
-            role="switch"
-            aria-checked={isPublic}
-            aria-label="Toggle public visibility"
-            className={`${styles.toggle} ${isPublic ? styles.toggleOn : ""}`}
-            onClick={() => {
-              const nextIsPublic = !isPublic;
-              setValue("is_public", nextIsPublic, {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-              if (!nextIsPublic) {
-                setValue("is_collaborative", false, {
+            className={styles.coverEditBtn}
+            onClick={() => coverInputRef.current?.click()}
+            disabled={isCoverUploading}
+            aria-label={
+              isCoverUploading ? "Uploading cover image" : "Change playlist cover"
+            }
+          >
+            <IoImageOutline size={18} aria-hidden="true" />
+            {isCoverUploading ? "Uploading…" : "Change cover"}
+          </button>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            className={styles.hiddenInput}
+            onChange={handleCoverChange}
+            aria-label="Upload cover image file"
+            tabIndex={-1}
+          />
+        </div>
+
+        <div className={styles.editFields}>
+          <div className={styles.fieldGroup}>
+            <input
+              className={styles.editInput}
+              {...register("title")}
+              placeholder="Title"
+              aria-label="Playlist title"
+            />
+            {errors.title && (
+              <span className={styles.errorMessage} role="alert">
+                {errors.title.message}
+              </span>
+            )}
+          </div>
+
+          <textarea
+            className={styles.editTextarea}
+            {...register("description")}
+            placeholder="Description"
+            rows={3}
+            aria-label="Playlist description"
+          />
+
+          <div className={styles.toggleRow}>
+            <span aria-hidden="true">Public</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isPublic}
+              aria-label="Toggle public visibility"
+              className={`${styles.toggle} ${isPublic ? styles.toggleOn : ""}`}
+              onClick={() => {
+                const nextIsPublic = !isPublic;
+                setValue("is_public", nextIsPublic, {
                   shouldDirty: true,
                   shouldValidate: true,
                 });
-              }
-            }}
-          >
-            <span className={styles.toggleThumb} />
-          </button>
-
-          {isPublic && (
-            <>
-              <span aria-hidden="true">Collaborative</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isCollaborative}
-                aria-label="Toggle collaborative mode"
-                className={`${styles.toggle} ${isCollaborative ? styles.toggleOn : ""}`}
-                onClick={() =>
-                  setValue("is_collaborative", !isCollaborative, {
+                if (!nextIsPublic) {
+                  setValue("is_collaborative", false, {
                     shouldDirty: true,
                     shouldValidate: true,
-                  })
+                  });
                 }
-              >
-                <span className={styles.toggleThumb} />
-              </button>
-            </>
+              }}
+            >
+              <span className={styles.toggleThumb} />
+            </button>
+
+            {isPublic && (
+              <>
+                <span aria-hidden="true">Collaborative</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isCollaborative}
+                  aria-label="Toggle collaborative mode"
+                  className={`${styles.toggle} ${isCollaborative ? styles.toggleOn : ""}`}
+                  onClick={() =>
+                    setValue("is_collaborative", !isCollaborative, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                >
+                  <span className={styles.toggleThumb} />
+                </button>
+              </>
+            )}
+          </div>
+
+          {errors.is_collaborative && (
+            <span className={styles.errorMessage} role="alert">
+              {errors.is_collaborative.message}
+            </span>
           )}
-        </div>
 
-        {errors.is_collaborative && (
-          <span className={styles.errorMessage} role="alert">
-            {errors.is_collaborative.message}
-          </span>
-        )}
-
-        <div className={styles.editActions}>
-          <button
-            type="submit"
-            className={styles.iconBtn}
-            disabled={isSaving || isSubmittingLocal || isCoverUploading}
-            aria-label="Save playlist changes"
-          >
-            <IoCheckmarkOutline size={18} aria-hidden="true" />
-            {isSaving || isSubmittingLocal ? "Saving…" : "Save"}
-          </button>
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={() => {
-              reset({
-                title: playlist.title,
-                description: playlist.description ?? "",
-                is_public: playlist.is_public,
-                is_collaborative: playlist.is_collaborative,
-                cover_art_url: playlist.cover_art_url ?? "",
-              });
-              onClose();
-            }}
-            aria-label="Cancel editing"
-          >
-            <IoCloseOutline size={18} aria-hidden="true" />
-            Cancel
-          </button>
+          <div className={styles.editActions}>
+            <button
+              type="submit"
+              className={styles.iconBtn}
+              disabled={isSaving || isSubmittingLocal || isCoverUploading}
+              aria-label="Save playlist changes"
+            >
+              <IoCheckmarkOutline size={18} aria-hidden="true" />
+              {isSaving || isSubmittingLocal ? "Saving…" : "Save"}
+            </button>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={() => {
+                reset({
+                  title: playlist.title,
+                  description: playlist.description ?? "",
+                  is_public: playlist.is_public,
+                  is_collaborative: playlist.is_collaborative,
+                  cover_art_url: playlist.cover_art_url ?? "",
+                });
+                onClose();
+              }}
+              aria-label="Cancel editing"
+            >
+              <IoCloseOutline size={18} aria-hidden="true" />
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </form>
