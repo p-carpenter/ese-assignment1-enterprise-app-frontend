@@ -1,4 +1,7 @@
-import { Button as AriaButton, type ButtonProps as AriaButtonProps } from "react-aria-components";
+import {
+  Button as AriaButton,
+  type ButtonProps as AriaButtonProps,
+} from "react-aria-components";
 import styles from "./Button.module.css";
 
 interface ButtonProps extends AriaButtonProps {

@@ -68,6 +68,4 @@ describe("Button", () => {
     expect(btn.className).toMatch(/my-custom/);
     expect(btn.className).toMatch(/outlined/);
   });
-
-
 });
