@@ -37,7 +37,7 @@
     0 16px 24px rgba(0, 0, 0, 0.3),
     0 6px 8px rgba(0, 0, 0, 0.2);
   padding: 4px;
-  outline: none; 
+  outline: none;
   transform-origin: top right;
 }
 
@@ -105,5 +105,5 @@
 
 .dropdownItem[data-focus-visible] {
   outline: 2px solid white;
-  outline-offset: -2px; 
+  outline-offset: -2px;
 }
