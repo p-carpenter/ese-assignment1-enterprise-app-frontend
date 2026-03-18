@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginForm } from "./components/LoginForm/LoginForm";
@@ -51,14 +57,15 @@ describe("Auth features", () => {
     // Wait for the initial getMe call to settle before submitting
     await waitFor(() => expect(mockGetMe).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "user@example.com" },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText("Email address"), {
+        target: { value: "user@example.com" },
+      });
+      fireEvent.change(screen.getByPlaceholderText("Password"), {
+        target: { value: "secret" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /log in/i }));
     });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "secret" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith("user@example.com", "secret");
@@ -79,14 +86,15 @@ describe("Auth features", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "user@example.com" },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText("Email address"), {
+        target: { value: "user@example.com" },
+      });
+      fireEvent.change(screen.getByPlaceholderText("Password"), {
+        target: { value: "bad" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /log in/i }));
     });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "bad" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
     // AlertMessage displays errors with role="alert"
@@ -190,14 +198,15 @@ describe("Auth features", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "user@example.com" },
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText("Email address"), {
+        target: { value: "user@example.com" },
+      });
+      fireEvent.change(screen.getByPlaceholderText("Password"), {
+        target: { value: "bad" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /log in/i }));
     });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "bad" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(
       await screen.findByText("Unable to log in with provided credentials."),

@@ -31,7 +31,7 @@ export const UploadPage = () => {
       {activeTab === "upload" ? <SongUploadForm /> : <JamendoSongSearch />}
 
       <Button variant="outlined" size="large" onClick={() => navigate("/")}>
-        Cancel Upload
+        Go home
       </Button>
     </div>
   );

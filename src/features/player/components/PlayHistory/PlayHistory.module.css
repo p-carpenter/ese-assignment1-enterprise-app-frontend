@@ -47,6 +47,13 @@
   margin-bottom: 8px;
 }
 
+.songArtist {
+  font-weight: 400;
+  color: var(--app-white);
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
 .songMeta {
   font-size: 0.75rem;
   color: var(--app-gray);

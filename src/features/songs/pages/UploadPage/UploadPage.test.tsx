@@ -97,25 +97,25 @@ describe("UploadPage", () => {
   });
 
   describe("Actions", () => {
-    it("renders a 'Cancel Upload' button", () => {
+    it("renders a 'Go Home' button", () => {
       render(
         <MemoryRouter>
           <UploadPage />
         </MemoryRouter>,
       );
       expect(
-        screen.getByRole("button", { name: /cancel upload/i }),
+        screen.getByRole("button", { name: /go home/i }),
       ).toBeInTheDocument();
     });
 
-    it("navigates to '/' when Cancel Upload is clicked", async () => {
+    it("navigates to '/' when Go Home is clicked", async () => {
       const user = userEvent.setup();
       render(
         <MemoryRouter>
           <UploadPage />
         </MemoryRouter>,
       );
-      await user.click(screen.getByRole("button", { name: /cancel upload/i }));
+      await user.click(screen.getByRole("button", { name: /go home/i }));
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
