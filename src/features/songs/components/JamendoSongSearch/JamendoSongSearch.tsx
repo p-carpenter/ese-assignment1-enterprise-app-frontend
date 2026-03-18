@@ -111,7 +111,7 @@ export const JamendoSongSearch = () => {
           placeholder="Search Jamendo tracks"
           aria-label="Search Jamendo tracks"
         />
-        <Button type="submit" size="large" disabled={isSearching}>
+        <Button type="submit" size="large" isDisabled={isSearching}>
           {isSearching ? "Searching..." : "Search"}
         </Button>
       </form>
@@ -144,7 +144,7 @@ export const JamendoSongSearch = () => {
               <Button
                 size="small"
                 onClick={() => void handleImport(track)}
-                disabled={isImportingTrackId === track.id}
+                isDisabled={isImportingTrackId === track.id}
               >
                 {isImportingTrackId === track.id ? "Importing..." : "Import"}
               </Button>
