@@ -8,7 +8,7 @@ import "@testing-library/jest-dom/vitest";
 expect.extend(toHaveNoViolations);
 
 const makeProps = (
-  overrides: Partial<Parameters<typeof PlaybackControls>[0]> = {}
+  overrides: Partial<Parameters<typeof PlaybackControls>[0]> = {},
 ) => ({
   isPlaying: false,
   isLoading: false,
@@ -37,7 +37,9 @@ describe("PlaybackControls", () => {
   describe("rendering", () => {
     it("renders a Previous, Play/Pause, and Next button", () => {
       render(<PlaybackControls {...makeProps()} />);
-      expect(screen.getByRole("button", { name: "Previous" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Previous" }),
+      ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
     });
@@ -98,22 +100,26 @@ describe("PlaybackControls", () => {
   describe("disabled and loading edge cases", () => {
     it("disables the Previous button and prevents callbacks when disablePrev=true", () => {
       const onPrev = vi.fn();
-      render(<PlaybackControls {...makeProps({ disablePrev: true, onPrev })} />);
-      
+      render(
+        <PlaybackControls {...makeProps({ disablePrev: true, onPrev })} />,
+      );
+
       const prevBtn = screen.getByRole("button", { name: "Previous" });
       expect(prevBtn).toBeDisabled();
-      
+
       fireEvent.click(prevBtn);
       expect(onPrev).not.toHaveBeenCalled();
     });
 
     it("disables the Next button and prevents callbacks when disableNext=true", () => {
       const onNext = vi.fn();
-      render(<PlaybackControls {...makeProps({ disableNext: true, onNext })} />);
-      
+      render(
+        <PlaybackControls {...makeProps({ disableNext: true, onNext })} />,
+      );
+
       const nextBtn = screen.getByRole("button", { name: "Next" });
       expect(nextBtn).toBeDisabled();
-      
+
       fireEvent.click(nextBtn);
       expect(onNext).not.toHaveBeenCalled();
     });
@@ -122,9 +128,13 @@ describe("PlaybackControls", () => {
       const onPlay = vi.fn();
       const onPrev = vi.fn();
       const onNext = vi.fn();
-      
-      render(<PlaybackControls {...makeProps({ isLoading: true, onPlay, onPrev, onNext })} />);
-      
+
+      render(
+        <PlaybackControls
+          {...makeProps({ isLoading: true, onPlay, onPrev, onNext })}
+        />,
+      );
+
       const buttons = screen.getAllByRole("button");
       buttons.forEach((btn) => {
         expect(btn).toBeDisabled();
