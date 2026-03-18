@@ -82,17 +82,11 @@ button {
   font-size: 14px;
   font-weight: 700;
   font-family: inherit;
-  /* background-color: var(--accent-green); */
   color: var(--app-black);
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-}
-
-button:hover {
-  /* background-color: var(--accent-green-bright); */
-  /* transform: scale(1.04); */
 }
 
 button:active {
