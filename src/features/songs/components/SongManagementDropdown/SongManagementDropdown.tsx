@@ -24,7 +24,7 @@ export const SongManagementDropdown: FC<SongManagementDropdownProps> = ({
 }) => {
   return (
     <MenuTrigger>
-      <Button className={styles.button}>
+      <Button className={styles.button} aria-label="Song options">
         <MoreHorizontalOutline />
       </Button>
 
