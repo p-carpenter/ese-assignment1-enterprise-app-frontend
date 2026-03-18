@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { axe, toHaveNoViolations } from "jest-axe";
 import { SongManagementDropdown } from "./SongManagementDropdown";
 import "@testing-library/jest-dom/vitest";
+
+// Extend Vitest's expect with jest-axe assertions.
+expect.extend(toHaveNoViolations);
 
 describe("SongManagementDropdown", () => {
   const makeItems = () => [
@@ -9,82 +14,142 @@ describe("SongManagementDropdown", () => {
     { label: "Delete", onSelect: vi.fn() },
   ];
 
+  const setupUser = () => {
+    return userEvent.setup();
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders the trigger (⋯) button", () => {
-    render(<SongManagementDropdown dropdownItems={makeItems()} />);
-    expect(screen.getByRole("button")).toBeInTheDocument();
+
+  describe("Rendering", () => {
+    it("renders the trigger button closed by default", () => {
+      render(<SongManagementDropdown dropdownItems={makeItems()} />);
+      expect(screen.getByRole("button", { expanded: false })).toBeInTheDocument();
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
+
+    it("renders with no dropdown items when dropdownItems is undefined", async () => {
+      const user = setupUser();
+      render(<SongManagementDropdown />);
+
+      await user.click(screen.getByRole("button"));
+
+      expect(screen.getByRole("menu")).toBeInTheDocument();
+      expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    });
   });
 
-  it("does not show dropdown items by default", () => {
-    render(<SongManagementDropdown dropdownItems={makeItems()} />);
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
-    expect(screen.queryByText("Delete")).not.toBeInTheDocument();
+  describe("Mouse Interactions", () => {
+    it("opens the menu on click and displays items", async () => {
+      const user = setupUser();
+      render(<SongManagementDropdown dropdownItems={makeItems()} />);
+
+      await user.click(screen.getByRole("button"));
+      expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+    });
+
+    it("calls onSelect and closes when clicking a valid item", async () => {
+      const user = setupUser();
+      const items = makeItems();
+      render(<SongManagementDropdown dropdownItems={items} />);
+
+      await user.click(screen.getByRole("button"));
+      await user.click(screen.getByRole("menuitem", { name: "Edit" }));
+
+      expect(items[0].onSelect).toHaveBeenCalledTimes(1);
+
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
+
+    it("closes the dropdown when clicking the background (outside)", async () => {
+      const user = setupUser();
+      render(<SongManagementDropdown dropdownItems={makeItems()} />);
+
+      await user.click(screen.getByRole("button"));
+      expect(screen.getByRole("menu")).toBeInTheDocument();
+
+      await user.click(document.body);
+
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
   });
 
-  it("shows dropdown items after clicking the trigger button", () => {
-    const items = makeItems();
-    render(<SongManagementDropdown dropdownItems={items} />);
-    fireEvent.click(screen.getByRole("button"));
-    expect(screen.getByText("Edit")).toBeInTheDocument();
-    expect(screen.getByText("Delete")).toBeInTheDocument();
+  describe("Keyboard Navigation & Accessibility", () => {
+    it("has no basic accessibility violations (axe-core)", async () => {
+      const { container } = render(<SongManagementDropdown dropdownItems={makeItems()} />);
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
+
+    it("can be opened and navigated using the keyboard (Enter/Arrow Keys)", async () => {
+      const user = setupUser();
+      const items = makeItems();
+      render(<SongManagementDropdown dropdownItems={items} />);
+
+      // Tab to button, press Enter to open.
+      await user.tab();
+      expect(screen.getByRole("button")).toHaveFocus();
+      await user.keyboard("{Enter}");
+
+      // First item should auto-focus in standard ARIA menus.
+      expect(screen.getByRole("menuitem", { name: "Edit" })).toHaveFocus();
+
+      // Arrow down to second item.
+      await user.keyboard("{ArrowDown}");
+      expect(screen.getByRole("menuitem", { name: "Delete" })).toHaveFocus();
+
+      // Trigger selection with Enter.
+      await user.keyboard("{Enter}");
+      expect(items[1].onSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes via the Escape key", async () => {
+      const user = setupUser();
+      render(<SongManagementDropdown dropdownItems={makeItems()} />);
+
+      await user.click(screen.getByRole("button"));
+      expect(screen.getByRole("menu")).toBeInTheDocument();
+
+      await user.keyboard("{Escape}");
+
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
   });
 
-  it("calls onSelect for the correct item when clicked", () => {
-    const items = makeItems();
-    render(<SongManagementDropdown dropdownItems={items} />);
-    fireEvent.click(screen.getByRole("button")); // open
-    fireEvent.click(screen.getByText("Edit"));
-    expect(items[0].onSelect).toHaveBeenCalledTimes(1);
-    expect(items[1].onSelect).not.toHaveBeenCalled();
-  });
+  describe("Edge Cases", () => {
+    it("renders a disabled item that cannot be clicked", async () => {
+      const user = setupUser();
+      const onSelect = vi.fn();
+      render(
+        <SongManagementDropdown
+          dropdownItems={[{ label: "Edit", onSelect, disabled: true }]}
+        />,
+      );
 
-  it("closes the dropdown after an item is selected", () => {
-    render(<SongManagementDropdown dropdownItems={makeItems()} />);
-    fireEvent.click(screen.getByRole("button")); // open
-    fireEvent.click(screen.getByText("Edit")); // select → closes
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
-  });
+      await user.click(screen.getByRole("button"));
 
-  it("closes the dropdown when the trigger is clicked a second time", () => {
-    render(<SongManagementDropdown dropdownItems={makeItems()} />);
-    const trigger = screen.getByRole("button");
-    fireEvent.click(trigger); // open
-    expect(screen.getByText("Edit")).toBeInTheDocument();
-    fireEvent.click(trigger); // close
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
-  });
+      const disabledItem = screen.getByRole("menuitem", { name: "Edit" });
+      expect(disabledItem).toHaveAttribute("aria-disabled", "true");
 
-  it("closes the dropdown when clicking outside the component", () => {
-    render(
-      <div>
-        <SongManagementDropdown dropdownItems={makeItems()} />
-        <div data-testid="outside">Outside</div>
-      </div>,
-    );
-    fireEvent.click(screen.getByRole("button")); // open
-    expect(screen.getByText("Edit")).toBeInTheDocument();
-    // Simulate a mousedown outside
-    fireEvent.mouseDown(screen.getByTestId("outside"));
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
-  });
+      // Clicking a disabled item should not trigger the callback.
+      await user.click(disabledItem);
+      expect(onSelect).not.toHaveBeenCalled();
+    });
 
-  it("renders a disabled item as a disabled button", () => {
-    render(
-      <SongManagementDropdown
-        dropdownItems={[{ label: "Edit", onSelect: vi.fn(), disabled: true }]}
-      />,
-    );
-    fireEvent.click(screen.getByRole("button")); // open
-    expect(screen.getByRole("button", { name: "Edit" })).toBeDisabled();
-  });
+    it("handles long text labels without crashing", async () => {
+      const user = setupUser();
+      const longText = "A".repeat(200);
+      render(
+        <SongManagementDropdown
+          dropdownItems={[{ label: longText, onSelect: vi.fn() }]}
+        />,
+      );
 
-  it("renders with no dropdown items when dropdownItems is undefined", () => {
-    render(<SongManagementDropdown />);
-    fireEvent.click(screen.getByRole("button")); // open
-    // Nothing to assert, but should not crash
-    expect(screen.queryByText("Edit")).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button"));
+      expect(screen.getByRole("menuitem", { name: longText })).toBeInTheDocument();
+    });
   });
 });
