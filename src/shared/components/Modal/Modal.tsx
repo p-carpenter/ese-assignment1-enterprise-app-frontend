@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { type ReactNode } from "react";
+import { ModalOverlay, Modal as AriaModal, Dialog, Heading, Button } from "react-aria-components";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -10,37 +10,29 @@ interface ModalProps {
 }
 
 export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className={styles.overlay} onClick={onClose}>
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          className={styles.closeButton}
-          onClick={onClose}
-          aria-label="Close"
+  return (
+    <ModalOverlay
+      isOpen={isOpen}
+      onOpenChange={(isOpen) => !isOpen && onClose()}
+      className={styles.overlay}
+      isDismissable
+    >
+      <AriaModal className={styles.modal}>
+        <Dialog
+          className={styles.dialog}
+          {...(!title ? { 'aria-label': 'Dialog' } : {})}
         >
-          ×
-        </button>
-        {title && <h2 className={styles.title}>{title}</h2>}
-        <div className={styles.content}>{children}</div>
-      </div>
-    </div>,
-    document.body,
+          {({ close }) => (
+            <>
+              <Button onPress={close} className={styles.closeButton} aria-label="Close">
+                ×
+              </Button>
+              {title && <Heading slot="title" className={styles.title}>{title}</Heading>}
+              <div className={styles.content}>{children}</div>
+            </>
+          )}
+        </Dialog>
+      </AriaModal>
+    </ModalOverlay>
   );
 };
