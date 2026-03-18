@@ -122,7 +122,8 @@ describe("SongUploadForm", () => {
           title: "",
           artist: "",
           album: "",
-          releaseYear: "",
+          release_year: undefined,
+          cover_art_url: "",
         });
       });
 
@@ -145,7 +146,7 @@ describe("SongUploadForm", () => {
         title: "ID3 Title",
         artist: "ID3 Artist",
         album: "ID3 Album",
-        year: "2001",
+        year: 2001,
       });
 
       render(<SongUploadForm />);
@@ -164,7 +165,7 @@ describe("SongUploadForm", () => {
         title: "ID3 Title",
         artist: "ID3 Artist",
         album: "ID3 Album",
-        releaseYear: "2001",
+        release_year: 2001,
       });
     });
 
@@ -172,6 +173,27 @@ describe("SongUploadForm", () => {
       setupCloudinaryMocks({ isMp3Uploading: true });
       render(<SongUploadForm />);
       expect(getFormProps().mp3Label).toBe("Uploading MP3...");
+    });
+
+    it("passes uploadedCoverUrl down to the form when cover art finishes uploading", async () => {
+      const { coverUpload } = setupCloudinaryMocks({
+        coverUpload: vi.fn().mockResolvedValue({
+          secure_url: "https://cloudinary.com/my-sick-cover.jpg",
+        }),
+      });
+
+      render(<SongUploadForm />);
+
+      await act(async () => {
+        await getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
+      });
+
+      await waitFor(() => expect(coverUpload).toHaveBeenCalled());
+
+      // Verify the parent hands the URL back to the child component.
+      expect(getFormProps().uploadedCoverUrl).toBe(
+        "https://cloudinary.com/my-sick-cover.jpg",
+      );
     });
   });
 
@@ -190,7 +212,7 @@ describe("SongUploadForm", () => {
         title: "ID3 Title",
         artist: "ID3 Artist",
         album: "ID3 Album",
-        year: "1999",
+        year: 1999,
       });
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
@@ -209,7 +231,8 @@ describe("SongUploadForm", () => {
           title: "",
           artist: "",
           album: "",
-          releaseYear: "",
+          release_year: undefined,
+          cover_art_url: "",
         });
       });
 
@@ -220,7 +243,7 @@ describe("SongUploadForm", () => {
         cover_art_url: "https://cdn/cover.jpg",
         duration: 181,
         album: "ID3 Album",
-        release_year: "1999",
+        release_year: 1999,
       });
 
       expect(mockInvalidateQueries).toHaveBeenCalledWith({
@@ -254,7 +277,8 @@ describe("SongUploadForm", () => {
           title: "Manual Title",
           artist: "Manual Artist",
           album: "Manual Album",
-          releaseYear: "2024",
+          release_year: 2024,
+          cover_art_url: "https://cdn/manual-cover.jpg",
         });
       });
 
@@ -263,7 +287,8 @@ describe("SongUploadForm", () => {
           title: "Manual Title",
           artist: "Manual Artist",
           album: "Manual Album",
-          release_year: "2024",
+          release_year: 2024,
+          cover_art_url: "https://cdn/manual-cover.jpg",
         }),
       );
     });
@@ -291,7 +316,8 @@ describe("SongUploadForm", () => {
           title: "",
           artist: "",
           album: "",
-          releaseYear: "",
+          release_year: undefined,
+          cover_art_url: "",
         });
       });
 

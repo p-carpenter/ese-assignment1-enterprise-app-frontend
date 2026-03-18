@@ -55,6 +55,7 @@ const mockSong: Song = {
   artist: "Artist A",
   file_url: "url",
   duration: 180,
+  cover_art_url: "https://placehold.co/220",
   uploaded_at: "2024-01-01",
 };
 
@@ -64,7 +65,7 @@ const makePlaylist = (overrides: Partial<Playlist> = {}): Playlist => ({
   description: "A playlist for testing",
   is_public: true,
   is_collaborative: false,
-  cover_art_url: null,
+  cover_art_url: "https://placehold.co/220",
   owner: { id: 1, username: "owner" },
   songs: [],
   ...overrides,

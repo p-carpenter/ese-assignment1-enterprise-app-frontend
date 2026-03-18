@@ -44,6 +44,7 @@ const songA: Song = {
   artist: "Artist A",
   file_url: "https://songs/a.mp3",
   duration: 120,
+  cover_art_url: "https://placehold.co/220",
   uploaded_at: "2024-01-01T00:00:00Z",
 };
 const songB: Song = {
@@ -52,6 +53,7 @@ const songB: Song = {
   artist: "Artist B",
   file_url: "https://songs/b.mp3",
   duration: 130,
+  cover_art_url: "https://placehold.co/220",
   uploaded_at: "2024-01-01T00:00:00Z",
 };
 const songC: Song = {
@@ -60,6 +62,7 @@ const songC: Song = {
   artist: "Artist C",
   file_url: "https://songs/c.mp3",
   duration: 140,
+  cover_art_url: "https://placehold.co/220",
   uploaded_at: "2024-01-01T00:00:00Z",
 };
 

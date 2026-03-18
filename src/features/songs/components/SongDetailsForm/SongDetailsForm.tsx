@@ -1,5 +1,5 @@
-import { useId, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useId, useEffect, useState, useRef } from "react";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import styles from "./SongDetailsForm.module.css";
 import { type SongDetailsValues, songDetailsSchema } from "./schema";
@@ -18,6 +18,7 @@ interface SongDetailsFormProps {
   coverArtUploading?: boolean;
   onCoverArtUpload?: (file: File) => void;
   coverArtLabel?: string;
+  uploadedCoverUrl?: string;
 }
 
 export const SongDetailsForm = ({
@@ -31,44 +32,62 @@ export const SongDetailsForm = ({
   mp3Label = "Select MP3",
   coverArtUploading = false,
   onCoverArtUpload,
-  coverArtLabel = "Select Cover Art",
+  uploadedCoverUrl,
 }: SongDetailsFormProps) => {
   const [mp3FileName, setMp3FileName] = useState<string>("");
-  const [coverFileName, setCoverFileName] = useState<string>("");
-
   const mp3InputId = useId();
-  const coverInputId = useId();
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    control,
     formState: { errors },
   } = useForm<SongDetailsValues>({
-    resolver: zodResolver(songDetailsSchema),
+    resolver: zodResolver(songDetailsSchema) as Resolver<SongDetailsValues>,
     defaultValues: {
       title: initialValues.title || "",
       artist: initialValues.artist || "",
       album: initialValues.album || "",
-      releaseYear: initialValues.releaseYear || "",
+      release_year: initialValues.release_year ?? undefined,
+      cover_art_url: initialValues.cover_art_url || "",
     },
   });
 
+  const formCoverUrl = useWatch({ control, name: "cover_art_url" });
+
   // Sync incoming ID3 tags.
   useEffect(() => {
-    reset({
-      title: initialValues.title || "",
-      artist: initialValues.artist || "",
-      album: initialValues.album || "",
-      releaseYear: initialValues.releaseYear || "",
-    });
+    reset(
+      {
+        title: initialValues.title || "",
+        artist: initialValues.artist || "",
+        album: initialValues.album || "",
+        release_year: initialValues.release_year ?? undefined,
+        cover_art_url: initialValues.cover_art_url || "",
+      },
+      { keepDirtyValues: true },
+    );
   }, [
     initialValues.title,
     initialValues.artist,
     initialValues.album,
-    initialValues.releaseYear,
+    initialValues.release_year,
+    initialValues.cover_art_url,
     reset,
   ]);
+
+  // Sync the uploaded cover URL from the parent into the form state.
+  useEffect(() => {
+    if (uploadedCoverUrl) {
+      setValue("cover_art_url", uploadedCoverUrl, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [uploadedCoverUrl, setValue]);
 
   return (
     <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
@@ -111,6 +130,49 @@ export const SongDetailsForm = ({
               ✓ Audio file ready
             </span>
           )}
+        </div>
+      )}
+
+      {onCoverArtUpload && (
+        <div
+          className={styles.fileUploadWrapper}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <img
+            src={formCoverUrl || "https://placehold.co/220"}
+            alt="Song cover preview"
+            style={{
+              width: "150px",
+              height: "150px",
+              objectFit: "cover",
+              borderRadius: "8px",
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => coverInputRef.current?.click()}
+            disabled={coverArtUploading}
+            style={{ cursor: "pointer" }}
+          >
+            {coverArtUploading ? "Uploading…" : "Change Cover Art"}
+          </button>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              if (!e.target.files) return;
+              onCoverArtUpload(e.target.files[0]);
+            }}
+            aria-label="Upload Cover Art"
+            tabIndex={-1}
+          />
         </div>
       )}
 
@@ -161,47 +223,14 @@ export const SongDetailsForm = ({
           placeholder="Release Year"
           aria-label="Release Year"
           className={styles.inputField}
-          {...register("releaseYear")}
+          {...register("release_year")}
         />
-        {errors.releaseYear && (
+        {errors.release_year && (
           <span className={styles.errorText} role="alert">
-            {errors.releaseYear.message}
+            {errors.release_year.message}
           </span>
         )}
       </div>
-
-      {onCoverArtUpload && (
-        <div className={styles.fileUploadWrapper}>
-          <label
-            htmlFor={coverInputId}
-            className={`${styles.uploadLabel} ${coverArtUploading ? styles.uploading : ""}`}
-          >
-            {coverArtUploading
-              ? "Uploading…"
-              : coverFileName
-                ? "✓ Change Cover"
-                : coverArtLabel}
-          </label>
-          <input
-            id={coverInputId}
-            type="file"
-            accept="image/*"
-            className={styles.fileInput}
-            disabled={coverArtUploading}
-            onChange={(e) => {
-              if (!e.target.files) return;
-              const file = e.target.files[0];
-              setCoverFileName(file.name);
-              onCoverArtUpload(file);
-            }}
-          />
-          {coverFileName && !coverArtUploading && (
-            <span className={`${styles.fileStatusText} ${styles.ready}`}>
-              ✓ {coverFileName}
-            </span>
-          )}
-        </div>
-      )}
 
       <button
         type="submit"

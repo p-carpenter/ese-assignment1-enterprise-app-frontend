@@ -15,7 +15,7 @@ const INITIAL_PLAYLISTS: Playlist[] = [
     description: "A default playlist.",
     is_public: true,
     is_collaborative: false,
-    cover_art_url: null,
+    cover_art_url: "https://placehold.co/220",
     owner: { id: 1, username: "testuser" },
     songs: [],
   },
@@ -51,7 +51,7 @@ export const handlers = [
       description: newPlaylistData.description || "",
       is_public: newPlaylistData.is_public || false,
       is_collaborative: newPlaylistData.is_collaborative || false,
-      cover_art_url: null,
+      cover_art_url: "https://placehold.co/220",
       owner: mockUser,
       songs: [],
     };
@@ -121,7 +121,7 @@ export const handlers = [
             album: "Mock Album",
             release_date: "2023-01-01",
             uploaded_at: new Date().toISOString(),
-            cover_image_url: null,
+            cover_art_url: "https://placehold.co/220",
             play_count: 0,
           },
         };

@@ -64,6 +64,7 @@ const makeSong = (overrides: Partial<Song> = {}): Song => ({
   artist: "Artist",
   duration: 210,
   file_url: "https://example.com/song.mp3",
+  cover_art_url: "https://placehold.co/220",
   uploaded_at: "2024-01-01T00:00:00Z",
   ...overrides,
 });

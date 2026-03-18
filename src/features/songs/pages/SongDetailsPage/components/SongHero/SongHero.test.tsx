@@ -33,9 +33,10 @@ const baseSong: Song = {
   title: "Test Song",
   artist: "Test Artist",
   album: "Test Album",
-  release_year: "2024",
+  release_year: 2024,
+
   file_url: "https://example.com/song.mp3",
-  cover_art_url: undefined,
+  cover_art_url: "https://placehold.co/220",
   duration: 125,
   uploaded_at: "2024-01-01T00:00:00Z",
   uploaded_by: { id: 99, username: "other" },
@@ -57,7 +58,7 @@ describe("SongHero", () => {
     render(<SongHero song={baseSong} onPlayClick={mockOnPlayClick} />);
 
     const cover = screen.getByRole("img", { name: "Test Song" });
-    expect(cover).toHaveAttribute("src", "https://placehold.co/400");
+    expect(cover).toHaveAttribute("src", "https://placehold.co/220");
     expect(screen.getByText("2:05")).toBeInTheDocument();
   });
 

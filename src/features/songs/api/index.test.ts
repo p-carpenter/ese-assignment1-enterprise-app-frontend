@@ -138,6 +138,7 @@ describe("Songs API", () => {
         title: "Song A",
         artist: "Artist 1",
         file_url: "http://example.com/song.mp3",
+        cover_art_url: "https://placehold.co/220",
         duration: 120,
       };
 
@@ -158,6 +159,7 @@ describe("Songs API", () => {
           title: "X",
           artist: "Y",
           file_url: "url",
+          cover_art_url: "https://placehold.co/220",
           duration: 0,
         }),
       ).rejects.toThrow("Upload failed");

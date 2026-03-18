@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateSong } from "@/features/songs/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
@@ -15,10 +15,10 @@ interface SongEditFormProps {
     title: string;
     artist: string;
     album?: string | null;
-    release_year?: string | null;
+    release_year?: number | null;
     file_url: string;
     duration: number;
-    cover_art_url?: string;
+    cover_art_url: string;
   };
   onClose: () => void;
 }
@@ -29,14 +29,14 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<SongEditFormValues>({
-    resolver: zodResolver(songEditSchema),
+    resolver: zodResolver(songEditSchema) as Resolver<SongEditFormValues>,
     defaultValues: {
-      title: song.title,
-      artist: song.artist,
-      album: song.album ?? "",
-      releaseYear: song.release_year ?? "",
+      title: song?.title || "",
+      artist: song?.artist || "",
+      album: song?.album || "",
+      release_year: song?.release_year || undefined,
     },
   });
 
@@ -46,12 +46,12 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     isError: isSaveError,
     error: saveError,
   } = useMutation({
-    mutationFn: (data: SongEditFormValues) =>
+    mutationFn: (data: Partial<SongEditFormValues>) =>
       updateSong(song.id, {
         title: data.title,
         artist: data.artist,
         album: data.album,
-        release_year: data.releaseYear,
+        release_year: data.release_year,
         file_url: song.file_url,
         duration: song.duration,
         cover_art_url: song.cover_art_url,
@@ -65,8 +65,23 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     },
   });
 
+  // Intercept the submission to filter out untouched fields
   const onFormSubmit = (data: SongEditFormValues) => {
-    saveEdit(data);
+    const payload = Object.keys(dirtyFields).reduce((acc, key) => {
+      const k = key as keyof SongEditFormValues;
+
+      (acc as Record<string, unknown>)[k] = data[k];
+
+      return acc;
+    }, {} as Partial<SongEditFormValues>);
+
+    // If no fields were changed, close the form without making an API call.
+    if (Object.keys(payload).length === 0) {
+      onClose();
+      return;
+    }
+
+    saveEdit(payload);
   };
 
   const editErrorMessage =
@@ -125,11 +140,11 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
           className={styles.editInput}
           placeholder="Release year"
           aria-label="Release year"
-          {...register("releaseYear")}
+          {...register("release_year")}
         />
-        {errors.releaseYear && (
+        {errors.release_year && (
           <span className={styles.errorText} role="alert">
-            {errors.releaseYear.message}
+            {errors.release_year.message}
           </span>
         )}
       </div>

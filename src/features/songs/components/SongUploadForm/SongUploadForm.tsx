@@ -75,14 +75,18 @@ export const SongUploadForm = () => {
     setIsSaving(true);
 
     try {
+      const releaseYear =
+        data.release_year ??
+        (id3Tags.year ? Number(id3Tags.year) || undefined : undefined);
+
       await uploadSong({
         title: data.title || id3Tags.title || songFileName,
         artist: data.artist || id3Tags.artist || "Unknown Artist",
         file_url: songUrl,
-        cover_art_url: coverArtUrl,
+        cover_art_url: data.cover_art_url || coverArtUrl,
         duration: songDuration,
         album: data.album || id3Tags.album || "Unknown Album",
-        release_year: data.releaseYear || id3Tags.year || "Unknown Year",
+        release_year: releaseYear,
       });
 
       void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
@@ -125,7 +129,7 @@ export const SongUploadForm = () => {
           title: id3Tags.title || "",
           artist: id3Tags.artist || "",
           album: id3Tags.album || "",
-          releaseYear: id3Tags.year || "",
+          release_year: id3Tags.year || undefined,
         }}
         onSubmit={handleSubmit}
         isSubmitting={isSaving}
@@ -136,6 +140,7 @@ export const SongUploadForm = () => {
         mp3Label={isMp3Uploading ? "Uploading MP3..." : "Select MP3"}
         coverArtUploading={isCoverUploading}
         onCoverArtUpload={handleCoverArtUpload}
+        uploadedCoverUrl={coverArtUrl} // <-- This feeds the URL back into the child form's preview
       />
     </div>
   );

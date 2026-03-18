@@ -23,7 +23,7 @@ const mockSong: Song = {
   cover_art_url: "http://example.com/history.jpg",
   album: "History Album",
   uploaded_at: "2026-02-19T10:30:00.000Z",
-  release_year: "2026",
+  release_year: 2026,
 };
 
 const mockEntry = {

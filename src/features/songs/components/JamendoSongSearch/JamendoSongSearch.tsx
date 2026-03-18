@@ -7,10 +7,11 @@ import { searchJamendoTracks } from "../../api/jamendo";
 import type { JamendoTrack } from "../../types";
 import styles from "./JamendoSongSearch.module.css";
 
-const getReleaseYear = (date?: string): string => {
-  if (!date) return "Unknown Year";
-  const year = date.split("-")[0];
-  return year || "Unknown Year";
+const getReleaseYear = (date?: string): number | undefined => {
+  if (!date) return undefined;
+  const yearStr = date.split("-")[0];
+  const n = Number(yearStr);
+  return Number.isFinite(n) ? n : undefined;
 };
 
 const formatDuration = (seconds: number) => {
@@ -71,11 +72,13 @@ export const JamendoSongSearch = () => {
     setImportError(null);
 
     try {
+      const release_year = getReleaseYear(track.releasedate);
+
       await uploadSong({
         title: track.name,
         artist: track.artist_name || "Unknown Artist",
         album: track.album_name || "Unknown Album",
-        release_year: getReleaseYear(track.releasedate),
+        release_year: release_year,
         file_url: fileUrl,
         cover_art_url: track.image || "",
         duration: Math.round(track.duration || 0),

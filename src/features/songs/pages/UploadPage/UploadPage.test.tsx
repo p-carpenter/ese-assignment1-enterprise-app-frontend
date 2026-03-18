@@ -161,7 +161,7 @@ describe("UploadPage", () => {
           title: "Integration Song",
           artist: "Integration Artist",
           album: "Integration Album",
-          release_year: "2019",
+          release_year: 2019,
           file_url: "https://jamendo/download.mp3",
           cover_art_url: "https://jamendo/cover.jpg",
           duration: 212,
