@@ -1,5 +1,11 @@
 import { type ReactNode } from "react";
-import { ModalOverlay, Modal as AriaModal, Dialog, Heading, Button } from "react-aria-components";
+import {
+  ModalOverlay,
+  Modal as AriaModal,
+  Dialog,
+  Heading,
+  Button,
+} from "react-aria-components";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -20,14 +26,22 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
       <AriaModal className={styles.modal}>
         <Dialog
           className={styles.dialog}
-          {...(!title ? { 'aria-label': 'Dialog' } : {})}
+          {...(!title ? { "aria-label": "Dialog" } : {})}
         >
           {({ close }) => (
             <>
-              <Button onPress={close} className={styles.closeButton} aria-label="Close">
+              <Button
+                onPress={close}
+                className={styles.closeButton}
+                aria-label="Close"
+              >
                 ×
               </Button>
-              {title && <Heading slot="title" className={styles.title}>{title}</Heading>}
+              {title && (
+                <Heading slot="title" className={styles.title}>
+                  {title}
+                </Heading>
+              )}
               <div className={styles.content}>{children}</div>
             </>
           )}
