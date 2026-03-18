@@ -137,9 +137,9 @@
 }
 
 .collaborativeToggle {
-  display: 'flex';
-  align-items: 'center';
-  gap: '8px';
+  display: "flex";
+  align-items: "center";
+  gap: "8px";
 }
 
 .toggleOn {

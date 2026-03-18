@@ -144,7 +144,9 @@ export const EditPlaylistForm = ({
             onClick={() => coverInputRef.current?.click()}
             disabled={isCoverUploading}
             aria-label={
-              isCoverUploading ? "Uploading cover image" : "Change playlist cover"
+              isCoverUploading
+                ? "Uploading cover image"
+                : "Change playlist cover"
             }
           >
             <IoImageOutline size={18} aria-hidden="true" />
