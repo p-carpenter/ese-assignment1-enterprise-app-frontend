@@ -50,7 +50,7 @@
 
 .app-grid {
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: clamp(260px, 20vw, 320px) 1fr;
   gap: 24px;
   /* padding: 24px 0; */
   height: 100%;
@@ -120,4 +120,10 @@
 .primary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .app-grid {
+    grid-template-columns: 1fr; /* Stack the layout on small screens */
+  }
 }
