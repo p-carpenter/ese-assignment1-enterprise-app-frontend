@@ -22,11 +22,12 @@ describe("SongManagementDropdown", () => {
     vi.clearAllMocks();
   });
 
-
   describe("Rendering", () => {
     it("renders the trigger button closed by default", () => {
       render(<SongManagementDropdown dropdownItems={makeItems()} />);
-      expect(screen.getByRole("button", { expanded: false })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { expanded: false }),
+      ).toBeInTheDocument();
       expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     });
 
@@ -47,7 +48,9 @@ describe("SongManagementDropdown", () => {
       render(<SongManagementDropdown dropdownItems={makeItems()} />);
 
       await user.click(screen.getByRole("button"));
-      expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("menuitem", { name: "Edit" }),
+      ).toBeInTheDocument();
     });
 
     it("calls onSelect and closes when clicking a valid item", async () => {
@@ -78,7 +81,9 @@ describe("SongManagementDropdown", () => {
 
   describe("Keyboard Navigation & Accessibility", () => {
     it("has no basic accessibility violations (axe-core)", async () => {
-      const { container } = render(<SongManagementDropdown dropdownItems={makeItems()} />);
+      const { container } = render(
+        <SongManagementDropdown dropdownItems={makeItems()} />,
+      );
 
       const results = await axe(container);
       expect(results).toHaveNoViolations();
@@ -149,7 +154,9 @@ describe("SongManagementDropdown", () => {
       );
 
       await user.click(screen.getByRole("button"));
-      expect(screen.getByRole("menuitem", { name: longText })).toBeInTheDocument();
+      expect(
+        screen.getByRole("menuitem", { name: longText }),
+      ).toBeInTheDocument();
     });
   });
 });
