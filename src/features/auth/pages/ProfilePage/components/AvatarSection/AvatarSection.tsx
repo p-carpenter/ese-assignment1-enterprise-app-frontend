@@ -1,9 +1,8 @@
 import { useRef, type ChangeEvent } from "react";
 import defaultAvatar from "@/shared/assets/default_avatar.png";
-import { Button } from "@/shared/components";
 import { PencilSolid } from "@/shared/icons";
 import styles from "./AvatarSection.module.css";
-import { Link } from "react-router-dom";
+import { LinkButton } from "@/shared/components/Button/LinkButton";
 
 interface AvatarSectionProps {
   username: string;
@@ -67,9 +66,9 @@ export const AvatarSection = ({
       <h1 className={styles.displayName}>{username}</h1>
 
       {!isEditing && (
-        <Button as={Link} to="/profile/edit" variant="outlined" size="small">
+        <LinkButton to="/profile/edit" variant="outlined" size="small">
           Edit Profile
-        </Button>
+        </LinkButton>
       )}
 
       {isUploading && (

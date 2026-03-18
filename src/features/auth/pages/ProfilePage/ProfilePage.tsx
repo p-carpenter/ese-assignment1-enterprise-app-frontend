@@ -1,5 +1,5 @@
 import { useState, type JSX } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Button, AlertMessage } from "@/shared/components";
 import { useCloudinaryUpload } from "@/shared/hooks";
@@ -8,6 +8,7 @@ import { useAuth } from "@/shared/context/AuthContext";
 import { AvatarSection } from "./components/AvatarSection/AvatarSection";
 import { ProfileInfo } from "./components/ProfileInfo/ProfileInfo";
 import styles from "./ProfilePage.module.css";
+import { LinkButton } from "@/shared/components/Button/LinkButton";
 
 export const ProfilePage = ({
   isEditing = false,
@@ -107,7 +108,7 @@ export const ProfilePage = ({
               variant="outlined"
               size="large"
               onClick={() => saveProfile()}
-              disabled={isUploading || isSaving}
+              isDisabled={isUploading || isSaving}
             >
               {isSaving ? "Saving..." : "Save"}
             </Button>
@@ -116,15 +117,14 @@ export const ProfilePage = ({
             </Button>
           </div>
         ) : (
-          <Button
-            as={Link}
+          <LinkButton
             to="/"
             variant="outlined"
             size="large"
             className={styles.backButton}
           >
             Back to Home
-          </Button>
+          </LinkButton>
         )}
       </div>
     </div>
