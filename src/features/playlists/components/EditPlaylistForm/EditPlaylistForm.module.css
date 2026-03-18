@@ -1,3 +1,10 @@
+/* ── Edit form row ───────────────────────────────────────────── */
+.editFormRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+}
 .editFields {
   flex: 1;
   min-width: 200px;
@@ -109,7 +116,8 @@
 .toggleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 16px;
   font-size: 0.88rem;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
@@ -126,6 +134,12 @@
   transition: background 0.25s;
   padding: 0;
   flex-shrink: 0;
+}
+
+.collaborativeToggle {
+  display: "flex";
+  align-items: "center";
+  gap: "8px";
 }
 
 .toggleOn {

@@ -26,7 +26,7 @@ export const CreateNewPlaylistModal = ({
   const createMutation = useMutation({
     mutationFn: (values: {
       title: string;
-      description: string;
+      description?: string;
       cover_art_url: string;
       is_collaborative: boolean;
       is_public: boolean;
@@ -56,7 +56,10 @@ export const CreateNewPlaylistModal = ({
       <CreateNewPlaylistForm
         onSubmit={(values) => {
           setFormError(null);
-          createMutation.mutate(values);
+          createMutation.mutate({
+            ...values,
+            cover_art_url: values.cover_art_url ?? "",
+          });
         }}
         isSubmitting={createMutation.isPending}
         error={formError}

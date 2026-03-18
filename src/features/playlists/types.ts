@@ -18,7 +18,7 @@ export interface PlaylistOwner {
 export interface Playlist {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   is_public: boolean;
   is_collaborative: boolean;
   cover_art_url: string | null;

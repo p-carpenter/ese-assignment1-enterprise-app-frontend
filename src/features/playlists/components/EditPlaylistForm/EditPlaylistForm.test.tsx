@@ -120,6 +120,51 @@ describe("EditPlaylistForm", () => {
   });
 
   describe("input interactions", () => {
+    it("hides the Collaborative toggle when public is false", () => {
+      renderForm({ ...basePlaylist, is_public: false });
+      expect(
+        screen.queryByRole("switch", { name: /toggle collaborative mode/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("resets collaborative to false and hides it when public is toggled off", async () => {
+      const user = userEvent.setup();
+
+      renderForm({ ...basePlaylist, is_public: true, is_collaborative: true });
+
+      const collabToggle = screen.getByRole("switch", {
+        name: /toggle collaborative mode/i,
+      });
+      expect(collabToggle).toHaveAttribute("aria-checked", "true");
+
+      // Toggle public off.
+      const publicToggle = screen.getByRole("switch", {
+        name: /toggle public visibility/i,
+      });
+      await user.click(publicToggle);
+
+      expect(
+        screen.queryByRole("switch", { name: /toggle collaborative mode/i }),
+      ).not.toBeInTheDocument();
+
+      let patchBody: Record<string, unknown> = {};
+      server.use(
+        http.patch(
+          "http://localhost:8000/api/playlists/1/",
+          async ({ request }) => {
+            patchBody = (await request.json()) as Record<string, unknown>;
+            return HttpResponse.json(basePlaylist);
+          },
+        ),
+      );
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
+      await waitFor(() => {
+        expect(patchBody.is_public).toBe(false);
+        expect(patchBody.is_collaborative).toBe(false);
+      });
+    });
     it("allows typing a new title", async () => {
       const user = userEvent.setup();
       renderForm();
@@ -271,6 +316,12 @@ describe("EditPlaylistForm", () => {
       const onClose = vi.fn();
       renderForm(basePlaylist, onClose);
 
+      // Make dirty
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
+      await user.type(titleInput, " updated");
+
       await user.click(
         screen.getByRole("button", { name: /save playlist changes/i }),
       );
@@ -322,6 +373,12 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm();
+
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
+      await user.type(titleInput, " changed");
+
       const saveBtn = screen.getByRole("button", {
         name: /save playlist changes/i,
       });
@@ -340,6 +397,12 @@ describe("EditPlaylistForm", () => {
 
       const onClose = vi.fn();
       renderForm(basePlaylist, onClose);
+
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
+      await user.type(titleInput, " changed");
+
       await user.click(
         screen.getByRole("button", { name: /save playlist changes/i }),
       );
@@ -374,6 +437,49 @@ describe("EditPlaylistForm", () => {
       await user.click(screen.getByRole("button", { name: /cancel editing/i }));
       expect(patched).toBe(false);
     });
+
+    it("resets form state to initial values on cancel", async () => {
+      const user = userEvent.setup();
+      renderForm();
+
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
+      const descInput = screen.getByRole("textbox", {
+        name: /playlist description/i,
+      });
+
+      await user.clear(titleInput);
+      await user.type(titleInput, "Changed Title");
+      await user.clear(descInput);
+      await user.type(descInput, "Changed Description");
+
+      await user.click(screen.getByRole("button", { name: /cancel editing/i }));
+
+      expect(titleInput).toHaveValue("My Playlist");
+      expect(descInput).toHaveValue("Original description");
+    });
+
+    it("closes the form without making an API call if no fields were changed", async () => {
+      const user = userEvent.setup();
+      let patched = false;
+      const onClose = vi.fn();
+
+      server.use(
+        http.patch("http://localhost:8000/api/playlists/1/", () => {
+          patched = true;
+          return HttpResponse.json(basePlaylist);
+        }),
+      );
+
+      renderForm(basePlaylist, onClose);
+      await user.click(
+        screen.getByRole("button", { name: /save playlist changes/i }),
+      );
+
+      expect(onClose).toHaveBeenCalledOnce();
+      expect(patched).toBe(false);
+    });
   });
 
   describe("payload shape", () => {
@@ -391,6 +497,12 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm({ ...basePlaylist, cover_art_url: null });
+      const titleInput = screen.getByRole("textbox", {
+        name: /playlist title/i,
+      });
+      await user.clear(titleInput);
+      await user.type(titleInput, "Updated Title");
+
       await user.click(
         screen.getByRole("button", { name: /save playlist changes/i }),
       );
@@ -415,13 +527,28 @@ describe("EditPlaylistForm", () => {
       );
 
       renderForm();
+      const fileInput = screen.getByLabelText(/upload cover image file/i);
+      const file = new File(["dummy"], "photo.jpg", { type: "image/jpeg" });
+      mockUpload.mockResolvedValueOnce({
+        secure_url: "https://example.com/new-cover.png",
+      });
+
+      await user.upload(fileInput, file);
+
+      await waitFor(() =>
+        expect(screen.getByRole("img")).toHaveAttribute(
+          "src",
+          "https://example.com/new-cover.png",
+        ),
+      );
+
       await user.click(
         screen.getByRole("button", { name: /save playlist changes/i }),
       );
 
       await waitFor(() => {
         expect(patchBody.cover_art_url).toBe(
-          "https://example.com/original-cover.png",
+          "https://example.com/new-cover.png",
         );
       });
     });
