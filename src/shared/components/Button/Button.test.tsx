@@ -21,7 +21,7 @@ describe("Button", () => {
   });
 
   it("is disabled when the disabled prop is true", () => {
-    render(<Button disabled>Click</Button>);
+    render(<Button isDisabled>Click</Button>);
     expect(screen.getByRole("button")).toBeDisabled();
   });
 
@@ -29,7 +29,7 @@ describe("Button", () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
     render(
-      <Button disabled onClick={onClick}>
+      <Button isDisabled onClick={onClick}>
         Click
       </Button>,
     );
@@ -69,14 +69,5 @@ describe("Button", () => {
     expect(btn.className).toMatch(/outlined/);
   });
 
-  it("renders as a different element when 'as' prop is provided", () => {
-    render(
-      <Button as="a" href="/somewhere">
-        Link button
-      </Button>,
-    );
-    expect(
-      screen.getByRole("link", { name: "Link button" }),
-    ).toBeInTheDocument();
-  });
+
 });

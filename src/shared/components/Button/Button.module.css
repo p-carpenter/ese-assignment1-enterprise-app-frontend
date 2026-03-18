@@ -1,6 +1,3 @@
-/* button.module.css */
-
-/* the base styles every button shares */
 .button {
   border-radius: 500px;
   font-weight: 700;
@@ -11,27 +8,42 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.button[data-focus-visible] {
+  outline: 2px solid var(--accent-green, #1db954);
+  outline-offset: 2px;
+}
+
+.button[data-pressed] {
+  transform: scale(0.98);
+}
+
+.button[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* visual variants */
 .outlined {
   background: transparent;
-  color: var(--app-white);
-  border: 1px solid var(--app-gray-dark);
+  color: var(--app-white, #fff);
+  border-color: var(--app-gray-dark, #555);
 }
 
-.outlined:hover {
-  border-color: var(--app-white);
+.outlined[data-hovered] {
+  border-color: var(--app-white, #fff);
 }
 
 .primary {
-  background: var(--accent-green);
-  color: var(--app-black);
-  border: none;
+  background: var(--accent-green, #1db954);
+  color: var(--app-black, #000);
 }
 
-.primary:hover {
-  background: var(--accent-green-bright);
+.primary[data-hovered] {
+  background: var(--accent-green-bright, #1ed760);
 }
 
 /* size modifiers */
@@ -43,4 +55,48 @@
 .large {
   padding: 12px 32px;
   font-size: 14px;
+}
+
+/* LinkButton styles */
+.linkOverride {
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button[data-focus-visible],
+.button:focus-visible {
+  outline: 2px solid var(--accent-green, #1db954);
+  outline-offset: 2px;
+}
+
+.button[data-pressed],
+.button:active {
+  transform: scale(0.98);
+}
+
+.button[data-disabled],
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.outlined {
+  background: transparent;
+  color: var(--app-white, #fff);
+  border-color: var(--app-gray-dark, #555);
+}
+
+.outlined[data-hovered],
+.outlined:hover {
+  border-color: var(--app-white, #fff);
+}
+
+.primary {
+  background: var(--accent-green, #1db954);
+  color: var(--app-black, #000);
+}
+
+.primary[data-hovered],
+.primary:hover {
+  background: var(--accent-green-bright, #1ed760);
 }
