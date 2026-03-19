@@ -1,8 +1,4 @@
 .songList {
-  border-radius: 8px;
-  padding: 24px;
-}
-.songList {
   background: var(--app-dark-elevated);
   border-radius: 8px;
   padding: 24px;
@@ -139,4 +135,25 @@
 
 .userAvatarFallback {
   line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .songUploadedAt {
+    display: none;
+  }
+
+  .songItem,
+  .songItemActive {
+    padding: 8px;
+  }
+
+  .albumArt {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  .userAvatar {
+    display: none;
+  }
 }
