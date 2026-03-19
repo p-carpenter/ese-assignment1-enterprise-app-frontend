@@ -24,19 +24,21 @@ export const AppLayout = (): JSX.Element => {
           style={{ opacity: coverUrl ? 0.35 : 1 }}
         />
       </div>
-      
+
       <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       <div className={styles.appGrid}>
         {/* Overlay to close the sidebar when tapping outside on mobile. */}
         {isSidebarOpen && (
-          <div 
-            className={styles.sidebarOverlay} 
-            onClick={() => setIsSidebarOpen(false)} 
+          <div
+            className={styles.sidebarOverlay}
+            onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        
-        <div className={`${styles.leftCol} ${isSidebarOpen ? styles.open : ""}`}>
+
+        <div
+          className={`${styles.leftCol} ${isSidebarOpen ? styles.open : ""}`}
+        >
           <PlaylistList />
         </div>
 
