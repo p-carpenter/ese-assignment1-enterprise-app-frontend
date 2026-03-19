@@ -17,14 +17,14 @@ export const UploadPage = () => {
           variant={activeTab === "upload" ? "primary" : "outlined"}
           onClick={() => setActiveTab("upload")}
         >
-          Upload File
+          Upload MP3
         </Button>
         <Button
           size="large"
           variant={activeTab === "jamendo" ? "primary" : "outlined"}
           onClick={() => setActiveTab("jamendo")}
         >
-          Import Jamendo
+          Search Jamendo
         </Button>
       </div>
 

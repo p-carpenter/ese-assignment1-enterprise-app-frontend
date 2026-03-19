@@ -59,7 +59,7 @@ export const Header = ({ onMenuClick }: HeaderProps): JSX.Element => {
           onClick={() => navigate("/upload")}
           className={styles.uploadButton}
         >
-          <span className={styles.uploadText}>Upload</span>
+          <span className={styles.uploadText}>Add Song</span>
           <MdAdd className={styles.uploadIcon} size={20} />
         </Button>
 
