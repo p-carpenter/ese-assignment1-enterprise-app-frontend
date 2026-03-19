@@ -1,3 +1,14 @@
+.uploadIcon {
+  display: none;
+  /* Hide icon on desktop */
+}
+
+.desktopAuthActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -5,6 +16,15 @@
   padding: 16px 0;
   margin-bottom: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--app-white, #fff);
+  cursor: pointer;
+  padding: 8px;
 }
 
 .centreActions {
@@ -54,6 +74,7 @@
   object-fit: cover;
   display: block;
 }
+
 .homeButton {
   width: 40px;
   height: 40px;
@@ -65,7 +86,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--app-white);
+  color: var(--app-white, #fff);
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
@@ -73,4 +94,53 @@
 
 .homeButton:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsiveness */
+@media (max-width: 920px) {
+  .uploadText {
+    display: none;
+    /* Hide 'Add' text on mobile */
+  }
+
+  .uploadIcon {
+    display: block;
+    /* Show '+' icon on mobile */
+  }
+
+  .uploadButton {
+    padding: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .desktopAuthActions {
+    display: none;
+    /* Hide the profile and logout buttons on mobile */
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .header {
+    padding: 12px 16px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    display: none;
+  }
+
+  .centreActions {
+    margin: 0;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .actions {
+    gap: 8px;
+  }
 }
