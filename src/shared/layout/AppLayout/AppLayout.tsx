@@ -1,4 +1,4 @@
-import { type JSX } from "react";
+import { type JSX, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { MiniPlayer, usePlayer } from "@/features/player";
 import { Header } from "@/shared/layout";
@@ -8,10 +8,10 @@ import styles from "./AppLayout.module.css";
 export const AppLayout = (): JSX.Element => {
   const { currentSong } = usePlayer();
   const coverUrl = currentSong?.cover_art_url;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="page-layout">
-      {/* Dynamic blurred background */}
+    <div className={styles.pageLayout}>
       <div className={styles.bg}>
         {coverUrl && (
           <div
@@ -24,23 +24,27 @@ export const AppLayout = (): JSX.Element => {
           style={{ opacity: coverUrl ? 0.35 : 1 }}
         />
       </div>
-      {/* TOP ROW: Header */}
-      <Header />
+      
+      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      {/* CONTENT ROW: Left column + Center (current route) */}
-      <div className="app-grid">
-        {/* LEFT COLUMN: PlaylistList auto-refetches via React Query cache invalidation */}
-        <div className={`col-scroll-auto ${styles.leftCol}`}>
+      <div className={styles.appGrid}>
+        {/* Overlay to close the sidebar when tapping outside on mobile. */}
+        {isSidebarOpen && (
+          <div 
+            className={styles.sidebarOverlay} 
+            onClick={() => setIsSidebarOpen(false)} 
+          />
+        )}
+        
+        <div className={`${styles.leftCol} ${isSidebarOpen ? styles.open : ""}`}>
           <PlaylistList />
         </div>
 
-        {/* CENTER COLUMN: route content renders here */}
-        <div className="col-scroll">
+        <div className={styles.centerCol}>
           <Outlet />
         </div>
       </div>
 
-      {/* BOTTOM ROW: persistent player controls */}
       <MiniPlayer />
     </div>
   );
