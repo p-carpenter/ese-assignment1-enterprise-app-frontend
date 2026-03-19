@@ -303,13 +303,13 @@
     transform: scale(0.95);
   }
 
-  /* ── SLIDING LYRICS PANEL ── */
+  /* Sliding lyrics panel */
   .lyricsOverlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 55vh; /* Covers most of the screen but leaves the header visible */
+    height: 55vh; /* Covers most of the screen but leaves the header visible. */
     background: #121212;
     border-radius: 24px 24px 0 0;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.8);
