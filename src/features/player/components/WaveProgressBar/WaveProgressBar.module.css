@@ -21,7 +21,7 @@
   align-items: center;
   gap: 1px;
   padding: 0 2px;
-  pointer-events: none; /* Allow clicks to pass through to the container for scrubbing */
+  pointer-events: none;
 }
 
 .bar {
@@ -61,7 +61,6 @@
   transition: opacity 0.15s;
 }
 
-/* Show a visible playhead line when scrubbing or using the keyboard */
 .thumb[data-dragging],
 .thumb[data-focus-visible] {
   opacity: 1;
@@ -72,7 +71,8 @@
 }
 
 @media (max-width: 920px) {
-  .container {
+  /* Collapsed mobile: thin progress bar pinned to bottom */
+  .container:not(.expanded) {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -85,31 +85,52 @@
     z-index: 10;
   }
 
-  .wrapper {
+  .container:not(.expanded) .wrapper {
     height: 100%;
     position: relative;
   }
 
-  .waveLayer {
+  .container:not(.expanded) .waveLayer {
     gap: 0;
     padding: 0;
     top: auto;
-    bottom: 0; /* pin the visual line to the bottom */
-    height: 2px; /* the actual visual thickness */
-    transition: height 0.1s ease; /* smooth grow effect */
+    bottom: 0;
+    height: 2px;
+    transition: height 0.1s ease;
   }
 
-  .bar {
+  .container:not(.expanded) .bar {
     border-radius: 0;
-    height: 100% !important;
+    height: 100%;
   }
 
-  /* make the line thicker when it is being dragged */
-  .container[data-dragging] .waveLayer {
+  .container:not(.expanded)[data-dragging] .waveLayer {
     height: 4px;
   }
 
-  .thumb {
+  .container:not(.expanded) .thumb {
     display: none;
+  }
+
+  /* Expanded */
+  .container.expanded {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex: 1;
+  }
+
+  .container.expanded .wrapper {
+    height: 100%;
+  }
+
+  .container.expanded .waveLayer {
+    gap: 2px;
+    padding: 0 2px;
+    align-items: center;
+  }
+
+  .container.expanded .bar {
+    border-radius: 2px;
   }
 }
