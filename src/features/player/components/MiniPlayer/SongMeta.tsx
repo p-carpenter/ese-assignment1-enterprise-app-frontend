@@ -7,6 +7,7 @@ interface SongMetaProps {
   artistRef: RefObject<HTMLSpanElement | null>;
   isScrolling: boolean;
   isArtistScrolling: boolean;
+  isExpanded?: boolean;
 }
 
 export const SongMeta: FC<SongMetaProps> = ({
@@ -14,6 +15,7 @@ export const SongMeta: FC<SongMetaProps> = ({
   artistRef,
   isScrolling,
   isArtistScrolling,
+  isExpanded = false,
 }) => {
   const { currentSong } = usePlayer();
 
@@ -22,18 +24,20 @@ export const SongMeta: FC<SongMetaProps> = ({
       <img
         src={currentSong?.cover_art_url || "https://placehold.co/48"}
         alt={currentSong?.title || "No track"}
-        className={styles.albumArt}
+        className={`${styles.albumArt} ${isExpanded ? styles.expandedArt : ""}`}
       />
-      <div className={styles.trackMeta}>
+      <div
+        className={`${styles.trackMeta} ${isExpanded ? styles.expandedMeta : ""}`}
+      >
         <span
           ref={titleRef}
-          className={`${styles.trackTitle} ${isScrolling ? styles.scrolling : ""}`}
+          className={`${styles.trackTitle} ${isScrolling ? styles.scrolling : ""} ${isExpanded ? styles.expandedTitle : ""}`}
         >
           {currentSong?.title || "No track selected"}
         </span>
         <span
           ref={artistRef}
-          className={`${styles.trackArtist} ${isArtistScrolling ? styles.scrolling : ""}`}
+          className={`${styles.trackArtist} ${isArtistScrolling ? styles.scrolling : ""} ${isExpanded ? styles.expandedArtist : ""}`}
         >
           {currentSong?.artist || "—"}
         </span>
