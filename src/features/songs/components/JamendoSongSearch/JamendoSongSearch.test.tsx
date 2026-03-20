@@ -1,21 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/vitest";
 import { JamendoSongSearch } from "./JamendoSongSearch";
 import { searchJamendoTracks } from "../../api/jamendo";
 import { uploadSong } from "../../api";
-
-const mockNavigate = vi.fn();
-
-vi.mock("react-router-dom", async () => {
-  const actual =
-    await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom",
-    );
-  return { ...actual, useNavigate: () => mockNavigate };
-});
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 vi.mock("../../api/jamendo", () => ({
   searchJamendoTracks: vi.fn(),
@@ -29,6 +20,8 @@ const mockedSearchJamendoTracks = vi.mocked(searchJamendoTracks);
 const mockedUploadSong = vi.mocked(uploadSong);
 
 describe("JamendoSongSearch", () => {
+  const mockOnImportSuccess = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -36,11 +29,7 @@ describe("JamendoSongSearch", () => {
   describe("Search", () => {
     it("shows validation error when searching with empty query", async () => {
       const user = userEvent.setup();
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.click(screen.getByRole("button", { name: /search/i }));
 
@@ -62,11 +51,7 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "test");
       await user.click(screen.getByRole("button", { name: /search/i }));
@@ -80,11 +65,7 @@ describe("JamendoSongSearch", () => {
       const user = userEvent.setup();
       mockedSearchJamendoTracks.mockResolvedValueOnce([]);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -103,11 +84,7 @@ describe("JamendoSongSearch", () => {
         new Error("Jamendo unavailable"),
       );
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "rock");
       await user.click(screen.getByRole("button", { name: /search/i }));
@@ -119,7 +96,7 @@ describe("JamendoSongSearch", () => {
   });
 
   describe("Import", () => {
-    it("imports a track and sends mapped payload to uploadSong", async () => {
+    it("imports a track and calls onImportSuccess with mapped payload", async () => {
       const user = userEvent.setup();
       mockedSearchJamendoTracks.mockResolvedValueOnce([
         {
@@ -136,11 +113,7 @@ describe("JamendoSongSearch", () => {
       ]);
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -164,7 +137,7 @@ describe("JamendoSongSearch", () => {
         });
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(mockOnImportSuccess).toHaveBeenCalledTimes(1);
     });
 
     it("uses audio URL when audiodownload is missing", async () => {
@@ -180,11 +153,7 @@ describe("JamendoSongSearch", () => {
       ]);
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -217,11 +186,7 @@ describe("JamendoSongSearch", () => {
       ]);
       mockedUploadSong.mockResolvedValueOnce({} as never);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -257,11 +222,7 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -278,7 +239,7 @@ describe("JamendoSongSearch", () => {
       expect(mockedUploadSong).not.toHaveBeenCalled();
     });
 
-    it("shows error when import fails and does not navigate", async () => {
+    it("shows error when import fails and does not call success callback", async () => {
       const user = userEvent.setup();
       mockedSearchJamendoTracks.mockResolvedValueOnce([
         {
@@ -291,11 +252,7 @@ describe("JamendoSongSearch", () => {
       ]);
       mockedUploadSong.mockRejectedValueOnce(new Error("DB unavailable"));
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -307,7 +264,7 @@ describe("JamendoSongSearch", () => {
       await user.click(screen.getByRole("button", { name: /^import$/i }));
 
       expect(await screen.findByText("DB unavailable")).toBeInTheDocument();
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockOnImportSuccess).not.toHaveBeenCalled();
     });
 
     it("disables import during request and re-enables after failed import", async () => {
@@ -330,11 +287,7 @@ describe("JamendoSongSearch", () => {
           }) as never,
       );
 
-      render(
-        <MemoryRouter>
-          <JamendoSongSearch />
-        </MemoryRouter>,
-      );
+      render(<JamendoSongSearch onImportSuccess={mockOnImportSuccess} />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -357,7 +310,59 @@ describe("JamendoSongSearch", () => {
       await waitFor(() => {
         expect(screen.getByRole("button", { name: /^import$/i })).toBeEnabled();
       });
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockOnImportSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Error handling", () => {
+    it("renders search error AlertMessage when searchError is set", async () => {
+      render(<JamendoSongSearch onImportSuccess={vi.fn()} />);
+      // Simulate empty search to trigger searchError.
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: /search/i }));
+      expect(
+        await screen.findByText(/enter a title, artist, or keyword/i),
+      ).toBeInTheDocument();
+    });
+
+    it("renders import error AlertMessage when importError is set", async () => {
+      const user = userEvent.setup();
+      // Mock a track with no playable URL.
+      vi.mocked(searchJamendoTracks).mockResolvedValueOnce([
+        {
+          id: "j-8",
+          name: "No URL",
+          artist_name: "Artist",
+          duration: 120,
+          audio: "",
+        },
+      ]);
+      render(<JamendoSongSearch onImportSuccess={vi.fn()} />);
+      await user.type(
+        screen.getByLabelText(/search jamendo tracks/i),
+        "no-url",
+      );
+      await user.click(screen.getByRole("button", { name: /search/i }));
+      await screen.findByText("No URL");
+      await user.click(screen.getByRole("button", { name: /^import$/i }));
+      expect(
+        await screen.findByText(/no playable URL available for import/i),
+      ).toBeInTheDocument();
+    });
+
+    it("does not render AlertMessage when there are no errors", () => {
+      render(<JamendoSongSearch onImportSuccess={vi.fn()} />);
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Accessibility", () => {
+    it("should have no accessibility violations", async () => {
+      const { container } = render(
+        <JamendoSongSearch onImportSuccess={vi.fn()} />,
+      );
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
     });
   });
 });

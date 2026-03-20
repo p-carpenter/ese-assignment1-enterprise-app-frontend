@@ -1,5 +1,4 @@
 import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AlertMessage, Button } from "@/shared/components";
 import { ApiError } from "@/shared/api/errors";
 import { uploadSong } from "../../api";
@@ -20,8 +19,13 @@ const formatDuration = (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export const JamendoSongSearch = () => {
-  const navigate = useNavigate();
+interface JamendoSongSearchProps {
+  onImportSuccess: () => void;
+}
+
+export const JamendoSongSearch = ({
+  onImportSuccess,
+}: JamendoSongSearchProps) => {
   const [query, setQuery] = useState("");
   const [tracks, setTracks] = useState<JamendoTrack[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -84,7 +88,8 @@ export const JamendoSongSearch = () => {
         duration: Math.round(track.duration || 0),
       });
 
-      navigate("/");
+      // Let the parent component handle the routing
+      onImportSuccess();
     } catch (error) {
       setImportError(
         error instanceof ApiError
