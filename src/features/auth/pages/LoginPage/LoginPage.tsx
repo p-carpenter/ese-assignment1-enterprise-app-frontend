@@ -17,7 +17,7 @@ export const LoginPage = () => {
       </div>
       <AuthFormFooter
         footerText="Don't have an account?"
-        linkText="Sign up for Spotify"
+        linkText="Sign up to AdaStream"
         linkTo="/register"
       />
     </AuthLayout>
