@@ -43,7 +43,7 @@ export const LoginForm = () => {
 
   return (
     <>
-      <h2 className={styles.title}>Log in to Spotify</h2>
+      <h2 className={styles.title}>Log in to AdaStream</h2>
       <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
         <AlertMessage message={apiError} onDismiss={() => setApiError("")} />
 

@@ -62,7 +62,7 @@ describe("Header", () => {
   describe("Navigation & Layout", () => {
     it("renders the app title with correct href", () => {
       renderHeader();
-      const titleLink = screen.getByRole("link", { name: /music player/i });
+      const titleLink = screen.getByRole("link", { name: /adastream/i });
       expect(titleLink).toBeInTheDocument();
       expect(titleLink).toHaveAttribute("href", "/");
     });

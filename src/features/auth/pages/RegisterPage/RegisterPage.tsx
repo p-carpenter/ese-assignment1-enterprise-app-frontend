@@ -12,7 +12,7 @@ export const RegisterPage = () => {
       </div>
       <AuthFormFooter
         footerText="Already have an account?"
-        linkText="Log in to Spotify"
+        linkText="Log in to AdaStream"
         linkTo="/login"
       />
     </AuthLayout>

@@ -49,7 +49,7 @@ export const RegistrationForm = () => {
 
   return (
     <>
-      <h2 className={styles.title}>Sign up for Spotify</h2>
+      <h2 className={styles.title}>Sign up to AdaStream</h2>
       <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
         <AlertMessage message={apiError} onDismiss={() => setApiError("")} />
         <AlertMessage
