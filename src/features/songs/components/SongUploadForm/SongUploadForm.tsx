@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { readId3Tags, type Id3Tags } from "@/shared/hooks/useId3Tags";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { type SongDetailsValues } from "../SongDetailsForm/schema";

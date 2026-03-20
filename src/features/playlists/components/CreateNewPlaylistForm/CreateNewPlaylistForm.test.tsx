@@ -9,7 +9,7 @@ const { mockUseCloudinaryUpload, mockUpload } = vi.hoisted(() => ({
   mockUpload: vi.fn(),
 }));
 
-vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: mockUseCloudinaryUpload,
 }));
 

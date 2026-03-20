@@ -5,7 +5,7 @@ import { EditSongModal } from "./EditSongModal";
 import type { Song } from "../../types";
 import { ApiError } from "@/shared/api/errors";
 import * as api from "../../api";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import type { ComponentProps, ReactNode } from "react";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 
@@ -13,7 +13,7 @@ vi.mock("../../api", () => ({
   updateSong: vi.fn(),
 }));
 
-vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
 }));
 
