@@ -53,7 +53,7 @@
   background-color: transparent;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 920px) {
   .searchWrapper {
     margin: 0 8px;
     max-width: 100%;

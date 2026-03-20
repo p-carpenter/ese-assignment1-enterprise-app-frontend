@@ -94,7 +94,7 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 920px) {
   .app-grid {
     grid-template-columns: 1fr; /* Stack the layout on small screens */
   }
