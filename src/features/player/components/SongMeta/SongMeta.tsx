@@ -1,5 +1,5 @@
 import { type FC, type RefObject } from "react";
-import { usePlayer } from "../..";
+import { usePlayer } from "@/shared/context";
 import styles from "./SongMeta.module.css";
 
 interface SongMetaProps {
