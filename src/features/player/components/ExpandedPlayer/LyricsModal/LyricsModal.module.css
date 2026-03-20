@@ -1,0 +1,128 @@
+.lyricsToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--app-white);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  outline: none;
+}
+
+.lyricsToggleBtn[data-hovered] {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lyricsToggleBtn[data-pressed] {
+  transform: scale(0.95);
+}
+
+.lyricsToggleBtn[data-focus-visible] {
+  box-shadow: 0 0 0 2px var(--app-white);
+  outline: 2px solid var(--app-black);
+}
+
+.modalOverlayBackground {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+}
+
+.modalOverlayBackground[data-entering] {
+  animation: fade 0.3s ease;
+}
+
+.modalOverlayBackground[data-exiting] {
+  animation: fade 0.3s ease reverse;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lyricsOverlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55vh;
+  background: #121212;
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.lyricsOverlay[data-entering] {
+  animation: slideUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.lyricsOverlay[data-exiting] {
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) reverse;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.lyricsDialog {
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.lyricsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  flex-shrink: 0;
+}
+
+.lyricsTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--app-white);
+}
+
+.collapseButton {
+  background: none;
+  border: none;
+  color: var(--app-white);
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  outline: none;
+}
+
+.collapseButton[data-focus-visible] {
+  box-shadow: 0 0 0 2px var(--app-white);
+  border-radius: 4px;
+}
+
+.lyricsContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 32px;
+}
+
+.lyricsContent > section {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.lyricsContent > section > h2 {
+  display: none;
+}
