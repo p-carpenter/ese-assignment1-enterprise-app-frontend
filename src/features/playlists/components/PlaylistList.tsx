@@ -66,47 +66,57 @@ export const PlaylistList = () => {
               <IoAddCircleOutline size={18} />
             </button>
           </div>
-          <ul className={styles.playlist}>
-            {playlists.map((playlist) => (
-              <li key={playlist.id}>
-                <Link
-                  to={`/playlists/${playlist.id}`}
-                  className={styles.playlistLink}
-                >
-                  <div className={styles.thumb}>
-                    {playlist.cover_art_url ? (
-                      <img
-                        src={playlist.cover_art_url}
-                        alt={playlist.title}
-                        className={styles.thumbImg}
-                      />
-                    ) : (
-                      <div className={styles.thumbFallback} />
-                    )}
-                  </div>
-                  <div className={styles.info}>
-                    <span className={styles.name}>{playlist.title}</span>
-                    <div className={styles.meta}>
-                      <span className={styles.songCount}>
-                        {playlist.songs.length}{" "}
-                        {playlist.songs.length === 1 ? "song" : "songs"}
-                      </span>
-                      {playlist.is_public && (
-                        <span className={styles.badge} title="Public">
-                          <IoEarthOutline size={12} />
-                        </span>
-                      )}
-                      {playlist.is_collaborative && (
-                        <span className={styles.badge} title="Collaborative">
-                          <IoPeopleOutline size={12} />
-                        </span>
+
+          {playlists.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>You don't have any playlists yet.</p>
+              <Button onClick={() => setIsModalOpen(true)}>
+                Create your first playlist
+              </Button>
+            </div>
+          ) : (
+            <ul className={styles.playlist}>
+              {playlists.map((playlist) => (
+                <li key={playlist.id}>
+                  <Link
+                    to={`/playlists/${playlist.id}`}
+                    className={styles.playlistLink}
+                  >
+                    <div className={styles.thumb}>
+                      {playlist.cover_art_url ? (
+                        <img
+                          src={playlist.cover_art_url}
+                          alt={playlist.title}
+                          className={styles.thumbImg}
+                        />
+                      ) : (
+                        <div className={styles.thumbFallback} />
                       )}
                     </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    <div className={styles.info}>
+                      <span className={styles.name}>{playlist.title}</span>
+                      <div className={styles.meta}>
+                        <span className={styles.songCount}>
+                          {playlist.songs.length}{" "}
+                          {playlist.songs.length === 1 ? "song" : "songs"}
+                        </span>
+                        {playlist.is_public && (
+                          <span className={styles.badge} title="Public">
+                            <IoEarthOutline size={12} />
+                          </span>
+                        )}
+                        {playlist.is_collaborative && (
+                          <span className={styles.badge} title="Collaborative">
+                            <IoPeopleOutline size={12} />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Auth section for mobile.*/}
