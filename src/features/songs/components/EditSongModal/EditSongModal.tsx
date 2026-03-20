@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/shared/components/Modal/Modal";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
 import { type SongDetailsValues } from "../SongDetailsForm/schema";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { type Song } from "../../types";
 import { updateSong } from "../../api";
 import { ApiError } from "@/shared/api/errors";

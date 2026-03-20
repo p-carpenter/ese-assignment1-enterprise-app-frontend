@@ -210,3 +210,51 @@
 .playBtn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+@media (max-width: 920px) {
+  .hero {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .coverWrap {
+    width: 100%;
+    max-width: 240px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .coverArt {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .heroInfo {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .titleRow {
+    justify-content: center;
+  }
+
+  .heroDescription {
+    text-align: center;
+  }
+
+  .heroMeta {
+    justify-content: center;
+  }
+
+  .heroActions {
+    justify-content: center;
+    width: 100%;
+  }
+}

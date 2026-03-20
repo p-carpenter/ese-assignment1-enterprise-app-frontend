@@ -27,7 +27,7 @@ vi.mock("./api", () => ({
   listSongsPaginated: vi.fn(),
 }));
 
-vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
 }));
 
@@ -109,7 +109,6 @@ const createTestQueryClient = () =>
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-/** Wraps SongLibrary in a MemoryRouter + QueryClientProvider so hooks work in tests. */
 const renderLibrary = (searchQuery = "") => {
   const queryClient = createTestQueryClient();
   return render(
@@ -125,7 +124,7 @@ const renderLibrary = (searchQuery = "") => {
   );
 };
 
-/** Shared player context mock matching PlayerContextType. */
+/** Shared player context mock.*/
 const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
   ({
     playlist: mockSongs,

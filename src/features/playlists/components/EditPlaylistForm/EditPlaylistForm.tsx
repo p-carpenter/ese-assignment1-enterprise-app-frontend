@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updatePlaylist } from "@/features/playlists/api";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import {
   IoCheckmarkOutline,

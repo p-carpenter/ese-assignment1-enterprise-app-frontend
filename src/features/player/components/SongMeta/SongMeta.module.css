@@ -2,8 +2,8 @@
 .trackMeta {
   display: flex;
   flex-direction: column;
-  width: 9.375rem; /* 150px */
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -61,8 +61,34 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 1080px) {
-  .trackMeta {
-    display: none;
-  }
+/* Expanded Mobile Overlay Styles */
+.expandedArt {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1/1;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.expandedMeta {
+  align-items: flex-start;
+  width: 100%;
+  gap: 4px;
+}
+
+.expandedTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 0;
+  white-space: normal;
+  overflow: visible;
+}
+
+.expandedArtist {
+  font-size: 1.1rem;
+  color: #b3b3b3;
+  opacity: 1;
 }

@@ -4,7 +4,7 @@ import { PlaylistHero } from "./PlaylistHero";
 import type { Playlist } from "../../types";
 import type { UserMini } from "@/features/auth/types";
 
-// Mock sub-components that have their own complex dependencies/tests
+// Mock sub-components that have their own complex dependencies/tests.
 vi.mock("../EditPlaylistForm/EditPlaylistForm", () => ({
   EditPlaylistForm: ({
     onClose,

@@ -5,6 +5,14 @@
   align-items: flex-start;
   gap: 24px;
 }
+
+@media (max-width: 600px) {
+  .editFormRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
 .editFields {
   flex: 1;
   min-width: 200px;

@@ -81,10 +81,10 @@ describe("Header", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders an Upload button that navigates to /upload", async () => {
+    it("renders an Add Song button that navigates to /upload", async () => {
       const user = userEvent.setup();
       renderHeader();
-      await user.click(screen.getByRole("button", { name: /upload/i }));
+      await user.click(screen.getByRole("button", { name: /add song/i }));
       expect(mockNavigate).toHaveBeenCalledWith("/upload");
     });
   });

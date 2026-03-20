@@ -1,23 +1,21 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  PlaybackControls,
-  usePlayer,
-  PlayHistory,
-  WaveProgressBar,
-} from "../..";
-import { VolumeBar } from "../VolumeBar/VolumeBar";
+import { PlaybackControls, usePlayer, PlayHistory, WaveProgressBar } from "..";
 import {
   IoTimeOutline,
   IoCloseOutline,
   IoRepeatOutline,
 } from "react-icons/io5";
 import styles from "./MiniPlayer.module.css";
-import { SongMeta } from "./SongMeta";
-import { PlaybackTimeDisplay } from "../PlaybackTimeDisplay/PlaybackTimeDisplay";
+import { SongMeta, PlaybackTimeDisplay, VolumeBar } from "../";
 import { useIsOverflowing } from "../../hooks/useOverflow";
+import { useMediaQuery } from "@/shared/hooks";
+import { DialogTrigger, Button, Popover, Dialog } from "react-aria-components";
+interface Props {
+  onExpand: () => void;
+}
 
-export const MiniPlayer = () => {
+export const MiniPlayer = ({ onExpand }: Props) => {
   const {
     currentSong,
     isPlaying,
@@ -34,6 +32,7 @@ export const MiniPlayer = () => {
   } = usePlayer();
 
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width: 920px)");
 
   const titleRef = useRef<HTMLSpanElement>(null);
   const artistRef = useRef<HTMLSpanElement>(null);
@@ -42,25 +41,35 @@ export const MiniPlayer = () => {
   const isArtistScrolling = useIsOverflowing(artistRef, [currentSong]);
 
   const maxDuration = Math.max(duration ?? 0, currentSong?.duration ?? 0);
-  const disableControls = 0 >= maxDuration || isLoading;
+  const disableControls = maxDuration <= 0 || isLoading;
+
+  const handleMetaClick = () => {
+    if (!currentSong) return;
+    if (isMobile) {
+      onExpand();
+    } else {
+      navigate(`/songs/${currentSong.id}`);
+    }
+  };
 
   return (
-    <>
-      <div className={styles.miniPlayer}>
-        <button
-          className={styles.metaButton}
-          onClick={() => currentSong && navigate(`/songs/${currentSong.id}`)}
-          aria-label="Go to song details"
-          disabled={!currentSong}
-        >
-          <SongMeta
-            titleRef={titleRef}
-            artistRef={artistRef}
-            isScrolling={isScrolling}
-            isArtistScrolling={isArtistScrolling}
-          />
-        </button>
+    <div className={styles.miniPlayer}>
+      <Button
+        className={styles.metaWrapper}
+        onPress={handleMetaClick}
+        isDisabled={!currentSong}
+        aria-label="View song details"
+      >
+        <SongMeta
+          titleRef={titleRef}
+          artistRef={artistRef}
+          isScrolling={isScrolling}
+          isArtistScrolling={isArtistScrolling}
+          isExpanded={false}
+        />
+      </Button>
 
+      <div className={styles.mainControls}>
         <PlaybackControls
           isPlaying={isPlaying}
           isLoading={isLoading}
@@ -71,22 +80,25 @@ export const MiniPlayer = () => {
           disablePrev={disableControls}
           disableNext={disableControls}
         />
+      </div>
 
+      <div className={styles.progressWrapper}>
         <WaveProgressBar
           currentSong={currentSong ?? undefined}
           duration={duration}
           getPosition={getPosition}
           seek={seek}
+          isExpanded={false}
         />
+      </div>
 
+      <div className={styles.desktopControls}>
         <PlaybackTimeDisplay
           getPosition={getPosition}
           maxDuration={maxDuration}
           isPlaying={isPlaying}
         />
-
         <VolumeBar />
-
         <button
           className={`${styles.iconButton} ${isLooping ? styles.iconButtonActive : ""}`}
           onClick={toggleLoop}
@@ -94,36 +106,39 @@ export const MiniPlayer = () => {
         >
           <IoRepeatOutline size={20} />
         </button>
-
         <div className={styles.historyAnchor}>
-          <button
-            popoverTarget="history-panel"
-            className={styles.iconButton}
-            aria-label="Toggle play history"
-          >
-            <IoTimeOutline size={20} />
-          </button>
+          <DialogTrigger>
+            <Button
+              className={styles.iconButton}
+              aria-label="Toggle play history"
+            >
+              <IoTimeOutline size={20} />
+            </Button>
 
-          <div
-            id="history-panel"
-            popover="auto"
-            className={styles.historyPanel}
-          >
-            <div className={styles.historyPanelHeader}>
-              <span className={styles.historyPanelTitle}>Recently Played</span>
-              <button
-                popoverTarget="history-panel"
-                popoverTargetAction="hide"
-                className={styles.historyPanelClose}
-                aria-label="Close history"
-              >
-                <IoCloseOutline size={18} />
-              </button>
-            </div>
-            <PlayHistory hideTitle />
-          </div>
+            <Popover placement="top right" className={styles.historyPanel}>
+              <Dialog className={styles.dialogOutline}>
+                {({ close }) => (
+                  <>
+                    <div className={styles.historyPanelHeader}>
+                      <span className={styles.historyPanelTitle}>
+                        Recently Played
+                      </span>
+                      <Button
+                        onPress={close}
+                        className={styles.historyPanelClose}
+                        aria-label="Close history"
+                      >
+                        <IoCloseOutline size={18} />
+                      </Button>
+                    </div>
+                    <PlayHistory hideTitle />
+                  </>
+                )}
+              </Dialog>
+            </Popover>
+          </DialogTrigger>
         </div>
       </div>
-    </>
+    </div>
   );
 };

@@ -9,34 +9,6 @@
   padding: 60px;
   color: var(--app-gray);
 }
-.app-container {
-  padding: 24px;
-  max-width: 100vw;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-/* Full-page 3-row layout: header | content | player */
-.page-layout {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.app-header {
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 .app-title {
   font-size: 2.5rem;
@@ -50,7 +22,7 @@
 
 .app-grid {
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: clamp(260px, 20vw, 320px) 1fr;
   gap: 24px;
   /* padding: 24px 0; */
   height: 100%;
@@ -120,4 +92,10 @@
 .primary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 920px) {
+  .app-grid {
+    grid-template-columns: 1fr; /* Stack the layout on small screens */
+  }
 }

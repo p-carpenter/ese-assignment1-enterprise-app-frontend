@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { playlistSchema, type PlaylistFormValues } from "./schema";
 import styles from "@/features/songs/components/SongUploadForm/SongUploadForm.module.css";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { AlertMessage } from "@/shared/components";
 
 interface CreateNewPlaylistFormProps {

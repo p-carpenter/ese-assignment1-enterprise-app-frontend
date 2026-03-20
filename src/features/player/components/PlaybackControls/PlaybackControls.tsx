@@ -17,6 +17,7 @@ interface PlaybackControlsProps {
   onNext: () => void;
   disablePrev: boolean;
   disableNext: boolean;
+  isExpanded?: boolean;
 }
 
 export const PlaybackControls: FC<PlaybackControlsProps> = ({
@@ -28,16 +29,21 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
   onNext,
   disablePrev,
   disableNext,
+  isExpanded = false,
 }) => {
+  // Scale icons up for mobile expanded view.
+  const secondaryIconSize = isExpanded ? 32 : 16;
+  const primaryIconSize = isExpanded ? 32 : 16;
+
   return (
-    <div className={styles.buttons}>
+    <div className={`${styles.buttons} ${isExpanded ? styles.expanded : ""}`}>
       <Button
         onPress={onPrev}
         className={styles.btn}
         isDisabled={disablePrev || isLoading}
         aria-label="Previous"
       >
-        <IoPlaySkipBackSharp size={16} />
+        <IoPlaySkipBackSharp size={secondaryIconSize} />
       </Button>
 
       <Button
@@ -46,7 +52,11 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
         isDisabled={isLoading}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
-        {isPlaying ? <IoPauseSharp size={16} /> : <IoPlaySharp size={16} />}
+        {isPlaying ? (
+          <IoPauseSharp size={primaryIconSize} />
+        ) : (
+          <IoPlaySharp size={primaryIconSize} />
+        )}
       </Button>
 
       <Button
@@ -55,7 +65,7 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
         isDisabled={disableNext || isLoading}
         aria-label="Next"
       >
-        <IoPlaySkipForwardSharp size={16} />
+        <IoPlaySkipForwardSharp size={secondaryIconSize} />
       </Button>
     </div>
   );

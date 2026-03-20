@@ -3,10 +3,15 @@ import styles from "./Header.module.css";
 import type { JSX } from "react";
 import { Button } from "@/shared/components";
 import { useAuth } from "@/shared/context/AuthContext";
-import { TiHome } from "react-icons/ti";
+import { TiHome, TiThMenu } from "react-icons/ti";
 import { SearchBar } from "./SearchBar/SearchBar";
+import { MdAdd } from "react-icons/md";
 
-export const Header = (): JSX.Element => {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export const Header = ({ onMenuClick }: HeaderProps): JSX.Element => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -23,6 +28,16 @@ export const Header = (): JSX.Element => {
 
   return (
     <div className={styles.header}>
+      {onMenuClick && (
+        <button
+          className={styles.hamburger}
+          onClick={onMenuClick}
+          aria-label="Toggle menu"
+        >
+          <TiThMenu size={24} />
+        </button>
+      )}
+
       <Link to="/" className={styles.titleLink}>
         <h1 className={styles.title}>Music Player</h1>
       </Link>
@@ -42,25 +57,30 @@ export const Header = (): JSX.Element => {
           variant="primary"
           size="small"
           onClick={() => navigate("/upload")}
+          className={styles.uploadButton}
         >
-          Upload
+          <span className={styles.uploadText}>Add Song</span>
+          <MdAdd className={styles.uploadIcon} size={20} />
         </Button>
-        <button
-          className={styles.avatarButton}
-          onClick={() => navigate("/profile")}
-          title="View Profile"
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" className={styles.avatar} />
-          ) : (
-            <span className={styles.avatarInitial}>
-              {user?.username?.[0]?.toUpperCase()}
-            </span>
-          )}
-        </button>
-        <Button variant="outlined" size="small" onClick={handleLogout}>
-          Log Out
-        </Button>
+
+        <div className={styles.desktopAuthActions}>
+          <button
+            className={styles.avatarButton}
+            onClick={() => navigate("/profile")}
+            title="View Profile"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className={styles.avatar} />
+            ) : (
+              <span className={styles.avatarInitial}>
+                {user?.username?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </button>
+          <Button variant="outlined" size="small" onClick={handleLogout}>
+            Log Out
+          </Button>
+        </div>
       </div>
     </div>
   );

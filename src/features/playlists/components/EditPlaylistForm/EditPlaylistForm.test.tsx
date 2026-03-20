@@ -12,7 +12,7 @@ import "@testing-library/jest-dom/vitest";
 // ─── Mock useCloudinaryUpload ─────────────────────────────────────────────────
 const mockUpload = vi.fn();
 
-vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: () => ({
     upload: mockUpload,
     isUploading: false,
@@ -20,7 +20,6 @@ vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
   }),
 }));
 
-// Mock AlertMessage for å unngå animasjonsproblemer i testmiljøet
 vi.mock("@/shared/components/AlertMessage/AlertMessage", () => ({
   AlertMessage: ({ message }: { message?: string | null }) =>
     message ? <div role="alert">{message}</div> : null,

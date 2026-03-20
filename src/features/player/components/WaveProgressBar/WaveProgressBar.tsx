@@ -1,18 +1,13 @@
-import { useEffect, useRef, useState, type FC } from "react";
+import { useEffect, useMemo, useRef, useState, type FC } from "react";
 import { Slider, SliderTrack, SliderThumb } from "react-aria-components";
 import styles from "./WaveProgressBar.module.css";
-
-const BAR_COUNT = 280;
-
-const PLACEHOLDER_BARS: number[] = Array.from({ length: BAR_COUNT }, (_, i) =>
-  Math.round(12 + Math.abs(Math.sin(i * 0.71) * 55 + Math.sin(i * 0.29) * 25)),
-);
 
 interface WaveProgressBarProps {
   currentSong?: { duration: number; id: number };
   duration?: number;
   seek: (position: number) => void;
   getPosition: () => number;
+  isExpanded?: boolean;
 }
 
 export const WaveProgressBar: FC<WaveProgressBarProps> = ({
@@ -20,10 +15,23 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
   duration: audioDuration,
   seek,
   getPosition,
+  isExpanded = false,
 }) => {
   const frameRef = useRef<number>(0);
   const [position, setPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
+  const barCount = isExpanded ? 80 : 280;
+
+  const PLACEHOLDER_BARS = useMemo(
+    () =>
+      Array.from({ length: barCount }, (_, i) =>
+        Math.round(
+          12 + Math.abs(Math.sin(i * 0.71) * 55 + Math.sin(i * 0.29) * 25),
+        ),
+      ),
+    [barCount],
+  );
 
   const duration = Math.max(audioDuration ?? 0, currentSong?.duration ?? 0);
 
@@ -45,7 +53,7 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
 
   return (
     <Slider
-      className={styles.container}
+      className={`${styles.container} ${isExpanded ? styles.expanded : ""}`}
       value={position}
       onChange={(v) => {
         setIsDragging(true);
@@ -67,12 +75,12 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
 
           return (
             <>
-              <div className={styles.waveLayer}>
+              <div data-testid="wave-layer" className={styles.waveLayer}>
                 {PLACEHOLDER_BARS.map((h, i) => (
                   <div
                     key={i}
                     className={`${styles.bar} ${
-                      i / BAR_COUNT <= displayProgress
+                      i / barCount <= displayProgress
                         ? styles.barPlayed
                         : styles.barUnplayed
                     }`}

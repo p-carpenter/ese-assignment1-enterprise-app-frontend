@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { SongUploadForm } from "./SongUploadForm";
-import { useCloudinaryUpload } from "@/shared/hooks/useCloudinaryUpload";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { readId3Tags } from "@/shared/hooks/useId3Tags";
 import { uploadSong } from "../../api";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ vi.mock("@tanstack/react-query", () => ({
   useQueryClient: vi.fn(),
 }));
 
-vi.mock("@/shared/hooks/useCloudinaryUpload", () => ({
+vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
 }));
 

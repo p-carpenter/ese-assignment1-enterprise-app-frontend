@@ -52,3 +52,15 @@
   color: var(--app-white);
   background-color: transparent;
 }
+
+@media (max-width: 920px) {
+  .searchWrapper {
+    margin: 0 8px;
+    max-width: 100%;
+  }
+
+  .searchInput {
+    padding: 8px 32px 8px 12px;
+    font-size: 13px;
+  }
+}
