@@ -88,7 +88,6 @@ export const JamendoSongSearch = ({
         duration: Math.round(track.duration || 0),
       });
 
-      // Let the parent component handle the routing
       onImportSuccess();
     } catch (error) {
       setImportError(
