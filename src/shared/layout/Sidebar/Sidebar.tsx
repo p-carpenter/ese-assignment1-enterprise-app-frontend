@@ -1,4 +1,4 @@
-import { PlaylistList } from "@/features/playlists/components/PlaylistList";
+import { PlaylistList } from "@/features/playlists/components/PlaylistList/PlaylistList";
 import { AuthFooter } from "./AuthFooter/AuthFooter";
 import styles from "./Sidebar.module.css";
 
