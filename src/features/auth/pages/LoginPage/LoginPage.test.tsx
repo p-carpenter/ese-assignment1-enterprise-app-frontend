@@ -58,11 +58,9 @@ describe("LoginPage", () => {
     expect(screen.getByText(/forgot your password\?/i)).toBeInTheDocument();
   });
 
-  it("renders the 'Sign up for Spotify' footer link", async () => {
+  it("renders the 'Sign up' footer link", async () => {
     await renderLoginPage();
-    expect(
-      screen.getByRole("link", { name: /sign up for spotify/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign up/i })).toBeInTheDocument();
   });
 
   it("renders the 'Don't have an account?' footer text", async () => {

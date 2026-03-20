@@ -4,13 +4,13 @@ import { AuthLayout } from "./AuthLayout";
 import "@testing-library/jest-dom/vitest";
 
 describe("AuthLayout", () => {
-  it("renders the app title 'Music Player'", () => {
+  it("renders the app title", () => {
     render(
       <AuthLayout>
         <div>Child Content</div>
       </AuthLayout>,
     );
-    expect(screen.getByText("Music Player")).toBeInTheDocument();
+    expect(screen.getByText("AdaStream")).toBeInTheDocument();
   });
 
   it("renders its children", () => {
