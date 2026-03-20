@@ -7,10 +7,7 @@ import {
   PlaybackTimeDisplay,
   SongMeta,
 } from "..";
-import {
-  IoRepeatOutline,
-  IoChevronDownOutline,
-} from "react-icons/io5";
+import { IoRepeatOutline, IoChevronDownOutline } from "react-icons/io5";
 import { useIsOverflowing } from "@/features/player/hooks";
 import { HistoryPopover } from "./HistoryPopover/HistoryPopover";
 import { LyricsModal } from "./LyricsModal/LyricsModal";

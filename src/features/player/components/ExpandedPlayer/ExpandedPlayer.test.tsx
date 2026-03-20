@@ -3,11 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExpandedPlayer } from "./ExpandedPlayer";
 import { useIsOverflowing } from "@/features/player/hooks";
-import {
-  PlaybackControls,
-  usePlayer,
-  WaveProgressBar,
-} from "..";
+import { PlaybackControls, usePlayer, WaveProgressBar } from "..";
 import type { Song } from "@/features/songs/types";
 import type { PlayerContextType } from "@/shared/context/PlayerContext";
 import { axe, toHaveNoViolations } from "jest-axe";
@@ -191,14 +187,16 @@ describe("ExpandedPlayer", () => {
     it("toggles loop state and accurately reflects external isLooping changes", async () => {
       const user = userEvent.setup();
       const toggleLoop = vi.fn();
-      
+
       vi.mocked(usePlayer).mockReturnValue(
         makePlayerState({ isLooping: false, toggleLoop }),
       );
 
-      const { rerender } = render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
+      const { rerender } = render(
+        <ExpandedPlayer onCollapse={mockOnCollapse} />,
+      );
       const loopBtn = screen.getByRole("button", { name: "Loop playback" });
-      
+
       expect(loopBtn).toHaveAttribute("aria-pressed", "false");
       await user.click(loopBtn);
       expect(toggleLoop).toHaveBeenCalledTimes(1);

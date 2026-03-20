@@ -7,18 +7,12 @@ export const HistoryPopover = () => {
   return (
     <div className={styles.historyAnchor}>
       <DialogTrigger>
-        <Button
-          className={styles.iconButton}
-          aria-label="Toggle play history"
-        >
+        <Button className={styles.iconButton} aria-label="Toggle play history">
           <IoTimeOutline size={24} />
         </Button>
 
         <Popover placement="top right" className={styles.historyPanel}>
-          <Dialog
-            className={styles.dialogOutline}
-            aria-label="Play History"
-          >
+          <Dialog className={styles.dialogOutline} aria-label="Play History">
             {({ close }) => (
               <>
                 <div className={styles.historyPanelHeader}>

@@ -1,4 +1,10 @@
-import { Button, DialogTrigger, ModalOverlay, Modal, Dialog } from "react-aria-components";
+import {
+  Button,
+  DialogTrigger,
+  ModalOverlay,
+  Modal,
+  Dialog,
+} from "react-aria-components";
 import { IoChevronUpOutline, IoChevronDownOutline } from "react-icons/io5";
 import { LyricsSection } from "@/features/songs/pages/SongDetailsPage/components";
 import styles from "./LyricsModal.module.css";

@@ -15,13 +15,17 @@ describe("LyricsModal", () => {
     const user = userEvent.setup();
     render(<LyricsModal currentSong={mockSong} />);
 
-    expect(screen.queryByRole("dialog", { name: "Lyrics" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Lyrics" }),
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Lyrics/i }));
     expect(screen.getByRole("dialog", { name: "Lyrics" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Close lyrics" }));
-    expect(screen.queryByRole("dialog", { name: "Lyrics" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Lyrics" }),
+    ).not.toBeInTheDocument();
   });
 
   it("closes the modal when pressing the Escape key", async () => {
@@ -32,7 +36,9 @@ describe("LyricsModal", () => {
     expect(screen.getByRole("dialog", { name: "Lyrics" })).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
-    expect(screen.queryByRole("dialog", { name: "Lyrics" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Lyrics" }),
+    ).not.toBeInTheDocument();
   });
 
   it("closes the modal when clicking on the overlay backdrop", async () => {
@@ -40,10 +46,12 @@ describe("LyricsModal", () => {
     render(<LyricsModal currentSong={mockSong} />);
 
     await user.click(screen.getByRole("button", { name: /Lyrics/i }));
-    
+
     await user.click(document.body);
-    
-    expect(screen.queryByRole("dialog", { name: "Lyrics" })).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("dialog", { name: "Lyrics" }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not render LyricsSection inside the modal if there is no currentSong", async () => {
