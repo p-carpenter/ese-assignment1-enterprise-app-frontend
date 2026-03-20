@@ -1,6 +1,10 @@
 import { type JSX, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { MiniPlayer, usePlayer } from "@/features/player";
+import {
+  ExpandedPlayer,
+  MiniPlayer,
+  usePlayer,
+} from "@/features/player/components";
 import { Header } from "@/shared/layout";
 import { PlaylistList } from "@/features/playlists/components/PlaylistList";
 import styles from "./AppLayout.module.css";
@@ -9,6 +13,7 @@ export const AppLayout = (): JSX.Element => {
   const { currentSong } = usePlayer();
   const coverUrl = currentSong?.cover_art_url;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
 
   return (
     <div className={styles.pageLayout}>
@@ -47,7 +52,11 @@ export const AppLayout = (): JSX.Element => {
         </div>
       </div>
 
-      <MiniPlayer />
+      {isPlayerExpanded ? (
+        <ExpandedPlayer onCollapse={() => setIsPlayerExpanded(false)} />
+      ) : (
+        <MiniPlayer onExpand={() => setIsPlayerExpanded(true)} />
+      )}
     </div>
   );
 };
