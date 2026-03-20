@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { usePlayer } from "@/features/player";
+import { usePlayer } from "@/features/player/components";
 import { useLyrics } from "../../../../hooks/useLyrics";
 import { SyncedLyrics } from "../SyncedLyrics/SyncedLyrics";
 import styles from "./LyricsSection.module.css";

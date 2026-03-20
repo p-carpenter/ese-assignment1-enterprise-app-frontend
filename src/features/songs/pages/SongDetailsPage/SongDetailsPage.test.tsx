@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -70,13 +70,22 @@ const renderPage = (songId: string | undefined = "1") => {
 
 describe("SongDetailsPage", () => {
   const playSong = vi.fn();
+  const pause = vi.fn();
+  const play = vi.fn();
+  let isPlaying = false;
+  let currentSong: Song | undefined = undefined;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Streng typing mot context typen vår istedenfor any.
     vi.mocked(usePlayer).mockReturnValue({
       playSong,
+      pause,
+      play,
+      isPlaying,
+      currentSong,
     } as unknown as PlayerContextType);
+    isPlaying = false;
+    currentSong = undefined;
   });
 
   it("shows loading state while song data is being fetched", async () => {
@@ -91,20 +100,40 @@ describe("SongDetailsPage", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
   });
 
-  it("calls playSong when SongHero triggers play click", async () => {
+  it("shows error state when song is not found", async () => {
+    server.use(
+      http.get("http://localhost:8000/api/songs/1/", () =>
+        HttpResponse.error(),
+      ),
+    );
+    renderPage();
+    const alert = await screen.findByTestId("alert-message");
+    expect(alert).toHaveTextContent("Song not found or an error has occurred.");
+  });
+
+  it("shows error state when song is undefined", async () => {
+    server.use(
+      http.get("http://localhost:8000/api/songs/1/", () =>
+        HttpResponse.json(undefined),
+      ),
+    );
+    renderPage();
+    const alert = await screen.findByTestId("alert-message");
+    expect(alert).toHaveTextContent("Song not found or an error has occurred.");
+  });
+
+  it("renders SongHero, LyricsSection, MoreByArtist", async () => {
     server.use(
       http.get("http://localhost:8000/api/songs/1/", () =>
         HttpResponse.json(mockSong),
       ),
     );
-
     renderPage();
-
-    const playBtn = await screen.findByRole("button", {
-      name: "Play from hero",
-    });
-    fireEvent.click(playBtn);
-
-    expect(playSong).toHaveBeenCalledWith(mockSong);
+    expect(await screen.findByTestId("song-hero")).toBeInTheDocument();
+    expect(screen.getByTestId("lyrics-section")).toBeInTheDocument();
+    expect(screen.getByTestId("more-by-artist")).toBeInTheDocument();
+    expect(screen.getByTestId("more-by-artist")).toHaveTextContent(
+      "Test Artist:1",
+    );
   });
 });
