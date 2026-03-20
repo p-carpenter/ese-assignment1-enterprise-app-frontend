@@ -9,7 +9,7 @@ import {
   IoPeopleOutline,
   IoEarthOutline,
 } from "react-icons/io5";
-import { CreateNewPlaylistModal } from "./CreateNewPlaylistModal";
+import { CreateNewPlaylistModal } from "../CreateNewPlaylistModal";
 import { useAuth } from "@/shared/context/AuthContext";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
