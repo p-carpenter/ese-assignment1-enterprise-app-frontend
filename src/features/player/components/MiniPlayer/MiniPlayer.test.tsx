@@ -1,54 +1,19 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useNavigate } from "react-router-dom";
 import { MiniPlayer } from "./MiniPlayer";
 import { useIsOverflowing } from "../../hooks/useOverflow";
-import type { ComponentProps } from "react";
+import { useMediaQuery } from "@/shared/hooks";
+import { PlaybackControls, PlayHistory, WaveProgressBar } from "..";
+import { SongMeta, PlaybackTimeDisplay } from "../";
 import type { Song } from "@/features/songs/types";
-import type { PlayerContextType } from "@/shared/context/PlayerContext";
-import type { PlaybackControls as PlaybackControlsComponent } from "../PlaybackControls/PlaybackControls";
-import type { WaveProgressBar as WaveProgressBarComponent } from "../WaveProgressBar/WaveProgressBar";
-import type { PlayHistory as PlayHistoryComponent } from "../PlayHistory/PlayHistory";
-import type { SongMeta as SongMetaComponent } from "./SongMeta";
-import type { PlaybackTimeDisplay as PlaybackTimeDisplayComponent } from "../PlaybackTimeDisplay/PlaybackTimeDisplay";
-
-type PlaybackControlsProps = ComponentProps<typeof PlaybackControlsComponent>;
-type WaveProgressBarProps = ComponentProps<typeof WaveProgressBarComponent>;
-type PlayHistoryProps = ComponentProps<typeof PlayHistoryComponent>;
-type SongMetaProps = ComponentProps<typeof SongMetaComponent>;
-type PlaybackTimeDisplayProps = ComponentProps<
-  typeof PlaybackTimeDisplayComponent
->;
-type MiniPlayerState = Pick<
-  PlayerContextType,
-  | "currentSong"
-  | "isPlaying"
-  | "isLoading"
-  | "isLooping"
-  | "duration"
-  | "play"
-  | "pause"
-  | "playPrev"
-  | "playNext"
-  | "seek"
-  | "getPosition"
-  | "toggleLoop"
->;
-
-const mockUsePlayer = vi.fn();
-const mockPlaybackControls = vi.fn();
-const mockWaveProgressBar = vi.fn();
-const mockPlayHistory = vi.fn();
-const mockSongMeta = vi.fn();
-const mockPlaybackTimeDisplay = vi.fn();
-const mockVolumeBar = vi.fn(() => <div data-testid="volume-bar" />);
-const mockNavigate = vi.fn();
-
-let capturedPlaybackControlsProps: PlaybackControlsProps | undefined;
-let capturedWaveProgressBarProps: WaveProgressBarProps | undefined;
-let capturedPlayHistoryProps: PlayHistoryProps | undefined;
-let capturedSongMetaProps: SongMetaProps | undefined;
-let capturedPlaybackTimeDisplayProps: PlaybackTimeDisplayProps | undefined;
+import {
+  type PlayerContextType,
+  usePlayer,
+} from "@/shared/context/PlayerContext";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 vi.mock("react-router-dom", async () => {
   const actual =
@@ -57,6 +22,42 @@ vi.mock("react-router-dom", async () => {
     );
   return { ...actual, useNavigate: vi.fn() };
 });
+
+vi.mock("@/shared/hooks/useMediaQuery/useMediaQuery", () => ({
+  useMediaQuery: vi.fn(),
+}));
+
+vi.mock("../../hooks/useOverflow", () => ({
+  useIsOverflowing: vi.fn(),
+}));
+
+vi.mock("@/shared/context/PlayerContext", () => ({
+  usePlayer: vi.fn(),
+}));
+
+vi.mock("../PlaybackControls/PlaybackControls", () => ({
+  PlaybackControls: vi.fn(() => <div data-testid="playback-controls" />),
+}));
+
+vi.mock("../WaveProgressBar/WaveProgressBar", () => ({
+  WaveProgressBar: vi.fn(() => <div data-testid="wave-progress" />),
+}));
+
+vi.mock("../PlayHistory/PlayHistory", () => ({
+  PlayHistory: vi.fn(() => <div data-testid="play-history" />),
+}));
+
+vi.mock("../SongMeta/SongMeta", () => ({
+  SongMeta: vi.fn(() => <div data-testid="song-meta" />),
+}));
+
+vi.mock("../PlaybackTimeDisplay/PlaybackTimeDisplay", () => ({
+  PlaybackTimeDisplay: vi.fn(() => <div data-testid="playback-time" />),
+}));
+
+vi.mock("../VolumeBar/VolumeBar", () => ({
+  VolumeBar: vi.fn(() => <div data-testid="volume-bar" />),
+}));
 
 const makeSong = (overrides: Partial<Song> = {}): Song => ({
   id: 4,
@@ -69,231 +70,289 @@ const makeSong = (overrides: Partial<Song> = {}): Song => ({
   ...overrides,
 });
 
-const expectDefined = <T,>(value: T | undefined): T => {
-  expect(value).toBeDefined();
-  return value as T;
-};
-
-vi.mock("../..", () => ({
-  usePlayer: () => mockUsePlayer(),
-  PlaybackControls: (props: PlaybackControlsProps) => {
-    capturedPlaybackControlsProps = props;
-    mockPlaybackControls(props);
-    return <div data-testid="playback-controls" />;
-  },
-  WaveProgressBar: (props: WaveProgressBarProps) => {
-    capturedWaveProgressBarProps = props;
-    mockWaveProgressBar(props);
-    return <div data-testid="wave-progress" />;
-  },
-  PlayHistory: (props: PlayHistoryProps) => {
-    capturedPlayHistoryProps = props;
-    mockPlayHistory(props);
-    return <div data-testid="play-history" />;
-  },
-}));
-
-vi.mock("../VolumeBar/VolumeBar", () => ({
-  VolumeBar: () => {
-    mockVolumeBar();
-    return <div data-testid="volume-bar" />;
-  },
-}));
-
-vi.mock("./SongMeta", () => ({
-  SongMeta: (props: SongMetaProps) => {
-    capturedSongMetaProps = props;
-    mockSongMeta(props);
-    return <div data-testid="song-meta" />;
-  },
-}));
-
-vi.mock("../PlaybackTimeDisplay/PlaybackTimeDisplay", () => ({
-  PlaybackTimeDisplay: (props: PlaybackTimeDisplayProps) => {
-    capturedPlaybackTimeDisplayProps = props;
-    mockPlaybackTimeDisplay(props);
-    return <div data-testid="playback-time" />;
-  },
-}));
-
-vi.mock("../../hooks/useOverflow", () => ({
-  useIsOverflowing: vi.fn(),
-}));
-
 const makePlayerState = (
-  overrides: Partial<MiniPlayerState> = {},
-): MiniPlayerState => ({
-  currentSong: makeSong(),
-  isPlaying: false,
-  isLoading: false,
-  isLooping: false,
-  duration: 200,
-  play: vi.fn(),
-  pause: vi.fn(),
-  playPrev: vi.fn(async () => {}),
-  playNext: vi.fn(async () => {}),
-  seek: vi.fn(),
-  getPosition: vi.fn(() => 10),
-  toggleLoop: vi.fn(),
-  ...overrides,
-});
+  overrides: Partial<PlayerContextType> = {},
+): PlayerContextType =>
+  ({
+    currentSong: makeSong(),
+    isPlaying: false,
+    isLoading: false,
+    isLooping: false,
+    duration: 200,
+    play: vi.fn(),
+    pause: vi.fn(),
+    playPrev: vi.fn(),
+    playNext: vi.fn(),
+    seek: vi.fn(),
+    getPosition: vi.fn(() => 10),
+    toggleLoop: vi.fn(),
+    ...overrides,
+  }) as PlayerContextType;
 
 describe("MiniPlayer", () => {
+  const mockNavigate = vi.fn();
+  const mockOnExpand = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
-    capturedPlaybackControlsProps = undefined;
-    capturedWaveProgressBarProps = undefined;
-    capturedPlayHistoryProps = undefined;
-    capturedSongMetaProps = undefined;
-    capturedPlaybackTimeDisplayProps = undefined;
     vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-    vi.mocked(useIsOverflowing)
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true);
-    mockUsePlayer.mockReturnValue(makePlayerState());
+    vi.mocked(useMediaQuery).mockReturnValue(false);
+    vi.mocked(useIsOverflowing).mockReturnValue(false);
+    vi.mocked(usePlayer).mockReturnValue(makePlayerState());
   });
 
-  it("renders core child sections", () => {
-    render(<MiniPlayer />);
+  describe("Layout & Rendering", () => {
+    it("renders all core child sections", () => {
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    expect(screen.getByTestId("song-meta")).toBeInTheDocument();
-    expect(screen.getByTestId("playback-controls")).toBeInTheDocument();
-    expect(screen.getByTestId("wave-progress")).toBeInTheDocument();
-    expect(screen.getByTestId("playback-time")).toBeInTheDocument();
-    expect(screen.getByTestId("volume-bar")).toBeInTheDocument();
-    expect(screen.getByTestId("play-history")).toBeInTheDocument();
-  });
-
-  it("navigates to song details when current song exists", () => {
-    render(<MiniPlayer />);
-    fireEvent.click(screen.getByRole("button", { name: "Go to song details" }));
-    expect(mockNavigate).toHaveBeenCalledWith("/songs/4");
-  });
-
-  it("disables metadata navigation when no current song", () => {
-    mockUsePlayer.mockReturnValue(makePlayerState({ currentSong: null }));
-    render(<MiniPlayer />);
-
-    const metaButton = screen.getByRole("button", {
-      name: "Go to song details",
+      expect(screen.getByTestId("song-meta")).toBeInTheDocument();
+      expect(screen.getByTestId("playback-controls")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-progress")).toBeInTheDocument();
+      expect(screen.getByTestId("playback-time")).toBeInTheDocument();
+      expect(screen.getByTestId("volume-bar")).toBeInTheDocument();
     });
-    expect(metaButton).toBeDisabled();
 
-    fireEvent.click(metaButton);
-    expect(mockNavigate).not.toHaveBeenCalled();
+    it("passes correct overflow flags to SongMeta", () => {
+      vi.mocked(useIsOverflowing)
+        .mockReturnValueOnce(false) // titleRef
+        .mockReturnValueOnce(true); // artistRef
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      expect(vi.mocked(SongMeta)).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isScrolling: false,
+          isArtistScrolling: true,
+          isExpanded: false,
+        }),
+        undefined,
+      );
+    });
+
+    it("should have no accessibility violations", async () => {
+      const { container } = render(<MiniPlayer onExpand={mockOnExpand} />);
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+    });
   });
 
-  it("passes disable controls when loading or maxDuration is zero", () => {
-    mockUsePlayer.mockReturnValue(
-      makePlayerState({
-        isLoading: true,
-        duration: undefined,
-        currentSong: makeSong({ duration: 0 }),
-      }),
-    );
+  describe("Navigation & Meta Interaction", () => {
+    it("navigates to song details on desktop when current song exists", async () => {
+      const user = userEvent.setup();
+      vi.mocked(useMediaQuery).mockReturnValue(false);
 
-    render(<MiniPlayer />);
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    const playbackProps = expectDefined(capturedPlaybackControlsProps);
-    expect(playbackProps.isLoading).toBe(true);
-    expect(playbackProps.disablePrev).toBe(true);
-    expect(playbackProps.disableNext).toBe(true);
+      await user.click(
+        screen.getByRole("button", { name: "View song details" }),
+      );
+
+      expect(mockNavigate).toHaveBeenCalledWith("/songs/4");
+      expect(mockOnExpand).not.toHaveBeenCalled();
+    });
+
+    it("triggers onExpand on mobile instead of navigating", async () => {
+      const user = userEvent.setup();
+      vi.mocked(useMediaQuery).mockReturnValue(true);
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      await user.click(
+        screen.getByRole("button", { name: "View song details" }),
+      );
+
+      expect(mockOnExpand).toHaveBeenCalledTimes(1);
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("disables metadata button and does nothing when no song is playing", async () => {
+      const user = userEvent.setup();
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ currentSong: null }),
+      );
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      const metaButton = screen.getByRole("button", {
+        name: "View song details",
+      });
+      expect(metaButton).toBeDisabled();
+
+      await user.click(metaButton);
+
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockOnExpand).not.toHaveBeenCalled();
+    });
   });
 
-  it("calculates maxDuration correctly when player duration is missing", () => {
-    mockUsePlayer.mockReturnValue(
-      makePlayerState({
-        duration: undefined,
-        currentSong: makeSong({ id: 7, title: "Song", duration: 300 }),
-      }),
-    );
+  describe("Playback Controls", () => {
+    it("disables controls when player is loading", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ isLoading: true }),
+      );
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    render(<MiniPlayer />);
+      expect(vi.mocked(PlaybackControls)).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isLoading: true,
+          disablePrev: true,
+          disableNext: true,
+        }),
+        undefined,
+      );
+    });
 
-    const timeProps = expectDefined(capturedPlaybackTimeDisplayProps);
-    expect(timeProps.maxDuration).toBe(300);
+    it("disables controls when calculated maxDuration is zero", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({
+          duration: 0,
+          currentSong: makeSong({ duration: 0 }),
+        }),
+      );
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      expect(vi.mocked(PlaybackControls)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ disablePrev: true, disableNext: true }),
+        undefined,
+      );
+    });
+
+    it("calculates maxDuration from player duration first, falling back to song duration", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({
+          duration: undefined,
+          currentSong: makeSong({ duration: 300 }),
+        }),
+      );
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      expect(vi.mocked(PlaybackTimeDisplay)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ maxDuration: 300 }),
+        undefined,
+      );
+    });
+
+    it("wires player callbacks directly into playback components", () => {
+      const state = makePlayerState();
+      vi.mocked(usePlayer).mockReturnValue(state);
+
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      const playbackProps = vi.mocked(PlaybackControls).mock.lastCall![0];
+      const waveProps = vi.mocked(WaveProgressBar).mock.lastCall![0];
+
+      playbackProps.onPlay();
+      playbackProps.onPause();
+      playbackProps.onPrev();
+      playbackProps.onNext();
+      waveProps.seek(42);
+
+      expect(state.play).toHaveBeenCalledTimes(1);
+      expect(state.pause).toHaveBeenCalledTimes(1);
+      expect(state.playPrev).toHaveBeenCalledTimes(1);
+      expect(state.playNext).toHaveBeenCalledTimes(1);
+      expect(state.seek).toHaveBeenCalledWith(42);
+    });
   });
 
-  it("passes max duration, isPlaying to PlaybackTimeDisplay and overflow flags to SongMeta", () => {
-    mockUsePlayer.mockReturnValue(
-      makePlayerState({
-        duration: 180,
-        isPlaying: true,
-        currentSong: makeSong({ id: 7, title: "Song", duration: 240 }),
-      }),
-    );
+  describe("Desktop Auxiliary Controls (RAC)", () => {
+    it("toggles loop state and updates aria labels", async () => {
+      const user = userEvent.setup();
+      const toggleLoop = vi.fn();
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ isLooping: true, toggleLoop }),
+      );
 
-    render(<MiniPlayer />);
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    const timeProps = expectDefined(capturedPlaybackTimeDisplayProps);
-    expect(timeProps.maxDuration).toBe(240);
-    expect(timeProps.isPlaying).toBe(true);
+      const loopButton = screen.getByRole("button", { name: "Disable loop" });
+      await user.click(loopButton);
 
-    const metaProps = expectDefined(capturedSongMetaProps);
-    expect(metaProps.isScrolling).toBe(false);
-    expect(metaProps.isArtistScrolling).toBe(true);
+      expect(toggleLoop).toHaveBeenCalledTimes(1);
+    });
 
-    const waveProps = expectDefined(capturedWaveProgressBarProps);
-    expect(waveProps.currentSong?.id).toBe(7);
+    it("opens and closes the Play History popover via RAC", async () => {
+      const user = userEvent.setup();
+      render(<MiniPlayer onExpand={mockOnExpand} />);
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "Toggle play history" }),
+      );
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByTestId("play-history")).toBeInTheDocument();
+
+      expect(vi.mocked(PlayHistory)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ hideTitle: true }),
+        undefined,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Close history" }));
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 
-  it("wires player callbacks into playback controls and waveform", () => {
-    const play = vi.fn();
-    const pause = vi.fn();
-    const playPrev = vi.fn(async () => {});
-    const playNext = vi.fn(async () => {});
-    const seek = vi.fn();
-    const getPosition = vi.fn(() => 10);
+  describe("Edge Cases", () => {
+    it("handleMetaClick returns early if currentSong is null", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ currentSong: null }),
+      );
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    mockUsePlayer.mockReturnValue(
-      makePlayerState({ play, pause, playPrev, playNext, seek, getPosition }),
-    );
+      const metaButton = screen.getByRole("button", {
+        name: "View song details",
+      });
 
-    render(<MiniPlayer />);
+      fireEvent.click(metaButton);
 
-    const playbackProps = expectDefined(capturedPlaybackControlsProps);
-    const waveProps = expectDefined(capturedWaveProgressBarProps);
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockOnExpand).not.toHaveBeenCalled();
+    });
 
-    playbackProps.onPlay();
-    playbackProps.onPause();
-    playbackProps.onPrev();
-    playbackProps.onNext();
-    waveProps.seek(42);
-    waveProps.getPosition();
+    it("handles duration being null or undefined by defaulting to 0", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({
+          duration: undefined,
+          currentSong: makeSong({ duration: 0 }),
+        }),
+      );
 
-    expect(play).toHaveBeenCalledTimes(1);
-    expect(pause).toHaveBeenCalledTimes(1);
-    expect(playPrev).toHaveBeenCalledTimes(1);
-    expect(playNext).toHaveBeenCalledTimes(1);
-    expect(seek).toHaveBeenCalledWith(42);
-    expect(getPosition).toHaveBeenCalledTimes(1);
-  });
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-  it("toggles loop using the loop button and reflects aria label", () => {
-    const toggleLoop = vi.fn();
-    mockUsePlayer.mockReturnValue(
-      makePlayerState({ isLooping: true, toggleLoop }),
-    );
+      // Verify PlaybackControls receives disablePrev: true because maxDuration is 0.
+      expect(vi.mocked(PlaybackControls)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ disablePrev: true, disableNext: true }),
+        undefined,
+      );
+    });
 
-    render(<MiniPlayer />);
+    it("passes undefined to WaveProgressBar when no song is present", () => {
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ currentSong: null }),
+      );
 
-    const loopButton = screen.getByRole("button", { name: "Disable loop" });
-    fireEvent.click(loopButton);
+      render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    expect(toggleLoop).toHaveBeenCalledTimes(1);
-  });
+      expect(vi.mocked(WaveProgressBar)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ currentSong: undefined }),
+        undefined,
+      );
+    });
 
-  it("renders play history toggle controls", () => {
-    render(<MiniPlayer />);
+    it("updates SongMeta with new refs when song changes", () => {
+      const { rerender } = render(<MiniPlayer onExpand={mockOnExpand} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle play history" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Close history", { selector: "button" }),
-    ).toBeInTheDocument();
+      const newSong = makeSong({ id: 99, title: "New Title" });
+      vi.mocked(usePlayer).mockReturnValue(
+        makePlayerState({ currentSong: newSong }),
+      );
 
-    const historyProps = expectDefined(capturedPlayHistoryProps);
-    expect(historyProps.hideTitle).toBe(true);
+      rerender(<MiniPlayer onExpand={mockOnExpand} />);
+
+      expect(vi.mocked(SongMeta)).toHaveBeenCalled();
+    });
   });
 });

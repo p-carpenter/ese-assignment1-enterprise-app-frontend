@@ -20,7 +20,8 @@
   text-align: left;
   flex: 1;
   min-width: 0;
-  max-width: 280px;
+  max-width: 250px;
+  background: transparent;
 }
 
 .metaWrapper:hover {
@@ -158,7 +159,6 @@
     align-items: center;
     padding: 8px 12px 10px;
     gap: 8px;
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .metaWrapper {
@@ -171,7 +171,7 @@
     display: none;
   }
 
-  .miniPlayer:not(.expanded) .progressWrapper {
+  .progressWrapper {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -179,179 +179,7 @@
     flex: none;
   }
 
-  .miniPlayer:not(.expanded) .mainControls {
+  .mainControls {
     margin-left: auto;
-  }
-
-  /* Expanded full-screen overlay */
-  .miniPlayer.expanded {
-    position: fixed;
-    inset: 0;
-    height: 100dvh;
-    z-index: 9999;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 24px;
-    background: linear-gradient(to bottom, #2b2b2b 0%, #121212 100%);
-    box-sizing: border-box;
-  }
-
-  .expandedLayout {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-  }
-
-  .expandedHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 40px;
-    flex-shrink: 0;
-  }
-
-  .headerTitle {
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--app-white);
-  }
-
-  .collapseButton {
-    background: none;
-    border: none;
-    color: var(--app-white);
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-  }
-
-  .headerSpacer {
-    width: 28px;
-  }
-
-  .expandedMetaWrapper {
-    flex: none;
-    width: 100%;
-    max-width: 100%;
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0;
-    cursor: default;
-  }
-
-  .expandedProgress {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
-    margin: 16px 0;
-    min-height: 80px;
-  }
-
-  .expandedTimeInfo {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 12px;
-  }
-
-  .expandedPlaybackRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0 16px;
-    margin-bottom: 32px;
-    flex-shrink: 0;
-  }
-
-  .expandedBottomAction {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    padding-bottom: 24px;
-    flex-shrink: 0;
-  }
-
-  .lyricsToggleBtn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--app-white);
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition:
-      background 0.2s,
-      transform 0.1s;
-  }
-
-  .lyricsToggleBtn:active {
-    transform: scale(0.95);
-  }
-
-  /* Sliding lyrics panel */
-  .lyricsOverlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 55vh; /* Covers most of the screen but leaves the header visible. */
-    background: #121212;
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.8);
-    display: flex;
-    flex-direction: column;
-
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 100;
-  }
-
-  .lyricsOverlay.lyricsVisible {
-    transform: translateY(0);
-  }
-
-  .lyricsHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 24px 16px;
-    flex-shrink: 0;
-  }
-
-  .lyricsTitle {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--app-white);
-  }
-
-  .lyricsContent {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 16px 32px;
-  }
-
-  .lyricsContent > section {
-    background: transparent;
-    border: none;
-    padding: 0;
-  }
-
-  .lyricsContent > section > h2 {
-    display: none;
   }
 }
