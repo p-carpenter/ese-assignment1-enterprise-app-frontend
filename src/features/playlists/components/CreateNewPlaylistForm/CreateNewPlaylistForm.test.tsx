@@ -74,6 +74,28 @@ describe("CreateNewPlaylistForm", () => {
         );
       });
     });
+
+    it("submits successfully with only required fields", async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+
+      await user.type(screen.getByLabelText("Title"), "Minimal Playlist");
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Minimal Playlist",
+            description: "",
+            cover_art_url: "",
+            is_public: false,
+            is_collaborative: false,
+          }),
+          expect.anything(),
+        );
+      });
+    });
   });
 
   describe("UI States", () => {
@@ -185,8 +207,9 @@ describe("CreateNewPlaylistForm", () => {
       expect(mockUpload).not.toHaveBeenCalled();
     });
 
-    it("keeps cover URL empty if upload resolves null", async () => {
+    it("maintains default empty cover_art_url if backend handles the placeholder (upload returns null)", async () => {
       const user = userEvent.setup();
+      // Simulate an upload failing or returning nothing
       mockUpload.mockResolvedValue(null);
       const onSubmit = vi.fn();
 
@@ -203,11 +226,54 @@ describe("CreateNewPlaylistForm", () => {
       await user.click(screen.getByRole("button", { name: "Create Playlist" }));
 
       await waitFor(() => {
+        // The frontend shouldn't send the placeholder URL, it should send the empty string
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Fallback Playlist",
+            cover_art_url: "",
+          }),
+          expect.anything(),
+        );
+      });
+    });
+
+    it("handles thrown errors during upload without crashing the form", async () => {
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const user = userEvent.setup();
+      mockUpload.mockRejectedValue(new Error("Network Error"));
+      const onSubmit = vi.fn();
+
+      render(<CreateNewPlaylistForm onSubmit={onSubmit} />);
+      const fileInput = screen.getByLabelText(
+        "Upload Cover Art",
+      ) as HTMLInputElement;
+      const file = new File(["cover"], "cover.jpg", { type: "image/jpeg" });
+
+      await user.upload(fileInput, file);
+      await waitFor(() => expect(mockUpload).toHaveBeenCalledWith(file));
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Cover art upload failed:",
+        expect.any(Error),
+      );
+
+      // Form should still be submittable with default empty cover_art_url.
+      await user.type(
+        screen.getByLabelText("Title"),
+        "Error Recovery Playlist",
+      );
+      await user.click(screen.getByRole("button", { name: "Create Playlist" }));
+
+      await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith(
           expect.objectContaining({ cover_art_url: "" }),
           expect.anything(),
         );
       });
+
+      consoleSpy.mockRestore();
     });
   });
 });
