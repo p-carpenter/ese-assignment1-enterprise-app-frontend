@@ -13,7 +13,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
       </div>
 
       <header className={styles.header}>
-        <span className={styles.logo}>Music Player</span>
+        <span className={styles.logo}>AdaStream</span>
       </header>
 
       <main className={styles.main}>
