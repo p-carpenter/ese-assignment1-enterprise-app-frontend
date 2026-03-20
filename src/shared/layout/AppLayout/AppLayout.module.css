@@ -75,7 +75,6 @@
 
 /* Responsiveness */
 @media (max-width: 920px) {
-
   .appGrid {
     padding: 0;
   }
@@ -83,7 +82,7 @@
   .centerCol {
     padding: 8px;
   }
-  
+
   .leftCol {
     position: absolute;
     top: 0;
