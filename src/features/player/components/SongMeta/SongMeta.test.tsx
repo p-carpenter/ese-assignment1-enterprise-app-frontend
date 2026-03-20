@@ -1,11 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SongMeta } from "./SongMeta";
-import { usePlayer } from "../..";
+import { usePlayer } from "@/shared/context";
 import styles from "./SongMeta.module.css";
 import type { PlayerContextType } from "@/shared/context/PlayerContext";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
-vi.mock("../..", () => ({
+vi.mock("@/shared/context", () => ({
   usePlayer: vi.fn(),
 }));
 
@@ -29,7 +31,7 @@ const defaultPlayerContext: PlayerContextType = {
   playSong: vi.fn(async () => {}),
 };
 
-describe("SongMeta", () => {
+describe("SongMeta", async () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(usePlayer).mockReturnValue(defaultPlayerContext);
@@ -147,5 +149,89 @@ describe("SongMeta", () => {
 
     expect(title.className).not.toContain(styles.scrolling);
     expect(artist.className).not.toContain(styles.scrolling);
+  });
+
+  it("applies expanded classes when isExpanded is true", () => {
+    vi.mocked(usePlayer).mockReturnValue({
+      ...defaultPlayerContext,
+      currentSong: {
+        id: 4,
+        title: "Expanded Song",
+        artist: "Expanded Artist",
+        file_url: "https://example.com/d.mp3",
+        cover_art_url: "https://example.com/cover.jpg",
+        duration: 200,
+        uploaded_at: "2024-01-01T00:00:00Z",
+      },
+    });
+
+    render(
+      <SongMeta
+        titleRef={{ current: null }}
+        artistRef={{ current: null }}
+        isScrolling={false}
+        isArtistScrolling={false}
+        isExpanded={true}
+      />,
+    );
+
+    const img = screen.getByRole("img", { name: "Expanded Song" });
+    const title = screen.getByText("Expanded Song");
+    const artist = screen.getByText("Expanded Artist");
+    const trackMeta = title.closest("div");
+
+    expect(img.className).toContain(styles.expandedArt);
+    expect(trackMeta?.className).toContain(styles.expandedMeta);
+    expect(title.className).toContain(styles.expandedTitle);
+    expect(artist.className).toContain(styles.expandedArtist);
+  });
+
+  it("does not apply expanded classes when isExpanded is false", () => {
+    vi.mocked(usePlayer).mockReturnValue({
+      ...defaultPlayerContext,
+      currentSong: {
+        id: 5,
+        title: "Normal Song",
+        artist: "Normal Artist",
+        file_url: "https://example.com/e.mp3",
+        cover_art_url: "https://example.com/cover.jpg",
+        duration: 200,
+        uploaded_at: "2024-01-01T00:00:00Z",
+      },
+    });
+
+    render(
+      <SongMeta
+        titleRef={{ current: null }}
+        artistRef={{ current: null }}
+        isScrolling={false}
+        isArtistScrolling={false}
+        isExpanded={false}
+      />,
+    );
+
+    const img = screen.getByRole("img", { name: "Normal Song" });
+    const title = screen.getByText("Normal Song");
+    const artist = screen.getByText("Normal Artist");
+    const trackMeta = title.closest("div");
+
+    expect(img.className).not.toContain(styles.expandedArt);
+    expect(trackMeta?.className).not.toContain(styles.expandedMeta);
+    expect(title.className).not.toContain(styles.expandedTitle);
+    expect(artist.className).not.toContain(styles.expandedArtist);
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(
+      <SongMeta
+        titleRef={{ current: null }}
+        artistRef={{ current: null }}
+        isScrolling={true}
+        isArtistScrolling={true}
+      />,
+    );
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
