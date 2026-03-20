@@ -6,7 +6,7 @@ import {
   usePlayer,
 } from "@/features/player/components";
 import { Header } from "@/shared/layout";
-import { PlaylistList } from "@/features/playlists/components/PlaylistList";
+import { Sidebar } from "@/shared/layout/Sidebar/Sidebar";
 import styles from "./AppLayout.module.css";
 
 export const AppLayout = (): JSX.Element => {
@@ -44,7 +44,7 @@ export const AppLayout = (): JSX.Element => {
         <div
           className={`${styles.leftCol} ${isSidebarOpen ? styles.open : ""}`}
         >
-          <PlaylistList />
+          <Sidebar />
         </div>
 
         <div className={styles.centerCol}>
