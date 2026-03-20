@@ -75,7 +75,7 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
 
           return (
             <>
-              <div className={styles.waveLayer}>
+              <div data-testid="wave-layer" className={styles.waveLayer}>
                 {PLACEHOLDER_BARS.map((h, i) => (
                   <div
                     key={i}
