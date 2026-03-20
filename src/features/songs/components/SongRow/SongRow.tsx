@@ -56,7 +56,11 @@ export const SongRow = memo(
             {new Date(song.uploaded_at).toDateString()}
           </span>
           <span className={styles.duration}>{formatTime(song.duration)}</span>
-          {avatarUser && <UserAvatar user={avatarUser} />}
+          {avatarUser && (
+            <div className={styles.userAvatar}>
+              {<UserAvatar user={avatarUser} />}
+            </div>
+          )}
         </div>
         <div className="dropdown-container">
           <SongManagementDropdown dropdownItems={dropdownItems} />
