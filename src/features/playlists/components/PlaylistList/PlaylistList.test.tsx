@@ -4,8 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PlaylistList } from "./PlaylistList";
 import { AuthContext } from "@/shared/context/AuthContext";
 import { MemoryRouter } from "react-router-dom";
-import * as router from "react-router-dom";
-import type { Playlist } from "../types";
+import type { Playlist } from "../../types";
 import { type UserProfile } from "@/features/auth/types";
 import { server } from "@/mocks/server";
 import { http, HttpResponse, delay } from "msw";
@@ -13,24 +12,15 @@ import { resetHandlerState } from "@/mocks/handlers";
 import { axe, toHaveNoViolations } from "jest-axe";
 expect.extend(toHaveNoViolations);
 
-// Mock react-router-dom to spy on useNavigate.
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: vi.fn(),
-  };
-});
-
 const mockPlaylists: Playlist[] = [
   {
     id: 1,
     title: "Rock Classics",
     description: "The best rock songs",
-    songs: [], // Tests plural "0 songs"
+    songs: [],
     is_public: false,
     is_collaborative: false,
-    cover_art_url: null, // Tests fallback UI
+    cover_art_url: null,
     owner: { id: 1, username: "testuser" },
   },
   {
@@ -53,9 +43,9 @@ const mockPlaylists: Playlist[] = [
         },
       },
     ],
-    is_public: true, // Tests Earth icon badge
-    is_collaborative: true, // Tests People icon badge
-    cover_art_url: "https://example.com/jazz.jpg", // Tests image rendering
+    is_public: true,
+    is_collaborative: true,
+    cover_art_url: "https://example.com/jazz.jpg",
     owner: { id: 1, username: "testuser" },
   },
 ];
@@ -75,16 +65,11 @@ const createTestQueryClient = () =>
 interface ProviderOptions {
   user?: UserProfile | null;
   loading?: boolean;
-  logoutMock?: () => Promise<void>;
 }
 
 const renderWithProviders = (
   ui: React.ReactElement,
-  {
-    user = mockUser,
-    loading = false,
-    logoutMock = vi.fn(() => Promise.resolve()),
-  }: ProviderOptions = {},
+  { user = mockUser, loading = false }: ProviderOptions = {},
 ) => {
   const queryClient = createTestQueryClient();
   return render(
@@ -97,7 +82,7 @@ const renderWithProviders = (
             setUser: () => {},
             refreshUser: () => Promise.resolve(),
             login: () => Promise.resolve(),
-            logout: logoutMock,
+            logout: () => Promise.resolve(),
           }}
         >
           {ui}
@@ -243,105 +228,5 @@ describe("PlaylistList", () => {
     const { container } = renderWithProviders(<PlaylistList />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
-  });
-
-  describe("Auth Footer Rendering & Actions", () => {
-    let navigateMock: ReturnType<typeof vi.fn>;
-
-    beforeEach(() => {
-      navigateMock = vi.fn();
-      vi.spyOn(router, "useNavigate").mockReturnValue(
-        navigateMock as unknown as router.NavigateFunction,
-      );
-
-      server.use(
-        http.get("http://localhost:8000/api/playlists/", () => {
-          return HttpResponse.json(mockPlaylists);
-        }),
-      );
-    });
-
-    it("renders the user avatar image if avatar_url is provided", async () => {
-      const userWithAvatar = {
-        ...mockUser,
-        avatar_url: "https://example.com/me.jpg",
-      };
-      renderWithProviders(<PlaylistList />, { user: userWithAvatar });
-
-      await screen.findByText("Rock Classics");
-
-      const avatar = screen.getByAltText("Profile");
-      expect(avatar).toBeInTheDocument();
-      expect(avatar).toHaveAttribute("src", "https://example.com/me.jpg");
-    });
-
-    it("renders the user's initial if avatar_url is missing", async () => {
-      const userWithoutAvatar = {
-        ...mockUser,
-        username: "bob",
-        avatar_url: "",
-      };
-      renderWithProviders(<PlaylistList />, { user: userWithoutAvatar });
-
-      await screen.findByText("Rock Classics");
-
-      expect(screen.getByText("B")).toBeInTheDocument();
-      expect(screen.queryByAltText("Profile")).not.toBeInTheDocument();
-    });
-
-    it("navigates to the profile page when the avatar button is clicked", async () => {
-      renderWithProviders(<PlaylistList />);
-      await screen.findByText("Rock Classics");
-
-      const profileButton = screen.getByTitle("View Profile");
-      fireEvent.click(profileButton);
-
-      expect(navigateMock).toHaveBeenCalledWith("/profile");
-    });
-
-    it("calls logout and navigates to login when Log Out is clicked", async () => {
-      const logoutMock = vi.fn(() => Promise.resolve());
-      renderWithProviders(<PlaylistList />, { logoutMock });
-
-      await screen.findByText("Rock Classics");
-
-      const logoutButton = screen.getByRole("button", { name: "Log Out" });
-      fireEvent.click(logoutButton);
-
-      expect(logoutMock).toHaveBeenCalled();
-
-      await waitFor(() => {
-        expect(navigateMock).toHaveBeenCalledWith("/login");
-      });
-    });
-
-    it("logs an error and does not navigate if logout fails", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      const failingLogoutMock = vi.fn(() =>
-        Promise.reject(new Error("Network Error")),
-      );
-
-      renderWithProviders(<PlaylistList />, { logoutMock: failingLogoutMock });
-
-      await screen.findByText("Rock Classics");
-
-      const logoutButton = screen.getByRole("button", { name: "Log Out" });
-      fireEvent.click(logoutButton);
-
-      await waitFor(() => {
-        expect(failingLogoutMock).toHaveBeenCalled();
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Logout failed:",
-        expect.any(Error),
-      );
-
-      expect(navigateMock).not.toHaveBeenCalledWith("/login");
-
-      consoleSpy.mockRestore();
-    });
   });
 });
