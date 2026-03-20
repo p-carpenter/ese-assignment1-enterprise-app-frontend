@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Tabs, TabList, Tab, TabPanel } from "react-aria-components";
 import { SongUploadForm } from "@/features/songs";
 import { JamendoSongSearch } from "@/features/songs/components/JamendoSongSearch/JamendoSongSearch";
 import { Button } from "@/shared/components";
@@ -7,28 +7,23 @@ import styles from "./UploadPage.module.css";
 
 export const UploadPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"upload" | "jamendo">("upload");
 
   return (
     <div className={styles.page}>
-      <div className={styles.tabs}>
-        <Button
-          size="large"
-          variant={activeTab === "upload" ? "primary" : "outlined"}
-          onClick={() => setActiveTab("upload")}
-        >
-          Upload MP3
-        </Button>
-        <Button
-          size="large"
-          variant={activeTab === "jamendo" ? "primary" : "outlined"}
-          onClick={() => setActiveTab("jamendo")}
-        >
-          Search Jamendo
-        </Button>
-      </div>
+      <Tabs aria-label="Upload methods">
+        <TabList className={styles.tabs}>
+          <Tab id="upload">Upload MP3</Tab>
+          <Tab id="jamendo">Search Jamendo</Tab>
+        </TabList>
 
-      {activeTab === "upload" ? <SongUploadForm /> : <JamendoSongSearch />}
+        <TabPanel id="upload">
+          <SongUploadForm />
+        </TabPanel>
+
+        <TabPanel id="jamendo">
+          <JamendoSongSearch onImportSuccess={() => navigate("/")} />
+        </TabPanel>
+      </Tabs>
 
       <Button variant="outlined" size="large" onClick={() => navigate("/")}>
         Go home
