@@ -26,11 +26,7 @@ export const AuthFooter = () => {
         title="View Profile"
       >
         {user.avatar_url ? (
-          <img
-            src={user.avatar_url}
-            alt="Profile"
-            className={styles.avatar}
-          />
+          <img src={user.avatar_url} alt="Profile" className={styles.avatar} />
         ) : (
           <span className={styles.avatarInitial}>
             {user.username?.[0]?.toUpperCase()}
