@@ -221,7 +221,7 @@ describe("LyricsSection", () => {
       },
     });
     mockLyrics({
-      syncedLines: [], 
+      syncedLines: [],
       plainLyrics: "Fallback for empty array",
     });
 
