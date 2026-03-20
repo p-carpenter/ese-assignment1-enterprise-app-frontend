@@ -195,17 +195,16 @@ describe("LyricsSection", () => {
       },
     });
     mockLyrics({
-      syncedLines: null, // No synced lines
+      syncedLines: null,
       plainLyrics: "Just some plain text",
     });
 
     render(<LyricsSection song={dummySong} />);
 
-    // Should fallback to plain lyrics
+    // Should fallback to plain lyrics.
     expect(screen.getByText("Just some plain text")).toBeInTheDocument();
     expect(screen.queryByTestId("synced-lyrics")).not.toBeInTheDocument();
 
-    // rAF should never have been called because of the early return in useEffect
     expect(window.requestAnimationFrame).not.toHaveBeenCalled();
   });
 
@@ -222,7 +221,7 @@ describe("LyricsSection", () => {
       },
     });
     mockLyrics({
-      syncedLines: [], // Empty array, fails the .length > 0 check
+      syncedLines: [], 
       plainLyrics: "Fallback for empty array",
     });
 
@@ -233,7 +232,6 @@ describe("LyricsSection", () => {
   });
 
   it("stops syncing and swaps to plain lyrics if the active song changes", () => {
-    // 1. Start with the song active and synced lyrics available
     mockPlayer({
       currentSong: {
         id: 1,
