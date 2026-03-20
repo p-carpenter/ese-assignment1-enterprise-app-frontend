@@ -1,0 +1,118 @@
+.historyAnchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: var(--app-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+  padding: 0;
+  outline: none;
+}
+
+.iconButton:hover,
+.iconButton[data-hovered] {
+  color: var(--app-white);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.iconButton[data-focus-visible] {
+  box-shadow: 0 0 0 2px var(--app-white);
+}
+
+.historyPanel {
+  width: 360px;
+  max-height: 60vh;
+  z-index: 100;
+  background: rgba(18, 18, 18, 0.8);
+  backdrop-filter: blur(24px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.historyPanel[data-entering] {
+  animation: popoverFadeIn 0.2s ease;
+}
+
+.historyPanel[data-exiting] {
+  animation: popoverFadeIn 0.2s ease reverse;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dialogOutline {
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: inherit;
+  overflow-y: auto;
+}
+
+.historyPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  background: var(--app-dark-elevated);
+  z-index: 1;
+}
+
+.historyPanelTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--app-white);
+  letter-spacing: 0.01em;
+}
+
+.historyPanelClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: var(--app-gray);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+  outline: none;
+}
+
+.historyPanelClose:hover {
+  color: var(--app-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.historyPanelClose[data-focus-visible] {
+  box-shadow: 0 0 0 2px var(--app-white);
+}
