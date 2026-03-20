@@ -39,7 +39,7 @@ export const Header = ({ onMenuClick }: HeaderProps): JSX.Element => {
       )}
 
       <Link to="/" className={styles.titleLink}>
-        <h1 className={styles.title}>Music Player</h1>
+        <h1 className={styles.title}>AdaStream</h1>
       </Link>
 
       <div className={styles.centreActions}>
