@@ -249,5 +249,61 @@ describe("PlayerContext", () => {
         expect.any(Object),
       );
     });
+    describe("Edge cases", () => {
+      it("does not crash when triggered with an empty playlist", async () => {
+        const { result } = setup();
+
+        // Playlist is empty by default on mount.
+        await act(async () => {
+          await result.current.playNext();
+        });
+        await act(async () => {
+          await result.current.playPrev();
+        });
+
+        expect(mockLoad).not.toHaveBeenCalled();
+      });
+
+      it("plays the first song in the playlist if the current song is not in the queue", async () => {
+        const { result } = setup();
+
+        await act(async () => {
+          await result.current.playSong(songA);
+          result.current.setPlaylist([songB, songC]);
+        });
+
+        mockLoad.mockClear();
+
+        await act(async () => {
+          await result.current.playNext();
+        });
+
+        expect(mockLoad).toHaveBeenCalledWith(
+          "https://songs/b.mp3",
+          expect.any(Object),
+        );
+      });
+
+      it("handles a single-item playlist by restarting the same track", async () => {
+        const { result } = setup();
+
+        await act(async () => {
+          await result.current.playSong(songA, [songA]);
+        });
+
+        mockStop.mockClear();
+        mockLoad.mockClear();
+        mockSeek.mockClear();
+        mockAudioPlay.mockClear();
+
+        await act(async () => {
+          await result.current.playNext();
+        });
+
+        expect(mockSeek).toHaveBeenCalledWith(0);
+        expect(mockAudioPlay).toHaveBeenCalled();
+        expect(mockLoad).not.toHaveBeenCalled();
+      });
+    });
   });
 });
