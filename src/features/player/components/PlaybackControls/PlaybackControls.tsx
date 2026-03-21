@@ -64,6 +64,7 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
         className={styles.btn}
         isDisabled={disableNext || isLoading}
         aria-label="Next"
+        
       >
         <IoPlaySkipForwardSharp size={secondaryIconSize} />
       </Button>
