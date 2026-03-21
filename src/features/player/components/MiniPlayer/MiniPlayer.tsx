@@ -29,6 +29,7 @@ export const MiniPlayer = ({ onExpand }: Props) => {
     seek,
     getPosition,
     toggleLoop,
+    playlist,
   } = usePlayer();
 
   const navigate = useNavigate();
@@ -41,7 +42,8 @@ export const MiniPlayer = ({ onExpand }: Props) => {
   const isArtistScrolling = useIsOverflowing(artistRef, [currentSong]);
 
   const maxDuration = Math.max(duration ?? 0, currentSong?.duration ?? 0);
-  const disableControls = maxDuration <= 0 || isLoading;
+  const disableControls =
+    maxDuration <= 0 || isLoading || playlist.length === 0;
 
   const handleMetaClick = () => {
     if (!currentSong) return;

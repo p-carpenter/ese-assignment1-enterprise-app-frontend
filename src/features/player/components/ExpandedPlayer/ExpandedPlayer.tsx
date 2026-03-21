@@ -31,6 +31,7 @@ export const ExpandedPlayer = ({ onCollapse }: Props) => {
     seek,
     getPosition,
     toggleLoop,
+    playlist,
   } = usePlayer();
 
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -40,7 +41,8 @@ export const ExpandedPlayer = ({ onCollapse }: Props) => {
   const isArtistScrolling = useIsOverflowing(artistRef, [currentSong]);
 
   const maxDuration = Math.max(duration ?? 0, currentSong?.duration ?? 0);
-  const disableControls = maxDuration <= 0 || isLoading;
+  const disableControls =
+    maxDuration <= 0 || isLoading || playlist.length === 0;
 
   return (
     <div className={styles.expandedPlayer}>
