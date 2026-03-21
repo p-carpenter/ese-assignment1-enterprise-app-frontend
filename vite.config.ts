@@ -16,6 +16,12 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'text-summary', 'json-summary', 'json'],
       reportOnFailure: true,
+      exclude: [
+        'src/mocks/**', 
+        'node_modules/**',
+        'dist/**',
+        'build/**',
+      ],
     },
   },
   resolve: {

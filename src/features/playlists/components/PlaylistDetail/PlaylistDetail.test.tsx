@@ -43,12 +43,34 @@ vi.mock(
   }),
 );
 
-// Fixtures
+vi.mock("../PlaylistHero/PlaylistHero", () => ({
+  PlaylistHero: ({
+    onAddSongClick,
+    onPlayClick,
+    canAddSongs,
+  }: {
+    onAddSongClick: () => void;
+    onPlayClick: () => void;
+    canAddSongs: boolean;
+  }) => (
+    <div data-testid="playlist-hero">
+      <button onClick={onPlayClick}>Play Playlist</button>
+      {canAddSongs && <button onClick={onAddSongClick}>Open Add Modal</button>}
+    </div>
+  ),
+}));
+
 const mockOwner: UserProfile = {
   id: 1,
   username: "owner",
   email: "owner@test.com",
 };
+const mockGuestUser: UserProfile = {
+  id: 2,
+  username: "guest",
+  email: "guest@test.com",
+};
+
 const mockSong: Song = {
   id: 10,
   title: "Song Alpha",
@@ -85,7 +107,10 @@ const authValue = (user: UserProfile | null) => ({
   logout: async () => {},
 });
 
-const renderDetail = (playlistId = 1, user: UserProfile | null = mockOwner) => {
+const renderDetail = (
+  playlistId: number | string = 1,
+  user: UserProfile | null = mockOwner,
+) => {
   const queryClient = createQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
@@ -100,7 +125,6 @@ const renderDetail = (playlistId = 1, user: UserProfile | null = mockOwner) => {
   );
 };
 
-// Typesikker mock for SongList
 const MockSongList = ({
   songs,
   getDropdownItems,
@@ -133,32 +157,365 @@ describe("PlaylistDetail", () => {
     vi.mocked(SongList).mockImplementation(MockSongList as typeof SongList);
   });
 
-  // Legg til resten av MSW-testene dine her. F.eks:
-  it("calls the remove-song endpoint after the dropdown action fires", async () => {
-    let removeSongCalled = false;
-    server.use(
-      http.get("http://localhost:8000/api/playlists/1/", () =>
-        HttpResponse.json(
-          makePlaylist({
-            songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
-          }),
+  describe("Render & Loading States", () => {
+    it("shows a loading indicator while fetching the playlist", () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", async () => {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          return HttpResponse.json(makePlaylist());
+        }),
+      );
+
+      renderDetail(1, mockOwner);
+      expect(screen.getByText(/loading playlist/i)).toBeInTheDocument();
+    });
+
+    it("displays an empty state message when the playlist has no songs", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist({ songs: [] })),
         ),
-      ),
-      http.delete("http://localhost:8000/api/playlists/1/delete_song/", () => {
-        removeSongCalled = true;
-        return HttpResponse.json(makePlaylist());
-      }),
-    );
+      );
 
-    renderDetail(1, mockOwner);
-    await screen.findByText("Song Alpha");
+      renderDetail(1, mockOwner);
+      expect(
+        await screen.findByText(/no songs in this playlist yet/i),
+      ).toBeInTheDocument();
+    });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /remove from playlist/i }),
-    );
+    it("renders the song list when songs are present", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
+            }),
+          ),
+        ),
+      );
 
-    await waitFor(() => {
-      expect(removeSongCalled).toBe(true);
+      renderDetail(1, mockOwner);
+      expect(await screen.findByText("Song Alpha")).toBeInTheDocument();
+    });
+  });
+
+  describe("Access Control & Permissions", () => {
+    it("renders add song actions for the playlist owner", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist({ is_collaborative: false })),
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+      expect(
+        await screen.findByRole("button", { name: "Open Add Modal" }),
+      ).toBeInTheDocument();
+    });
+
+    it("hides add song actions from non-owners on non-collaborative playlists", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist({ is_collaborative: false })),
+        ),
+      );
+
+      renderDetail(1, mockGuestUser);
+      await screen.findByTestId("playlist-hero");
+      expect(
+        screen.queryByRole("button", { name: "Open Add Modal" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders add song actions for authenticated users on collaborative playlists", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist({ is_collaborative: true })),
+        ),
+      );
+
+      renderDetail(1, mockGuestUser);
+      expect(
+        await screen.findByRole("button", { name: "Open Add Modal" }),
+      ).toBeInTheDocument();
+    });
+
+    it("hides add song actions from unauthenticated users on collaborative playlists", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist({ is_collaborative: true })),
+        ),
+      );
+
+      renderDetail(1, null);
+      await screen.findByTestId("playlist-hero");
+      expect(
+        screen.queryByRole("button", { name: "Open Add Modal" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("maps unique contributors and passes them down for collaborative playlists", async () => {
+      const mockContributor1 = {
+        id: 99,
+        username: "contributor1",
+        email: "c1@test.com",
+      };
+      const mockContributor2 = {
+        id: 100,
+        username: "contributor2",
+        email: "c2@test.com",
+      };
+
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              is_collaborative: true,
+              songs: [
+                {
+                  id: 1,
+                  order: 1,
+                  added_at: "",
+                  song: mockSong,
+                  added_by: mockContributor1,
+                },
+                {
+                  id: 2,
+                  order: 2,
+                  added_at: "",
+                  song: { ...mockSong, id: 11 },
+                  added_by: mockContributor2,
+                },
+                {
+                  id: 3,
+                  order: 3,
+                  added_at: "",
+                  song: { ...mockSong, id: 12 },
+                  added_by: mockContributor1,
+                },
+              ],
+            }),
+          ),
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+
+      const contributor1 = await screen.findAllByText("contributor1");
+      const contributor2 = await screen.findAllByText("contributor2");
+
+      expect(contributor1[0]).toBeInTheDocument();
+      expect(contributor2[0]).toBeInTheDocument();
+
+      // Verify the count of contributor avatars.
+      const avatars = screen.getAllByTestId(/^avatar-/);
+      expect(avatars).toHaveLength(3);
+    });
+  });
+
+  describe("User Interactions", () => {
+    it("triggers playSong with the first song and full list when Play is clicked", async () => {
+      const songTwo = { ...mockSong, id: 11, title: "Song Beta" };
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [
+                { id: 1, order: 1, added_at: "", song: mockSong },
+                { id: 2, order: 2, added_at: "", song: songTwo },
+              ],
+            }),
+          ),
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+
+      const playButton = await screen.findByRole("button", {
+        name: "Play Playlist",
+      });
+      fireEvent.click(playButton);
+
+      expect(mockPlaySong).toHaveBeenCalledTimes(1);
+      expect(mockPlaySong).toHaveBeenCalledWith(mockSong, [mockSong, songTwo]);
+    });
+
+    it("toggles the Add Song modal open and closed", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(makePlaylist()),
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+
+      const openButton = await screen.findByRole("button", {
+        name: "Open Add Modal",
+      });
+      fireEvent.click(openButton);
+      expect(
+        screen.getByRole("dialog", { name: "Add songs modal" }),
+      ).toBeInTheDocument();
+
+      const closeButton = screen.getByRole("button", { name: "Close Modal" });
+      fireEvent.click(closeButton);
+      expect(
+        screen.queryByRole("dialog", { name: "Add songs modal" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("calls the remove-song endpoint after the dropdown action fires", async () => {
+      let removeSongCalled = false;
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
+            }),
+          ),
+        ),
+        http.delete(
+          "http://localhost:8000/api/playlists/1/delete_song/",
+          () => {
+            removeSongCalled = true;
+            return HttpResponse.json(makePlaylist());
+          },
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+      await screen.findByText("Song Alpha");
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove from playlist/i }),
+      );
+
+      await waitFor(() => {
+        expect(removeSongCalled).toBe(true);
+      });
+    });
+  });
+
+  describe("Error Handling & Edge Cases", () => {
+    it("displays an error message if the playlist API returns a 404/500", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () => {
+          return HttpResponse.error();
+        }),
+      );
+
+      renderDetail(1, mockOwner);
+      expect(
+        await screen.findByText(
+          /playlist not found or you don't have permission/i,
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("gracefully handles invalid playlist IDs in the URL", async () => {
+      // Testing the fallback to '0' and subsequent failure/empty state.
+      renderDetail("invalid_id", mockOwner);
+      expect(
+        await screen.findByText(
+          /playlist not found or you don't have permission/i,
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("displays an inline error alert if removing a song fails", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
+            }),
+          ),
+        ),
+        http.delete(
+          "http://localhost:8000/api/playlists/1/delete_song/",
+          () => {
+            return new HttpResponse(null, {
+              status: 500,
+              statusText: "Server Error",
+            });
+          },
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+      await screen.findByText("Song Alpha");
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove from playlist/i }),
+      );
+
+      expect(await screen.findByText(/Unknown error/i)).toBeInTheDocument();
+    });
+
+    it("displays the readable message when the API returns a structured error payload", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
+            }),
+          ),
+        ),
+        // Intercept the DELETE request and return a structured Django error.
+        http.delete(
+          "http://localhost:8000/api/playlists/1/delete_song/",
+          () => {
+            return HttpResponse.json(
+              { detail: "You do not have permission to remove this song." },
+              { status: 403 },
+            );
+          },
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+      await screen.findByText("Song Alpha");
+
+      // Trigger the mutation.
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove from playlist/i }),
+      );
+
+      expect(
+        await screen.findByText(
+          "You do not have permission to remove this song.",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("displays fallback error message if thrown error is not an Error instance", async () => {
+      server.use(
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.json(
+            makePlaylist({
+              songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
+            }),
+          ),
+        ),
+        http.delete(
+          "http://localhost:8000/api/playlists/1/delete_song/",
+          () => {
+            // Simulate a thrown string instead of Error object.
+            throw "something bad happened";
+          },
+        ),
+      );
+
+      renderDetail(1, mockOwner);
+      await screen.findByText("Song Alpha");
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /remove from playlist/i }),
+      );
+
+      expect(
+        await screen.findByText(/unexpected error|remove/i),
+      ).toBeInTheDocument();
     });
   });
 });

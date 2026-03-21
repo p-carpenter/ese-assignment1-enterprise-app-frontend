@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AddSongToPlaylistModal } from "./AddSongToPlaylistModal";
 import { ApiError } from "@/shared/api/errors";
 import type { Song } from "@/features/songs/types";
+import type { Playlist } from "../../types";
 import * as songsApi from "@/features/songs/api";
 import * as playlistsApi from "@/features/playlists/api";
 import { usePlayer } from "@/shared/context/PlayerContext";
 import type { PlayerContextType } from "@/shared/context/PlayerContext";
 import type { ComponentProps } from "react";
 import { SongRow } from "@/features/songs/components/SongRow/SongRow";
-import type { Playlist } from "../../types";
 
 vi.mock("@/features/songs/api", () => ({
   listAllSongs: vi.fn(),
@@ -90,129 +90,136 @@ describe("AddSongToPlaylistModal", () => {
       </QueryClientProvider>,
     );
 
-  it("shows loading state", () => {
-    // Return a promise that never resolves to force the loading state
-    vi.mocked(songsApi.listAllSongs).mockImplementation(
-      () => new Promise(() => {}),
-    );
-
-    renderComponent();
-    expect(screen.getByText("Loading songs…")).toBeInTheDocument();
-  });
-
-  it("shows error when song list query fails", async () => {
-    vi.mocked(songsApi.listAllSongs).mockRejectedValue(
-      new Error("Network Error"),
-    );
-
-    renderComponent();
-    expect(
-      await screen.findByText("Failed to load songs."),
-    ).toBeInTheDocument();
-  });
-
-  it("filters out songs already in the playlist", async () => {
-    renderComponent({ existingSongIds: new Set([1]) });
-
-    await waitFor(() => {
-      expect(screen.queryByText("Add Skyline")).not.toBeInTheDocument();
-      expect(screen.getByText("Add Sunset")).toBeInTheDocument();
-    });
-  });
-
-  it("shows empty state for no matches when searching", async () => {
-    renderComponent();
-
-    // Wait for songs to load
-    await screen.findByText("Add Skyline");
-
-    fireEvent.change(screen.getByPlaceholderText(/search songs or artists/i), {
-      target: { value: "not-found" },
+  describe("Rendering & State", () => {
+    it("shows loading state", () => {
+      vi.mocked(songsApi.listAllSongs).mockImplementation(
+        () => new Promise(() => {}),
+      );
+      renderComponent();
+      expect(screen.getByText("Loading songs…")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("No matches found.")).toBeInTheDocument();
-  });
-
-  it("shows all-added message when no songs are available to add", async () => {
-    renderComponent({ existingSongIds: new Set([1, 2]) });
-
-    expect(
-      await screen.findByText("All songs are already in this playlist."),
-    ).toBeInTheDocument();
-  });
-
-  it("adds a song, shows feedback, and invalidates playlist queries", async () => {
-    vi.mocked(playlistsApi.addSongToPlaylist).mockResolvedValue(
-      undefined as unknown as Playlist,
-    );
-
-    renderComponent({ playlistId: 77 });
-
-    const addButton = await screen.findByRole("button", {
-      name: "Add Skyline",
+    it("shows error when song list query fails", async () => {
+      vi.mocked(songsApi.listAllSongs).mockRejectedValue(
+        new Error("Network Error"),
+      );
+      renderComponent();
+      expect(
+        await screen.findByText("Failed to load songs."),
+      ).toBeInTheDocument();
     });
-    fireEvent.click(addButton);
 
-    expect(await screen.findByText("✓ 1 song added")).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["playlist", 77],
-      });
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["playlists"],
+    it("filters out songs already in the playlist", async () => {
+      renderComponent({ existingSongIds: new Set([1]) });
+      await waitFor(() => {
+        expect(screen.queryByText("Add Skyline")).not.toBeInTheDocument();
+        expect(screen.getByText("Add Sunset")).toBeInTheDocument();
       });
     });
-  });
 
-  it("shows API-readable mutation errors", async () => {
-    vi.mocked(playlistsApi.addSongToPlaylist).mockRejectedValue(
-      new ApiError(400, { detail: "Song already exists in playlist." }),
-    );
-
-    renderComponent();
-
-    const addButton = await screen.findByRole("button", {
-      name: "Add Skyline",
+    it("shows empty state for no matches when searching", async () => {
+      renderComponent();
+      await screen.findByText("Add Skyline");
+      fireEvent.change(
+        screen.getByPlaceholderText(/search songs or artists/i),
+        {
+          target: { value: "not-found" },
+        },
+      );
+      expect(screen.getByText("No matches found.")).toBeInTheDocument();
     });
-    fireEvent.click(addButton);
 
-    expect(
-      await screen.findByText("Song already exists in playlist."),
-    ).toBeInTheDocument();
+    it("shows all-added message when no songs are available to add", async () => {
+      renderComponent({ existingSongIds: new Set([1, 2]) });
+      expect(
+        await screen.findByText("All songs are already in this playlist."),
+      ).toBeInTheDocument();
+    });
+
+    it("marks row active when current song matches", async () => {
+      vi.mocked(usePlayer).mockReturnValue({
+        currentSong: { id: 2 },
+      } as unknown as PlayerContextType);
+      renderComponent();
+      expect(await screen.findByTestId("active-2")).toBeInTheDocument();
+    });
   });
 
-  it("resets search and added state when closing", async () => {
-    const onClose = vi.fn();
-    vi.mocked(playlistsApi.addSongToPlaylist).mockResolvedValue(
-      undefined as unknown as Playlist,
-    );
+  describe("Interactions", () => {
+    it("adds a song, shows feedback, and invalidates playlist queries", async () => {
+      vi.mocked(playlistsApi.addSongToPlaylist).mockResolvedValue(
+        undefined as unknown as Playlist,
+      );
+      renderComponent({ playlistId: 77 });
 
-    renderComponent({ onClose });
+      const addButton = await screen.findByRole("button", {
+        name: "Add Skyline",
+      });
+      fireEvent.click(addButton);
 
-    await screen.findByText("Add Skyline");
+      expect(await screen.findByText("✓ 1 song added")).toBeInTheDocument();
 
-    const searchInput = screen.getByPlaceholderText(/search songs or artists/i);
-    fireEvent.change(searchInput, { target: { value: "sky" } });
+      await waitFor(() => {
+        expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+          queryKey: ["playlist", 77],
+        });
+        expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+          queryKey: ["playlists"],
+        });
+      });
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Add Skyline" }));
-    expect(await screen.findByText("✓ 1 song added")).toBeInTheDocument();
+    it("shows API-readable mutation errors", async () => {
+      vi.mocked(playlistsApi.addSongToPlaylist).mockRejectedValue(
+        new ApiError(400, { detail: "Song already exists in playlist." }),
+      );
+      renderComponent();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+      const addButton = await screen.findByRole("button", {
+        name: "Add Skyline",
+      });
+      fireEvent.click(addButton);
 
-    expect(onClose).toHaveBeenCalledOnce();
+      expect(
+        await screen.findByText("Song already exists in playlist."),
+      ).toBeInTheDocument();
+    });
 
-    expect(searchInput).toHaveValue("");
-    expect(screen.queryByText("✓ 1 song added")).not.toBeInTheDocument();
-  });
+    it("shows fallback error message if error is not ApiError", async () => {
+      vi.mocked(playlistsApi.addSongToPlaylist).mockRejectedValue(
+        "not-an-error-object",
+      );
+      renderComponent();
 
-  it("marks row active when current song matches", async () => {
-    vi.mocked(usePlayer).mockReturnValue({
-      currentSong: { id: 2 },
-    } as unknown as PlayerContextType);
+      const addButton = await screen.findByRole("button", {
+        name: "Add Skyline",
+      });
+      fireEvent.click(addButton);
 
-    renderComponent();
+      expect(await screen.findByText(/unexpected error/i)).toBeInTheDocument();
+    });
 
-    expect(await screen.findByTestId("active-2")).toBeInTheDocument();
+    it("resets search and added state when closing", async () => {
+      const onClose = vi.fn();
+      vi.mocked(playlistsApi.addSongToPlaylist).mockResolvedValue(
+        undefined as unknown as Playlist,
+      );
+      renderComponent({ onClose });
+
+      await screen.findByText("Add Skyline");
+      const searchInput = screen.getByPlaceholderText(
+        /search songs or artists/i,
+      );
+      fireEvent.change(searchInput, { target: { value: "sky" } });
+
+      fireEvent.click(screen.getByRole("button", { name: "Add Skyline" }));
+      expect(await screen.findByText("✓ 1 song added")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
+      expect(onClose).toHaveBeenCalledOnce();
+      expect(searchInput).toHaveValue("");
+      expect(screen.queryByText("✓ 1 song added")).not.toBeInTheDocument();
+    });
   });
 });
