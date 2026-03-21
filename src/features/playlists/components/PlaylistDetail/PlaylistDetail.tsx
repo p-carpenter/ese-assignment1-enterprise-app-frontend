@@ -86,7 +86,7 @@ export const PlaylistDetail = () => {
     );
 
   const isOwner = user?.id === playlist.owner.id;
-  const canAddSongs = isOwner || playlist.is_collaborative;
+  const canAddSongs = !!user && (isOwner || playlist.is_collaborative);
   const songs = playlist.songs.map((item) => item.song);
   const existingSongIds = new Set(songs.map((s) => s.id));
   const addedByMap = new Map(
