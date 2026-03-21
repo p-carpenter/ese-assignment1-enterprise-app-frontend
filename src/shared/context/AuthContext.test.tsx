@@ -47,12 +47,14 @@ describe("AuthContext", () => {
 
   it("throws a fatal error if useAuth is consumed outside the provider", () => {
     // Suppress React's error boundary console noise for this specific test.
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
     expect(() => renderHook(() => useAuth())).toThrow(
-      "useAuth must be used within AuthProvider"
+      "useAuth must be used within AuthProvider",
     );
-    
+
     consoleError.mockRestore();
   });
 
@@ -101,7 +103,7 @@ describe("AuthContext", () => {
 
     expect(loginApi).toHaveBeenCalledWith("test@example.com", "password123");
     expect(getMe).toHaveBeenCalledTimes(2);
-    
+
     await waitFor(() => {
       expect(result.current.user).toEqual(mockUser);
     });
@@ -111,7 +113,10 @@ describe("AuthContext", () => {
     vi.mocked(getMe).mockResolvedValueOnce(mockUser);
     vi.mocked(logoutApi).mockResolvedValueOnce(undefined);
 
-    queryClient.setQueryData(["playlists", "user-123"], [{ id: 1, name: "Vibes" }]);
+    queryClient.setQueryData(
+      ["playlists", "user-123"],
+      [{ id: 1, name: "Vibes" }],
+    );
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -122,11 +127,11 @@ describe("AuthContext", () => {
     });
 
     expect(logoutApi).toHaveBeenCalledTimes(1);
-    
+
     await waitFor(() => {
       expect(result.current.user).toBeNull();
     });
-    
+
     // The underlying query client data should be cleared.
     expect(queryClient.getQueryData(queryKeys.me)).toBeNull();
     expect(queryClient.getQueryData(["playlists", "user-123"])).toBeUndefined();
@@ -150,7 +155,7 @@ describe("AuthContext", () => {
 
   it("triggers a manual refetch via refreshUser", async () => {
     const updatedUser = { ...mockUser, username: "new-username" };
-    
+
     vi.mocked(getMe)
       .mockResolvedValueOnce(mockUser)
       .mockResolvedValueOnce(updatedUser);
@@ -163,7 +168,7 @@ describe("AuthContext", () => {
     });
 
     expect(getMe).toHaveBeenCalledTimes(2);
-    
+
     await waitFor(() => {
       expect(result.current.user).toEqual(updatedUser);
     });
