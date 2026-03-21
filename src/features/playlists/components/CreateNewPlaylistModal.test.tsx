@@ -6,6 +6,7 @@ import { ApiError } from "@/shared/api/errors";
 import type { Playlist } from "../types";
 import * as api from "@/features/playlists/api";
 import type { ReactNode } from "react";
+import type { PlaylistFormValues } from "./CreateNewPlaylistForm/schema";
 
 const mockNavigate = vi.fn();
 
@@ -14,15 +15,10 @@ vi.mock("react-router-dom", async () => {
     await vi.importActual<typeof import("react-router-dom")>(
       "react-router-dom",
     );
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
+  return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("@/features/playlists/api", () => ({
-  createPlaylist: vi.fn(),
-}));
+vi.mock("@/features/playlists/api", () => ({ createPlaylist: vi.fn() }));
 
 vi.mock("@/shared/components/Modal/Modal", () => ({
   Modal: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
@@ -31,15 +27,9 @@ vi.mock("@/shared/components/Modal/Modal", () => ({
 
 vi.mock("./CreateNewPlaylistForm/CreateNewPlaylistForm", () => ({
   CreateNewPlaylistForm: (props: {
-    onSubmit: (values: {
-      title: string;
-      description: string;
-      is_public: boolean;
-      cover_art_url: string;
-      is_collaborative: boolean;
-    }) => void;
-    isSubmitting?: boolean;
     error?: string | null;
+    isSubmitting: boolean;
+    onSubmit: (data: PlaylistFormValues) => void;
   }) => (
     <div>
       <div data-testid="form-error">{props.error}</div>
@@ -93,87 +83,95 @@ describe("CreateNewPlaylistModal", () => {
       </QueryClientProvider>,
     );
 
-  it("returns null when closed", () => {
-    const { container } = render(
-      <QueryClientProvider client={queryClient}>
-        <CreateNewPlaylistModal isOpen={false} onClose={vi.fn()} />
-      </QueryClientProvider>,
-    );
-    expect(container).toBeEmptyDOMElement();
+  describe("Rendering", () => {
+    it("returns null when closed", () => {
+      const { container } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateNewPlaylistModal isOpen={false} onClose={vi.fn()} />
+        </QueryClientProvider>,
+      );
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 
-  it("passes loading state from mutation to form and invalidates queries on success", async () => {
-    const onClose = vi.fn();
-    const onSuccess = vi.fn();
+  describe("Interactions & API calls", () => {
+    it("passes loading state from mutation to form and invalidates queries on success", async () => {
+      const onClose = vi.fn();
+      const onSuccess = vi.fn();
+      let resolveMutation: (value: Playlist) => void;
 
-    // 1. Lag en referanse for å kontrollere akkurat når mutasjonen er ferdig
-    let resolveMutation: (value: Playlist) => void;
-    vi.mocked(api.createPlaylist).mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveMutation = resolve;
-        }),
-    );
+      vi.mocked(api.createPlaylist).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveMutation = resolve;
+          }),
+      );
 
-    renderComponent({ onClose, onSuccess });
+      renderComponent({ onClose, onSuccess });
+      fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("is-submitting")).toHaveTextContent("true");
-    });
-
-    resolveMutation!(createdPlaylist);
-
-    await waitFor(() => {
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["playlists"],
+      await waitFor(() => {
+        expect(screen.getByTestId("is-submitting")).toHaveTextContent("true");
       });
-      expect(onClose).toHaveBeenCalledOnce();
-      expect(onSuccess).toHaveBeenCalledWith(createdPlaylist);
-      expect(mockNavigate).not.toHaveBeenCalled();
+
+      resolveMutation!(createdPlaylist);
+
+      await waitFor(() => {
+        expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+          queryKey: ["playlists"],
+        });
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(onSuccess).toHaveBeenCalledWith(createdPlaylist);
+        expect(mockNavigate).not.toHaveBeenCalled();
+      });
     });
-  });
 
-  it("navigates to playlist details when onSuccess callback is not provided", async () => {
-    vi.mocked(api.createPlaylist).mockResolvedValue(createdPlaylist);
+    it("navigates to playlist details when onSuccess callback is not provided", async () => {
+      vi.mocked(api.createPlaylist).mockResolvedValue(createdPlaylist);
+      renderComponent();
 
-    renderComponent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
-
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("/playlists/99");
+      fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith("/playlists/99");
+      });
     });
-  });
 
-  it("shows ApiError readable message on mutation error", async () => {
-    vi.mocked(api.createPlaylist).mockRejectedValue(
-      new ApiError(400, { detail: "Title already exists" }),
-    );
-
-    renderComponent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("form-error")).toHaveTextContent(
-        "Title already exists",
+    it("shows ApiError readable message on mutation error", async () => {
+      vi.mocked(api.createPlaylist).mockRejectedValue(
+        new ApiError(400, { detail: "Title already exists" }),
       );
+      renderComponent();
+
+      fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
+      await waitFor(() => {
+        expect(screen.getByTestId("form-error")).toHaveTextContent(
+          "Title already exists",
+        );
+      });
     });
-  });
 
-  it("shows generic message for unexpected mutation errors", async () => {
-    vi.mocked(api.createPlaylist).mockRejectedValue(new Error("boom"));
+    it("shows generic message for unexpected mutation errors", async () => {
+      vi.mocked(api.createPlaylist).mockRejectedValue(new Error("boom"));
+      renderComponent();
 
-    renderComponent();
+      fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
+      await waitFor(() => {
+        expect(screen.getByTestId("form-error")).toHaveTextContent(
+          "Failed to create playlist. Please try again.",
+        );
+      });
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Submit Form" }));
+    it("shows fallback error message if error is not ApiError", async () => {
+      vi.mocked(api.createPlaylist).mockRejectedValue("not-an-error-object");
+      renderComponent();
 
-    await waitFor(() => {
-      expect(screen.getByTestId("form-error")).toHaveTextContent(
-        "Failed to create playlist. Please try again.",
-      );
+      fireEvent.click(screen.getByText("Submit Form"));
+      await waitFor(() => {
+        expect(screen.getByTestId("form-error")).toHaveTextContent(
+          /unexpected error|failed/i,
+        );
+      });
     });
   });
 });
