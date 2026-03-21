@@ -96,6 +96,22 @@ describe("CreateNewPlaylistForm", () => {
         );
       });
     });
+
+    it("disables the upload button and shows uploading state when isCoverUploading is true", async () => {
+      userEvent.setup();
+      // Patch the hook to simulate uploading.
+      mockUseCloudinaryUpload.mockReturnValue({
+        upload: mockUpload,
+        isUploading: true,
+        error: null,
+      });
+      render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
+      const uploadBtn = screen.getByRole("button", {
+        name: /upload cover art/i,
+      });
+      expect(uploadBtn).toBeDisabled();
+      expect(uploadBtn).toHaveTextContent(/uploading/i);
+    });
   });
 
   describe("UI States", () => {
