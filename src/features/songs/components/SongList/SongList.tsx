@@ -105,7 +105,6 @@ export const SongList = ({
 
   return (
     <>
-      {/* Conditionally render the alert so you don't mount an empty error box */}
       {errorMessage && (
         <AlertMessage
           message={errorMessage}
