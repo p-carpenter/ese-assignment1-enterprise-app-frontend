@@ -43,7 +43,7 @@ export const SongList = ({
   );
 
   const deleteMutation = useMutation({
-    mutationFn: (songId: number) => deleteSong(songId),
+    mutationFn: (id: number) => deleteSong(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
       void queryClient.invalidateQueries({ queryKey: queryKeys.playlists });
@@ -99,17 +99,20 @@ export const SongList = ({
     if (addToPlaylistMutation.error) addToPlaylistMutation.reset();
   };
 
-  if (!songs || songs.length === 0) {
+  if (!songs?.length) {
     return <p>No songs found.</p>;
   }
 
   return (
     <>
-      <AlertMessage
-        message={errorMessage}
-        variant="error"
-        onDismiss={dismissError}
-      />
+      {/* Conditionally render the alert so you don't mount an empty error box */}
+      {errorMessage && (
+        <AlertMessage
+          message={errorMessage}
+          variant="error"
+          onDismiss={dismissError}
+        />
+      )}
 
       <div className={styles.columnHeaders}>
         <span className={styles.headerSong}>Title</span>
