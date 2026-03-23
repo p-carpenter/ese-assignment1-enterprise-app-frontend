@@ -143,7 +143,7 @@ export const SongList = ({
         </ul>
 
         {loadMoreRef && (
-          <div ref={loadMoreRef} className="h-10">
+          <div ref={loadMoreRef} className="h-10" data-testid="scroll-sentinel">
             {isFetchingNextPage && <p>Loading more...</p>}
           </div>
         )}
