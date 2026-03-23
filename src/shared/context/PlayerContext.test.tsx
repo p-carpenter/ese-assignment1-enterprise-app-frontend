@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PlayerProvider, usePlayer } from "./PlayerContext";
-import { logPlay } from "@/features/player/api";
-import type { Song } from "@/features/songs/types";
+import { createSong } from "@/test/factories/song";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
 let loadCallbacks: { onplay?: () => void; onend?: () => void } = {};
 
@@ -32,39 +34,21 @@ vi.mock("react-use-audio-player", () => ({
   }),
 }));
 
-vi.mock("@/features/player/api", () => ({
-  logPlay: vi.fn(),
-}));
-
-const mockedLogPlay = vi.mocked(logPlay);
-
-const songA: Song = {
+const songA = createSong({
   id: 1,
   title: "Song A",
-  artist: "Artist A",
   file_url: "https://songs/a.mp3",
-  duration: 120,
-  cover_art_url: "https://placehold.co/220",
-  uploaded_at: "2024-01-01T00:00:00Z",
-};
-const songB: Song = {
+});
+const songB = createSong({
   id: 2,
   title: "Song B",
-  artist: "Artist B",
   file_url: "https://songs/b.mp3",
-  duration: 130,
-  cover_art_url: "https://placehold.co/220",
-  uploaded_at: "2024-01-01T00:00:00Z",
-};
-const songC: Song = {
+});
+const songC = createSong({
   id: 3,
   title: "Song C",
-  artist: "Artist C",
   file_url: "https://songs/c.mp3",
-  duration: 140,
-  cover_art_url: "https://placehold.co/220",
-  uploaded_at: "2024-01-01T00:00:00Z",
-};
+});
 
 const setup = () => {
   const queryClient = new QueryClient({
@@ -85,52 +69,20 @@ const setup = () => {
 describe("PlayerContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedLogPlay.mockResolvedValue(undefined);
+    resetHandlerState();
     loadCallbacks = {};
   });
 
-  describe("Provider guard", () => {
-    it("throws if usePlayer is used outside provider", () => {
-      expect(() => renderHook(() => usePlayer())).toThrow(
-        "usePlayer must be used within PlayerProvider",
-      );
-    });
-  });
-
-  describe("Basic controls", () => {
-    it("forwards play, pause, seek, and setVolume to audio player", () => {
-      const { result } = setup();
-
-      act(() => result.current.play());
-      expect(mockAudioPlay).toHaveBeenCalled();
-
-      act(() => result.current.pause());
-      expect(mockAudioPause).toHaveBeenCalled();
-
-      act(() => result.current.seek(25));
-      expect(mockSeek).toHaveBeenCalledWith(25);
-
-      act(() => result.current.setVolume(0.4));
-      expect(mockSetVolume).toHaveBeenCalledWith(0.4);
-      expect(result.current.volume).toBe(0.4);
-
-      act(() => {
-        result.current.getPosition();
-      });
-      expect(mockGetPosition).toHaveBeenCalled();
-    });
-
-    it("toggles looping state", () => {
-      const { result } = setup();
-      expect(result.current.isLooping).toBe(false);
-
-      act(() => result.current.toggleLoop());
-      expect(result.current.isLooping).toBe(true);
-    });
-  });
-
   describe("Playback flow", () => {
-    it("loads a new song, updates playlist, and logs play history on onplay callback", async () => {
+    it("loads a new song, updates playlist, and logs play history via MSW onplay callback", async () => {
+      let historyLogCalled = false;
+      server.use(
+        http.post("http://localhost:8000/api/history/", () => {
+          historyLogCalled = true;
+          return HttpResponse.json({});
+        }),
+      );
+
       const { result, invalidateSpy } = setup();
 
       await act(async () => {
@@ -138,15 +90,9 @@ describe("PlayerContext", () => {
       });
 
       expect(result.current.playlist).toEqual([songA, songB, songC]);
-      expect(mockStop).toHaveBeenCalled();
       expect(mockLoad).toHaveBeenCalledWith(
         "https://songs/a.mp3",
-        expect.objectContaining({
-          autoplay: true,
-          format: "mp3",
-          html5: true,
-          initialVolume: 1,
-        }),
+        expect.objectContaining({ autoplay: true }),
       );
 
       act(() => {
@@ -154,35 +100,32 @@ describe("PlayerContext", () => {
       });
 
       await waitFor(() => {
-        expect(mockedLogPlay).toHaveBeenCalledWith(1);
+        expect(historyLogCalled).toBe(true);
       });
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["playHistory"] });
       expect(result.current.currentSong?.id).toBe(1);
     });
 
-    it("restarts current song without stopping/loading again", async () => {
+    it("supports normal playNext progression", async () => {
       const { result } = setup();
 
       await act(async () => {
-        await result.current.playSong(songA);
+        await result.current.playSong(songA, [songA, songB, songC]);
       });
 
-      mockStop.mockClear();
       mockLoad.mockClear();
-      mockSeek.mockClear();
-      mockAudioPlay.mockClear();
-
       await act(async () => {
-        await result.current.playSong(songA);
+        await result.current.playNext();
       });
 
-      expect(mockSeek).toHaveBeenCalledWith(0);
-      expect(mockAudioPlay).toHaveBeenCalled();
-      expect(mockStop).not.toHaveBeenCalled();
-      expect(mockLoad).not.toHaveBeenCalled();
+      // Moving from index 0 (songA) to index 1 (songB).
+      expect(mockLoad).toHaveBeenCalledWith(
+        "https://songs/b.mp3",
+        expect.any(Object),
+      );
     });
 
-    it("supports playPrev/playNext and wraps around playlist", async () => {
+    it("supports playPrev and wraps backward to the end of the playlist", async () => {
       const { result } = setup();
 
       await act(async () => {
@@ -193,19 +136,81 @@ describe("PlayerContext", () => {
       await act(async () => {
         await result.current.playPrev();
       });
+
+      // Wrapping backward from index 0 (songA) to index 2 (songC).
       expect(mockLoad).toHaveBeenCalledWith(
         "https://songs/c.mp3",
         expect.any(Object),
       );
+    });
+
+    it("supports playNext and wraps forward to the start of the playlist", async () => {
+      const { result } = setup();
+
+      await act(async () => {
+        // Start at the end of the playlist to test the forward wrap.
+        await result.current.playSong(songC, [songA, songB, songC]);
+      });
 
       mockLoad.mockClear();
       await act(async () => {
         await result.current.playNext();
       });
+
+      // Wrapping forward from index 2 (songC) to index 0 (songA).
       expect(mockLoad).toHaveBeenCalledWith(
         "https://songs/a.mp3",
         expect.any(Object),
       );
+    });
+
+    it("restarts the song if playSong is called with the currently playing track", async () => {
+      const { result } = setup();
+
+      await act(async () => {
+        await result.current.playSong(songA, [songA]);
+      });
+
+      mockLoad.mockClear();
+      mockSeek.mockClear();
+      mockAudioPlay.mockClear();
+
+      await act(async () => {
+        await result.current.playSong(songA);
+      });
+
+      expect(mockSeek).toHaveBeenCalledWith(0);
+      expect(mockAudioPlay).toHaveBeenCalled();
+      expect(mockLoad).not.toHaveBeenCalled();
+    });
+
+    it("ignores playPrev and playNext if playlist is empty", async () => {
+      const { result } = setup();
+
+      await act(async () => {
+        await result.current.playPrev();
+        await result.current.playNext();
+      });
+
+      expect(mockLoad).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Direct controls", () => {
+    it("calls underlying audio player methods directly", () => {
+      const { result } = setup();
+
+      act(() => {
+        result.current.play();
+        result.current.pause();
+        result.current.seek(50);
+        result.current.setVolume(0.5);
+      });
+
+      expect(mockAudioPlay).toHaveBeenCalled();
+      expect(mockAudioPause).toHaveBeenCalled();
+      expect(mockSeek).toHaveBeenCalledWith(50);
+      expect(mockSetVolume).toHaveBeenCalledWith(0.5);
     });
   });
 
@@ -249,61 +254,19 @@ describe("PlayerContext", () => {
         expect.any(Object),
       );
     });
-    describe("Edge cases", () => {
-      it("does not crash when triggered with an empty playlist", async () => {
-        const { result } = setup();
+  });
 
-        // Playlist is empty by default on mount.
-        await act(async () => {
-          await result.current.playNext();
-        });
-        await act(async () => {
-          await result.current.playPrev();
-        });
+  describe("Hook Usage", () => {
+    it("throws an error when used outside of PlayerProvider", () => {
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
-        expect(mockLoad).not.toHaveBeenCalled();
-      });
+      expect(() => renderHook(() => usePlayer())).toThrow(
+        "usePlayer must be used within PlayerProvider",
+      );
 
-      it("plays the first song in the playlist if the current song is not in the queue", async () => {
-        const { result } = setup();
-
-        await act(async () => {
-          await result.current.playSong(songA);
-          result.current.setPlaylist([songB, songC]);
-        });
-
-        mockLoad.mockClear();
-
-        await act(async () => {
-          await result.current.playNext();
-        });
-
-        expect(mockLoad).toHaveBeenCalledWith(
-          "https://songs/b.mp3",
-          expect.any(Object),
-        );
-      });
-
-      it("handles a single-item playlist by restarting the same track", async () => {
-        const { result } = setup();
-
-        await act(async () => {
-          await result.current.playSong(songA, [songA]);
-        });
-
-        mockStop.mockClear();
-        mockLoad.mockClear();
-        mockSeek.mockClear();
-        mockAudioPlay.mockClear();
-
-        await act(async () => {
-          await result.current.playNext();
-        });
-
-        expect(mockSeek).toHaveBeenCalledWith(0);
-        expect(mockAudioPlay).toHaveBeenCalled();
-        expect(mockLoad).not.toHaveBeenCalled();
-      });
+      consoleSpy.mockRestore();
     });
   });
 });

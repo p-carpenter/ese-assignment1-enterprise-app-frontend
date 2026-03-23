@@ -1,16 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 import { server } from "./src/mocks/server";
+import { mockIntersectionObserver } from 'jsdom-testing-mocks';
 
-// jsdom doesn't implement IntersectionObserver – provide a minimal stub.
-// vi.fn() uses arrow functions internally and can't be used with `new`;
-// a plain class is the only reliable constructor replacement in jsdom.
-beforeEach(() => {
-  window.IntersectionObserver = class {
-    observe() { return null; }
-    unobserve() { return null; }
-    disconnect() { return null; }
-  } as unknown as typeof IntersectionObserver;
-});
+export const interactionObserverMock = mockIntersectionObserver();
 
 beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
 afterEach(() => server.resetHandlers());

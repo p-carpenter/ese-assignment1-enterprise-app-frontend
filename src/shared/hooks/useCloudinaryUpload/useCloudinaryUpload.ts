@@ -51,3 +51,5 @@ export const useCloudinaryUpload = () => {
 
   return { upload, isUploading, error };
 };
+
+export type useCloudinaryUploadType = ReturnType<typeof useCloudinaryUpload>;

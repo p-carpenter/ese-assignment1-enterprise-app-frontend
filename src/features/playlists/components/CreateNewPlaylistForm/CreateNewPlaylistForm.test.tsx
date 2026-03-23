@@ -107,10 +107,9 @@ describe("CreateNewPlaylistForm", () => {
       });
       render(<CreateNewPlaylistForm onSubmit={vi.fn()} />);
       const uploadBtn = screen.getByRole("button", {
-        name: /upload cover art/i,
+        name: /uploading/i,
       });
       expect(uploadBtn).toBeDisabled();
-      expect(uploadBtn).toHaveTextContent(/uploading/i);
     });
   });
 

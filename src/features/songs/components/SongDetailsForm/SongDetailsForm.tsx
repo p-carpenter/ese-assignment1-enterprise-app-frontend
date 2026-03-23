@@ -211,11 +211,6 @@ export const SongDetailsForm = ({
           className={styles.inputField}
           {...register("album")}
         />
-        {errors.album && (
-          <span className={styles.errorText} role="alert">
-            {errors.album.message}
-          </span>
-        )}
       </div>
 
       <div className={styles.inputGroup}>

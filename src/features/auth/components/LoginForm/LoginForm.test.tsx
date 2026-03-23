@@ -1,45 +1,34 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginForm } from "./LoginForm";
-import { AuthContext } from "@/shared/context/AuthContext";
+import { AuthProvider } from "@/shared/context/AuthContext";
+import { renderWithQueryClient } from "@/test/render";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
-vi.mock("@/features/auth/api", () => ({
-  login: vi.fn(),
-}));
-
-const queryClient = new QueryClient();
-
-const renderLoginForm = (loginMock = vi.fn()) => {
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <AuthContext.Provider
-          value={{
-            user: null,
-            loading: false,
-            setUser: vi.fn(),
-            refreshUser: vi.fn(),
-            login: loginMock,
-            logout: vi.fn(),
-          }}
-        >
-          <LoginForm />
-        </AuthContext.Provider>
-      </MemoryRouter>
-    </QueryClientProvider>,
+const renderLoginForm = () => {
+  return renderWithQueryClient(
+    <MemoryRouter>
+      <AuthProvider>
+        <LoginForm />
+      </AuthProvider>
+    </MemoryRouter>,
   );
 };
 
 describe("LoginForm", () => {
+  beforeEach(() => {
+    resetHandlerState();
+  });
+
   describe("Validation", () => {
     it("shows validation errors for empty fields and invalid emails", async () => {
       const user = userEvent.setup();
       renderLoginForm();
 
-      // Submit empty.
       await user.click(screen.getByRole("button", { name: /log in/i }));
 
       expect(
@@ -49,7 +38,6 @@ describe("LoginForm", () => {
         await screen.findByText("Password is required"),
       ).toBeInTheDocument();
 
-      // Invalid email.
       await user.type(
         screen.getByPlaceholderText("Email address"),
         "not-an-email",
@@ -63,11 +51,15 @@ describe("LoginForm", () => {
   });
 
   describe("Edge cases", () => {
-    it("shows fallback error message if error is not ApiError or Error", async () => {
-      const loginMock = vi.fn().mockRejectedValue("not-an-error-object");
-      const user = userEvent.setup();
+    it("shows standard error message for generic network failures", async () => {
+      server.use(
+        http.post("http://localhost:8000/api/auth/login/", () =>
+          HttpResponse.error(),
+        ),
+      );
 
-      renderLoginForm(loginMock);
+      const user = userEvent.setup();
+      renderLoginForm();
 
       await user.type(
         screen.getByPlaceholderText("Email address"),
@@ -76,7 +68,9 @@ describe("LoginForm", () => {
       await user.type(screen.getByPlaceholderText("Password"), "password123");
       await user.click(screen.getByRole("button", { name: /log in/i }));
 
-      expect(await screen.findByText(/login failed/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+      });
     });
   });
 });

@@ -4,8 +4,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExpandedPlayer } from "./ExpandedPlayer";
 import { useIsOverflowing } from "@/features/player/hooks";
 import { PlaybackControls, usePlayer, WaveProgressBar } from "..";
-import type { Song } from "@/features/songs/types";
-import type { PlayerContextType } from "@/shared/context/PlayerContext";
+import { createMockPlayer } from "@/test/factories/player";
+import { createSong } from "@/test/factories/song";
 import { axe, toHaveNoViolations } from "jest-axe";
 expect.extend(toHaveNoViolations);
 
@@ -29,43 +29,19 @@ vi.mock("./LyricsModal/LyricsModal", () => ({
   LyricsModal: vi.fn(() => <div data-testid="lyrics-modal" />),
 }));
 
-const makeSong = (overrides: Partial<Song> = {}): Song => ({
-  id: 4,
-  title: "Now Playing",
-  artist: "Artist",
-  duration: 210,
-  file_url: "https://example.com/song.mp3",
-  cover_art_url: "https://placehold.co/220",
-  uploaded_at: "2024-01-01T00:00:00Z",
-  ...overrides,
-});
-
-const makePlayerState = (
-  overrides: Partial<PlayerContextType> = {},
-): PlayerContextType =>
-  ({
-    currentSong: makeSong(),
-    isPlaying: false,
-    isLoading: false,
-    isLooping: false,
-    duration: 200,
-    play: vi.fn(),
-    pause: vi.fn(),
-    playPrev: vi.fn(),
-    playNext: vi.fn(),
-    seek: vi.fn(),
-    getPosition: vi.fn(() => 10),
-    toggleLoop: vi.fn(),
-    ...overrides,
-  }) as PlayerContextType;
-
 describe("ExpandedPlayer", () => {
   const mockOnCollapse = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useIsOverflowing).mockReturnValue(false);
-    vi.mocked(usePlayer).mockReturnValue(makePlayerState());
+    vi.mocked(usePlayer).mockReturnValue(
+      createMockPlayer({
+        currentSong: createSong({ id: 4, title: "Now Playing", duration: 210 }),
+        duration: 200,
+        getPosition: vi.fn(() => 10),
+      }),
+    );
   });
 
   describe("Layout & Rendering", () => {
@@ -93,7 +69,7 @@ describe("ExpandedPlayer", () => {
   describe("State & Edge Cases", () => {
     it("disables playback controls when player is loading", () => {
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({ isLoading: true }),
+        createMockPlayer({ isLoading: true }),
       );
       render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
 
@@ -109,9 +85,9 @@ describe("ExpandedPlayer", () => {
 
     it("disables playback controls when maxDuration is zero or negative", () => {
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({
+        createMockPlayer({
           duration: 0,
-          currentSong: makeSong({ duration: 0 }),
+          currentSong: createSong({ duration: 0 }),
         }),
       );
       render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
@@ -127,9 +103,9 @@ describe("ExpandedPlayer", () => {
 
     it("handles cases where both context duration and song duration are missing", () => {
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({
+        createMockPlayer({
           duration: undefined,
-          currentSong: makeSong({ duration: undefined }),
+          currentSong: createSong({ duration: undefined }),
         }),
       );
       render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
@@ -142,7 +118,7 @@ describe("ExpandedPlayer", () => {
 
     it("passes undefined to currentSong prop in WaveProgressBar if no song exists", () => {
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({ currentSong: null }),
+        createMockPlayer({ currentSong: null }),
       );
       render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
 
@@ -163,7 +139,7 @@ describe("ExpandedPlayer", () => {
     });
 
     it("wires up all playback callbacks properly to child components", () => {
-      const state = makePlayerState();
+      const state = createMockPlayer();
       vi.mocked(usePlayer).mockReturnValue(state);
 
       render(<ExpandedPlayer onCollapse={mockOnCollapse} />);
@@ -189,7 +165,7 @@ describe("ExpandedPlayer", () => {
       const toggleLoop = vi.fn();
 
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({ isLooping: false, toggleLoop }),
+        createMockPlayer({ isLooping: false, toggleLoop }),
       );
 
       const { rerender } = render(
@@ -201,9 +177,8 @@ describe("ExpandedPlayer", () => {
       await user.click(loopBtn);
       expect(toggleLoop).toHaveBeenCalledTimes(1);
 
-      // Verify it updates if state changes externally.
       vi.mocked(usePlayer).mockReturnValue(
-        makePlayerState({ isLooping: true, toggleLoop }),
+        createMockPlayer({ isLooping: true, toggleLoop }),
       );
       rerender(<ExpandedPlayer onCollapse={mockOnCollapse} />);
       expect(loopBtn).toHaveAttribute("aria-pressed", "true");

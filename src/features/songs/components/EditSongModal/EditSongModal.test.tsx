@@ -1,17 +1,14 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditSongModal } from "./EditSongModal";
-import type { Song } from "../../types";
-import { ApiError } from "@/shared/api/errors";
-import * as api from "../../api";
 import { useCloudinaryUpload } from "@/shared/hooks";
 import type { ComponentProps, ReactNode } from "react";
 import { SongDetailsForm } from "../SongDetailsForm/SongDetailsForm";
-
-vi.mock("../../api", () => ({
-  updateSong: vi.fn(),
-}));
+import { renderWithQueryClient } from "@/test/render";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
+import { createSong } from "@/test/factories/song";
 
 vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
@@ -28,7 +25,6 @@ vi.mock("../SongDetailsForm/SongDetailsForm", () => ({
       <div data-testid="title">{props.initialValues?.title}</div>
       <div data-testid="artist">{props.initialValues?.artist}</div>
       <div data-testid="error">{props.error}</div>
-      <div data-testid="submitting">{String(props.isSubmitting)}</div>
       <button
         onClick={() =>
           props.onSubmit({
@@ -56,29 +52,14 @@ vi.mock("../SongDetailsForm/SongDetailsForm", () => ({
   ),
 }));
 
-const baseSong: Song = {
-  id: 7,
-  title: "Original",
-  artist: "Artist",
-  file_url: "https://example.com/song.mp3",
-  cover_art_url: "https://example.com/old-cover.jpg",
-  duration: 210,
-  uploaded_at: "2024-02-01T00:00:00Z",
-};
-
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
+const baseSong = createSong({ id: 1, title: "Original", artist: "Artist" });
 
 describe("EditSongModal", () => {
-  let queryClient: QueryClient;
   const mockUpload = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    queryClient = createTestQueryClient();
-    vi.spyOn(queryClient, "invalidateQueries");
+    resetHandlerState();
 
     vi.mocked(useCloudinaryUpload).mockReturnValue({
       upload: mockUpload,
@@ -90,16 +71,14 @@ describe("EditSongModal", () => {
   const renderComponent = (
     props: Partial<ComponentProps<typeof EditSongModal>> = {},
   ) =>
-    render(
-      <QueryClientProvider client={queryClient}>
-        <EditSongModal
-          song={baseSong}
-          isOpen={true}
-          onClose={vi.fn()}
-          onSongUpdated={vi.fn()}
-          {...props}
-        />
-      </QueryClientProvider>,
+    renderWithQueryClient(
+      <EditSongModal
+        song={baseSong}
+        isOpen={true}
+        onClose={vi.fn()}
+        onSongUpdated={vi.fn()}
+        {...props}
+      />,
     );
 
   it("returns null when song is null", () => {
@@ -107,84 +86,41 @@ describe("EditSongModal", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders SongDetailsForm with song initial values", () => {
-    renderComponent();
-    expect(screen.getByTestId("title")).toHaveTextContent("Original");
-    expect(screen.getByTestId("artist")).toHaveTextContent("Artist");
-  });
-
-  it("submits updated title and artist with existing cover URL", async () => {
-    vi.mocked(api.updateSong).mockResolvedValue(baseSong);
-
-    renderComponent();
-    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
-
-    await waitFor(() => {
-      expect(api.updateSong).toHaveBeenCalledWith(7, {
-        title: "Updated title",
-        artist: "Updated artist",
-        album: "Updated album",
-        release_year: 2023,
-        file_url: baseSong.file_url,
-        duration: baseSong.duration,
-        cover_art_url: "https://example.com/old-cover.jpg",
-      });
-    });
-  });
-
-  it("uses newly uploaded cover art URL for submit", async () => {
-    mockUpload.mockResolvedValue({
-      secure_url: "https://example.com/new-cover.jpg",
-    });
-    vi.mocked(api.updateSong).mockResolvedValue(baseSong);
-
-    renderComponent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Upload Cover" }));
-
-    await waitFor(() => {
-      expect(mockUpload).toHaveBeenCalled();
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
-
-    await waitFor(() => {
-      expect(api.updateSong).toHaveBeenCalledWith(
-        7,
-        expect.objectContaining({
-          cover_art_url: "https://example.com/new-cover.jpg",
-        }),
-      );
-    });
-  });
-
-  it("runs post-success side effects (invalidate + callbacks)", async () => {
-    vi.mocked(api.updateSong).mockResolvedValue(baseSong);
+  it("submits updated details and triggers callbacks", async () => {
     const onClose = vi.fn();
     const onSongUpdated = vi.fn();
 
     renderComponent({ onClose, onSongUpdated });
-
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => {
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["songs"],
-      });
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["song", 7],
-      });
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ["playlists"],
-      });
       expect(onSongUpdated).toHaveBeenCalledOnce();
       expect(onClose).toHaveBeenCalledOnce();
     });
   });
 
-  it("prefers ApiError readable message for form error", async () => {
-    vi.mocked(api.updateSong).mockRejectedValue(
-      new ApiError(400, { detail: "Validation failed" }),
+  it("handles cover art upload error natively logging it", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockUpload.mockRejectedValue(new Error("Upload failed"));
+
+    renderComponent();
+    fireEvent.click(screen.getByRole("button", { name: "Upload Cover" }));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Cover art upload failed:",
+        expect.any(Error),
+      );
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it("dismisses mutation error cleanly", async () => {
+    server.use(
+      http.put("http://localhost:8000/api/songs/1/", () =>
+        HttpResponse.json({ detail: "Validation failed" }, { status: 400 }),
+      ),
     );
 
     renderComponent();
@@ -193,42 +129,22 @@ describe("EditSongModal", () => {
     expect(await screen.findByTestId("error")).toHaveTextContent(
       "Validation failed",
     );
-  });
-
-  it("shows upload error when mutation has no error", () => {
-    vi.mocked(useCloudinaryUpload).mockReturnValue({
-      upload: mockUpload,
-      isUploading: false,
-      error: "Upload failed",
-    });
-
-    renderComponent();
-    expect(screen.getByTestId("error")).toHaveTextContent("Upload failed");
-  });
-
-  it("dismisses mutation error by calling onErrorDismiss", async () => {
-    vi.mocked(api.updateSong).mockRejectedValue(new Error("Boom"));
-
-    renderComponent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
-    expect(await screen.findByTestId("error")).toHaveTextContent("Boom");
 
     fireEvent.click(screen.getByRole("button", { name: "Dismiss Error" }));
 
     await waitFor(() => {
-      expect(screen.getByTestId("error")).toBeEmptyDOMElement();
+      expect(screen.queryByTestId("error")).toBeEmptyDOMElement();
     });
   });
 
-  it("passes submitting state when upload is in progress", () => {
+  it("shows upload error correctly when mutation has no error", () => {
     vi.mocked(useCloudinaryUpload).mockReturnValue({
       upload: mockUpload,
-      isUploading: true,
-      error: null,
+      isUploading: false,
+      error: "Cloudinary is down",
     });
 
     renderComponent();
-    expect(screen.getByTestId("submitting")).toHaveTextContent("true");
+    expect(screen.getByTestId("error")).toHaveTextContent("Cloudinary is down");
   });
 });

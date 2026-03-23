@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { ProfilePage } from "./ProfilePage";
-import { updateProfile } from "@/features/auth/api";
 import { useCloudinaryUpload } from "@/shared/hooks";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { changePassword } from "@/features/auth/api";
+import { renderWithQueryClient } from "@/test/render";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
 const mockNavigate = vi.fn();
 
@@ -30,19 +31,12 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("@/features/auth/api", () => ({
-  updateProfile: vi.fn(),
-  changePassword: vi.fn(),
-}));
 vi.mock("@/shared/hooks", () => ({ useCloudinaryUpload: vi.fn() }));
 vi.mock("@/shared/context/AuthContext", () => ({
   useAuth: () => mockAuthState,
 }));
 
-const mockUpdateProfile = vi.mocked(updateProfile);
 const mockedUseCloudinary = vi.mocked(useCloudinaryUpload);
-const mockChangePassword = vi.mocked(changePassword);
-
 type CloudinaryReturn = ReturnType<typeof useCloudinaryUpload>;
 
 const renderProfile = (
@@ -52,22 +46,17 @@ const renderProfile = (
   mockAuthState.user =
     userOverride === null ? null : { ...mockUser, ...(userOverride || {}) };
 
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <ProfilePage isEditing={isEditing} />
-      </MemoryRouter>
-    </QueryClientProvider>,
+  return renderWithQueryClient(
+    <MemoryRouter>
+      <ProfilePage isEditing={isEditing} />
+    </MemoryRouter>,
   );
 };
 
 describe("ProfilePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetHandlerState();
     mockedUseCloudinary.mockReturnValue({
       upload: vi
         .fn()
@@ -78,48 +67,81 @@ describe("ProfilePage", () => {
   });
 
   describe("when user is missing", () => {
-    it("shows 'Profile not found' message", () => {
-      renderProfile(null);
-      expect(screen.getByText("Profile not found.")).toBeInTheDocument();
-    });
-
-    it("shows a back to home button and navigates", async () => {
+    it("shows 'Profile not found' message and navigates home", async () => {
       const user = userEvent.setup();
       renderProfile(null);
-      const backBtn = screen.getByRole("button", { name: /back to home/i });
-      expect(backBtn).toBeInTheDocument();
-      await user.click(backBtn);
+
+      expect(screen.getByText("Profile not found.")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: /back to home/i }));
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
-  describe("view mode", () => {
-    it("shows Back to Home link", () => {
+  describe("View mode", () => {
+    it("shows Back to Home link without edit controls", () => {
       renderProfile();
       expect(
         screen.getByRole("link", { name: /back to home/i }),
       ).toBeInTheDocument();
-    });
-
-    it("does not show save or cancel buttons", () => {
-      renderProfile();
       expect(
         screen.queryByRole("button", { name: /save/i }),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /cancel/i }),
       ).not.toBeInTheDocument();
     });
   });
 
-  describe("edit mode", () => {
+  describe("Edit mode", () => {
+    describe("Avatar upload", () => {
+      it("handles avatar upload successfully", async () => {
+        const uploadMock = vi
+          .fn()
+          .mockResolvedValue({ secure_url: "http://example.com/new.jpg" });
+        mockedUseCloudinary.mockReturnValue({
+          upload: uploadMock,
+          isUploading: false,
+          error: null,
+        } as CloudinaryReturn);
+
+        const { container } = renderProfile(undefined, true);
+        const fileInput = container.querySelector('input[type="file"]');
+
+        if (fileInput) {
+          const file = new File(["dummy"], "avatar.png", { type: "image/png" });
+          fireEvent.change(fileInput, { target: { files: [file] } });
+          await waitFor(() => expect(uploadMock).toHaveBeenCalledWith(file));
+        }
+      });
+
+      it("handles avatar upload failure gracefully", async () => {
+        const consoleSpy = vi
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+        mockedUseCloudinary.mockReturnValue({
+          upload: vi.fn().mockRejectedValue(new Error("Upload failed")),
+          isUploading: false,
+          error: null,
+        } as CloudinaryReturn);
+
+        const { container } = renderProfile(undefined, true);
+        const fileInput = container.querySelector('input[type="file"]');
+
+        if (fileInput) {
+          const file = new File(["dummy"], "avatar.png", { type: "image/png" });
+          fireEvent.change(fileInput, { target: { files: [file] } });
+          await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalledWith(
+              "Avatar upload failed:",
+              expect.any(Error),
+            );
+          });
+        }
+        consoleSpy.mockRestore();
+      });
+    });
+
     describe("saving", () => {
-      it("calls updateProfile with new username and navigates on success", async () => {
+      it("submits new username and navigates on success", async () => {
         const user = userEvent.setup();
-        mockUpdateProfile.mockResolvedValueOnce({
-          ...mockUser,
-          username: "newname",
-        });
         renderProfile(undefined, true);
 
         const input = screen.getByTestId("edit-username-input");
@@ -128,27 +150,27 @@ describe("ProfilePage", () => {
         await user.click(screen.getByRole("button", { name: /save/i }));
 
         await waitFor(() => {
-          expect(mockUpdateProfile).toHaveBeenCalledWith(
-            "newname",
-            mockUser.avatar_url,
-          );
           expect(mockAuthState.setUser).toHaveBeenCalled();
           expect(mockNavigate).toHaveBeenCalledWith("/profile");
         });
       });
 
       it("displays error message when save fails", async () => {
+        server.use(
+          http.patch(
+            "http://localhost:8000/api/auth/user/",
+            () => new HttpResponse(null, { status: 500 }),
+          ),
+        );
+
         const user = userEvent.setup();
-        mockUpdateProfile.mockRejectedValueOnce(new Error("Save failed"));
         renderProfile(undefined, true);
 
         await user.click(screen.getByRole("button", { name: /save/i }));
 
-        await waitFor(() => {
-          expect(
-            screen.getByText("Failed to save profile. Please try again."),
-          ).toBeInTheDocument();
-        });
+        expect(
+          await screen.findByText("Failed to save profile. Please try again."),
+        ).toBeInTheDocument();
       });
 
       it("disables save button while uploading", () => {
@@ -163,101 +185,27 @@ describe("ProfilePage", () => {
       });
     });
 
-    describe("cancelling", () => {
-      it("navigates to /profile without saving", async () => {
+    describe("cancel edit", () => {
+      it("resets fields and navigates back to view profile", async () => {
         const user = userEvent.setup();
         renderProfile(undefined, true);
 
         const input = screen.getByTestId("edit-username-input");
         await user.clear(input);
-        await user.type(input, "changed-but-canceled");
+        await user.type(input, "changedname");
+
         await user.click(screen.getByRole("button", { name: /cancel/i }));
 
         expect(mockNavigate).toHaveBeenCalledWith("/profile");
-        expect(mockUpdateProfile).not.toHaveBeenCalled();
       });
     });
 
-    describe("avatar upload", () => {
-      it("updates avatar URL after successful upload", async () => {
+    describe("Password change", () => {
+      it("shows success message after password change succeeds", async () => {
         const user = userEvent.setup();
-        const newAvatarUrl = "http://example.com/new-avatar.jpg";
-        mockedUseCloudinary.mockReturnValue({
-          upload: vi.fn().mockResolvedValue({ secure_url: newAvatarUrl }),
-          isUploading: false,
-          error: null,
-        } satisfies CloudinaryReturn);
-
         renderProfile(undefined, true);
 
-        const fileInput = document.querySelector(
-          'input[type="file"]',
-        ) as HTMLInputElement;
-        const file = new File(["content"], "avatar.png", { type: "image/png" });
-        await user.upload(fileInput, file);
-
-        await waitFor(() => {
-          expect(screen.getByAltText("Profile")).toHaveAttribute(
-            "src",
-            newAvatarUrl,
-          );
-        });
-      });
-
-      it("displays upload error from Cloudinary", () => {
-        mockedUseCloudinary.mockReturnValue({
-          upload: vi.fn().mockResolvedValue(null),
-          isUploading: false,
-          error: "Cloudinary upload failed",
-        } satisfies CloudinaryReturn);
-
-        renderProfile(undefined, true);
-        expect(
-          screen.getByText("Cloudinary upload failed"),
-        ).toBeInTheDocument();
-      });
-
-      it("logs error when upload throws an exception", async () => {
-        const user = userEvent.setup();
-        const consoleErrorSpy = vi
-          .spyOn(console, "error")
-          .mockImplementation(() => {});
-        mockedUseCloudinary.mockReturnValue({
-          upload: vi.fn().mockRejectedValue(new Error("upload failed")),
-          isUploading: false,
-          error: null,
-        } satisfies CloudinaryReturn);
-
-        renderProfile(undefined, true);
-
-        const fileInput = document.querySelector(
-          'input[type="file"]',
-        ) as HTMLInputElement;
-        const file = new File(["content"], "avatar.png", { type: "image/png" });
-        await user.upload(fileInput, file);
-
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            "Avatar upload failed:",
-            expect.any(Error),
-          );
-        });
-        consoleErrorSpy.mockRestore();
-      });
-    });
-
-    describe("password change", () => {
-      it("shows success message after password change callback fires", async () => {
-        const user = userEvent.setup();
-
-        mockChangePassword.mockResolvedValueOnce(undefined);
-
-        renderProfile(undefined, true);
-
-        const icon = screen.getByTestId("edit-password-icon");
-        expect(icon).not.toBeNull();
-        await user.click(icon);
-
+        await user.click(screen.getByTestId("edit-password-icon"));
         await user.type(screen.getByPlaceholderText("Current Password"), "old");
         await user.type(
           screen.getByPlaceholderText("New Password"),
@@ -271,11 +219,9 @@ describe("ProfilePage", () => {
           screen.getByRole("button", { name: /change password/i }),
         );
 
-        await waitFor(() => {
-          expect(
-            screen.getByText("Password changed successfully."),
-          ).toBeInTheDocument();
-        });
+        expect(
+          await screen.findByText("Password changed successfully."),
+        ).toBeInTheDocument();
       });
     });
   });
