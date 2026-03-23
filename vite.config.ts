@@ -18,6 +18,7 @@ export default defineConfig({
       reportOnFailure: true,
       exclude: [
         'src/mocks/**', 
+        "src/test/**",
         'node_modules/**',
         'dist/**',
         'build/**',
