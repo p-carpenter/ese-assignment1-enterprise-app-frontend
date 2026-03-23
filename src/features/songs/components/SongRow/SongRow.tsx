@@ -28,10 +28,7 @@ export const SongRow = memo(
   ({ song, isActive, onPlay, dropdownItems, avatarUser }: SongRowProps) => {
     return (
       <li
-        onClick={(e) => {
-          if ((e.target as HTMLElement).closest(".dropdown-container")) return;
-          onPlay(song);
-        }}
+        onClick={() => onPlay(song)}
         className={isActive ? styles.songItemActive : styles.songItem}
       >
         <div className={styles.librarySections}>
@@ -62,7 +59,11 @@ export const SongRow = memo(
             </div>
           )}
         </div>
-        <div className="dropdown-container">
+        <div
+          className="dropdown-container"
+          data-testid="dropdown-container"
+          onClick={(e) => e.stopPropagation()}
+        >
           <SongManagementDropdown dropdownItems={dropdownItems} />
         </div>
       </li>
