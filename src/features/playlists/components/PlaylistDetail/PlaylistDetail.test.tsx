@@ -1,17 +1,17 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PlaylistDetail } from "./PlaylistDetail";
 import { AuthContext } from "@/shared/context/AuthContext";
+import { PlaylistDetail } from "./PlaylistDetail";
 import { type UserProfile } from "@/features/auth/types";
-import { type Song } from "@/features/songs/types";
-import { type Playlist } from "@/features/playlists/types";
 import { server } from "@/mocks/server";
 import { http, HttpResponse } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import { SongList } from "@/features/songs/components/SongList/SongList";
 import type { ComponentProps } from "react";
+import { renderWithQueryClient } from "@/test/render";
+import { createPlaylist } from "@/test/factories/playlist";
+import { createSong } from "@/test/factories/song";
 
 const mockPlaySong = vi.fn();
 
@@ -62,7 +62,7 @@ vi.mock("../PlaylistHero/PlaylistHero", () => ({
 
 const mockOwner: UserProfile = {
   id: 1,
-  username: "owner",
+  username: "testuser",
   email: "owner@test.com",
 };
 const mockGuestUser: UserProfile = {
@@ -70,33 +70,7 @@ const mockGuestUser: UserProfile = {
   username: "guest",
   email: "guest@test.com",
 };
-
-const mockSong: Song = {
-  id: 10,
-  title: "Song Alpha",
-  artist: "Artist A",
-  file_url: "url",
-  duration: 180,
-  cover_art_url: "https://placehold.co/220",
-  uploaded_at: "2024-01-01",
-};
-
-const makePlaylist = (overrides: Partial<Playlist> = {}): Playlist => ({
-  id: 1,
-  title: "Owner's Playlist",
-  description: "A playlist for testing",
-  is_public: true,
-  is_collaborative: false,
-  cover_art_url: "https://placehold.co/220",
-  owner: { id: 1, username: "owner" },
-  songs: [],
-  ...overrides,
-});
-
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
+const mockSong = createSong({ id: 10, title: "Song Alpha" });
 
 const authValue = (user: UserProfile | null) => ({
   user,
@@ -111,17 +85,14 @@ const renderDetail = (
   playlistId: number | string = 1,
   user: UserProfile | null = mockOwner,
 ) => {
-  const queryClient = createQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={authValue(user)}>
-        <MemoryRouter initialEntries={[`/playlists/${playlistId}`]}>
-          <Routes>
-            <Route path="/playlists/:playlistId" element={<PlaylistDetail />} />
-          </Routes>
-        </MemoryRouter>
-      </AuthContext.Provider>
-    </QueryClientProvider>,
+  return renderWithQueryClient(
+    <AuthContext.Provider value={authValue(user)}>
+      <MemoryRouter initialEntries={[`/playlists/${playlistId}`]}>
+        <Routes>
+          <Route path="/playlists/:playlistId" element={<PlaylistDetail />} />
+        </Routes>
+      </MemoryRouter>
+    </AuthContext.Provider>,
   );
 };
 
@@ -162,10 +133,9 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", async () => {
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return HttpResponse.json(makePlaylist());
+          return HttpResponse.json(createPlaylist());
         }),
       );
-
       renderDetail(1, mockOwner);
       expect(screen.getByText(/loading playlist/i)).toBeInTheDocument();
     });
@@ -173,10 +143,9 @@ describe("PlaylistDetail", () => {
     it("displays an empty state message when the playlist has no songs", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist({ songs: [] })),
+          HttpResponse.json(createPlaylist({ songs: [] })),
         ),
       );
-
       renderDetail(1, mockOwner);
       expect(
         await screen.findByText(/no songs in this playlist yet/i),
@@ -187,13 +156,12 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
             }),
           ),
         ),
       );
-
       renderDetail(1, mockOwner);
       expect(await screen.findByText("Song Alpha")).toBeInTheDocument();
     });
@@ -203,10 +171,9 @@ describe("PlaylistDetail", () => {
     it("renders add song actions for the playlist owner", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist({ is_collaborative: false })),
+          HttpResponse.json(createPlaylist({ is_collaborative: false })),
         ),
       );
-
       renderDetail(1, mockOwner);
       expect(
         await screen.findByRole("button", { name: "Open Add Modal" }),
@@ -216,10 +183,9 @@ describe("PlaylistDetail", () => {
     it("hides add song actions from non-owners on non-collaborative playlists", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist({ is_collaborative: false })),
+          HttpResponse.json(createPlaylist({ is_collaborative: false })),
         ),
       );
-
       renderDetail(1, mockGuestUser);
       await screen.findByTestId("playlist-hero");
       expect(
@@ -230,10 +196,9 @@ describe("PlaylistDetail", () => {
     it("renders add song actions for authenticated users on collaborative playlists", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist({ is_collaborative: true })),
+          HttpResponse.json(createPlaylist({ is_collaborative: true })),
         ),
       );
-
       renderDetail(1, mockGuestUser);
       expect(
         await screen.findByRole("button", { name: "Open Add Modal" }),
@@ -243,10 +208,9 @@ describe("PlaylistDetail", () => {
     it("hides add song actions from unauthenticated users on collaborative playlists", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist({ is_collaborative: true })),
+          HttpResponse.json(createPlaylist({ is_collaborative: true })),
         ),
       );
-
       renderDetail(1, null);
       await screen.findByTestId("playlist-hero");
       expect(
@@ -269,7 +233,7 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               is_collaborative: true,
               songs: [
                 {
@@ -298,28 +262,25 @@ describe("PlaylistDetail", () => {
           ),
         ),
       );
-
       renderDetail(1, mockOwner);
 
-      const contributor1 = await screen.findAllByText("contributor1");
-      const contributor2 = await screen.findAllByText("contributor2");
-
-      expect(contributor1[0]).toBeInTheDocument();
-      expect(contributor2[0]).toBeInTheDocument();
-
-      // Verify the count of contributor avatars.
-      const avatars = screen.getAllByTestId(/^avatar-/);
-      expect(avatars).toHaveLength(3);
+      expect(
+        (await screen.findAllByText("contributor1"))[0],
+      ).toBeInTheDocument();
+      expect(
+        (await screen.findAllByText("contributor2"))[0],
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId(/^avatar-/)).toHaveLength(3);
     });
   });
 
   describe("User Interactions", () => {
     it("triggers playSong with the first song and full list when Play is clicked", async () => {
-      const songTwo = { ...mockSong, id: 11, title: "Song Beta" };
+      const songTwo = createSong({ id: 11, title: "Song Beta" });
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [
                 { id: 1, order: 1, added_at: "", song: mockSong },
                 { id: 2, order: 2, added_at: "", song: songTwo },
@@ -328,14 +289,10 @@ describe("PlaylistDetail", () => {
           ),
         ),
       );
-
       renderDetail(1, mockOwner);
-
-      const playButton = await screen.findByRole("button", {
-        name: "Play Playlist",
-      });
-      fireEvent.click(playButton);
-
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Play Playlist" }),
+      );
       expect(mockPlaySong).toHaveBeenCalledTimes(1);
       expect(mockPlaySong).toHaveBeenCalledWith(mockSong, [mockSong, songTwo]);
     });
@@ -343,22 +300,19 @@ describe("PlaylistDetail", () => {
     it("toggles the Add Song modal open and closed", async () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
-          HttpResponse.json(makePlaylist()),
+          HttpResponse.json(createPlaylist()),
         ),
       );
-
       renderDetail(1, mockOwner);
 
-      const openButton = await screen.findByRole("button", {
-        name: "Open Add Modal",
-      });
-      fireEvent.click(openButton);
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Open Add Modal" }),
+      );
       expect(
         screen.getByRole("dialog", { name: "Add songs modal" }),
       ).toBeInTheDocument();
 
-      const closeButton = screen.getByRole("button", { name: "Close Modal" });
-      fireEvent.click(closeButton);
+      fireEvent.click(screen.getByRole("button", { name: "Close Modal" }));
       expect(
         screen.queryByRole("dialog", { name: "Add songs modal" }),
       ).not.toBeInTheDocument();
@@ -369,7 +323,7 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
             }),
           ),
@@ -378,32 +332,27 @@ describe("PlaylistDetail", () => {
           "http://localhost:8000/api/playlists/1/delete_song/",
           () => {
             removeSongCalled = true;
-            return HttpResponse.json(makePlaylist());
+            return HttpResponse.json(createPlaylist());
           },
         ),
       );
-
       renderDetail(1, mockOwner);
       await screen.findByText("Song Alpha");
 
       fireEvent.click(
         screen.getByRole("button", { name: /remove from playlist/i }),
       );
-
-      await waitFor(() => {
-        expect(removeSongCalled).toBe(true);
-      });
+      await waitFor(() => expect(removeSongCalled).toBe(true));
     });
   });
 
   describe("Error Handling & Edge Cases", () => {
     it("displays an error message if the playlist API returns a 404/500", async () => {
       server.use(
-        http.get("http://localhost:8000/api/playlists/1/", () => {
-          return HttpResponse.error();
-        }),
+        http.get("http://localhost:8000/api/playlists/1/", () =>
+          HttpResponse.error(),
+        ),
       );
-
       renderDetail(1, mockOwner);
       expect(
         await screen.findByText(
@@ -413,7 +362,6 @@ describe("PlaylistDetail", () => {
     });
 
     it("gracefully handles invalid playlist IDs in the URL", async () => {
-      // Testing the fallback to '0' and subsequent failure/empty state.
       renderDetail("invalid_id", mockOwner);
       expect(
         await screen.findByText(
@@ -426,7 +374,7 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
             }),
           ),
@@ -441,14 +389,11 @@ describe("PlaylistDetail", () => {
           },
         ),
       );
-
       renderDetail(1, mockOwner);
       await screen.findByText("Song Alpha");
-
       fireEvent.click(
         screen.getByRole("button", { name: /remove from playlist/i }),
       );
-
       expect(await screen.findByText(/Unknown error/i)).toBeInTheDocument();
     });
 
@@ -456,12 +401,11 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
             }),
           ),
         ),
-        // Intercept the DELETE request and return a structured Django error.
         http.delete(
           "http://localhost:8000/api/playlists/1/delete_song/",
           () => {
@@ -472,15 +416,11 @@ describe("PlaylistDetail", () => {
           },
         ),
       );
-
       renderDetail(1, mockOwner);
       await screen.findByText("Song Alpha");
-
-      // Trigger the mutation.
       fireEvent.click(
         screen.getByRole("button", { name: /remove from playlist/i }),
       );
-
       expect(
         await screen.findByText(
           "You do not have permission to remove this song.",
@@ -492,7 +432,7 @@ describe("PlaylistDetail", () => {
       server.use(
         http.get("http://localhost:8000/api/playlists/1/", () =>
           HttpResponse.json(
-            makePlaylist({
+            createPlaylist({
               songs: [{ id: 1, order: 1, added_at: "", song: mockSong }],
             }),
           ),
@@ -500,19 +440,15 @@ describe("PlaylistDetail", () => {
         http.delete(
           "http://localhost:8000/api/playlists/1/delete_song/",
           () => {
-            // Simulate a thrown string instead of Error object.
             throw "something bad happened";
           },
         ),
       );
-
       renderDetail(1, mockOwner);
       await screen.findByText("Song Alpha");
-
       fireEvent.click(
         screen.getByRole("button", { name: /remove from playlist/i }),
       );
-
       expect(
         await screen.findByText(/unexpected error|remove/i),
       ).toBeInTheDocument();

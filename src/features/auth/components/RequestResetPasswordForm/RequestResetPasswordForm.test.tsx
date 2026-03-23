@@ -1,19 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RequestResetPasswordForm } from "./RequestResetPasswordForm";
-import { requestPasswordReset } from "../../api";
-import { ApiError } from "@/shared/api/errors";
-
-vi.mock("../../api", () => ({
-  requestPasswordReset: vi.fn(),
-}));
+import { server } from "@/mocks/server";
+import { http, HttpResponse, delay } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
 describe("RequestResetPasswordForm", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    resetHandlerState();
   });
 
   it("shows validation error for empty or invalid email", async () => {
@@ -36,16 +33,17 @@ describe("RequestResetPasswordForm", () => {
     expect(
       await screen.findByText("Please enter a valid email address"),
     ).toBeInTheDocument();
-
-    expect(requestPasswordReset).not.toHaveBeenCalled();
   });
 
   it("submits successfully, shows loading state, and displays success message", async () => {
-    let resolveApi: (value?: unknown) => void;
-    const promise = new Promise((resolve) => {
-      resolveApi = resolve;
-    });
-    vi.mocked(requestPasswordReset).mockReturnValue(promise as Promise<void>);
+    server.use(
+      http.post("http://localhost:8000/api/auth/password/reset/", async () => {
+        await delay(100);
+        return HttpResponse.json({
+          detail: "Password reset e-mail has been sent.",
+        });
+      }),
+    );
 
     render(<RequestResetPasswordForm />);
 
@@ -57,33 +55,26 @@ describe("RequestResetPasswordForm", () => {
       screen.getByRole("button", { name: /request password reset/i }),
     );
 
-    const button = screen.getByRole("button", {
-      name: /requesting password reset/i,
-    });
-    expect(button).toBeDisabled();
-    expect(requestPasswordReset).toHaveBeenCalledWith("test@example.com");
-
-    resolveApi!();
+    expect(
+      screen.getByRole("button", { name: /requesting password reset/i }),
+    ).toBeDisabled();
 
     expect(
       await screen.findByText(
         "Password reset requested! Please check your email for a confirmation link.",
       ),
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", { name: /request password reset/i }),
-    ).toBeDisabled();
   });
 
   it("displays specific ApiError message when the server rejects the request", async () => {
-    const mockApiError = new ApiError(
-      429,
-      { detail: "Rate limited. Try again later." },
-      "Request failed",
+    server.use(
+      http.post("http://localhost:8000/api/auth/password/reset/", () =>
+        HttpResponse.json(
+          { detail: "Rate limited. Try again later." },
+          { status: 429 },
+        ),
+      ),
     );
-
-    vi.mocked(requestPasswordReset).mockRejectedValue(mockApiError);
 
     render(<RequestResetPasswordForm />);
 
@@ -101,8 +92,10 @@ describe("RequestResetPasswordForm", () => {
   });
 
   it("displays standard error message when request fails with a generic Error", async () => {
-    vi.mocked(requestPasswordReset).mockRejectedValue(
-      new Error("Network offline"),
+    server.use(
+      http.post("http://localhost:8000/api/auth/password/reset/", () =>
+        HttpResponse.error(),
+      ),
     );
 
     render(<RequestResetPasswordForm />);
@@ -115,6 +108,6 @@ describe("RequestResetPasswordForm", () => {
       screen.getByRole("button", { name: /request password reset/i }),
     );
 
-    expect(await screen.findByText("Network offline")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 });

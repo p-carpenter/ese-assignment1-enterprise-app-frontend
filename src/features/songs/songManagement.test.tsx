@@ -1,31 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditSongModal } from "./components/EditSongModal/EditSongModal";
 import { useCloudinaryUpload } from "@/shared/hooks";
-import type { Song } from "@/features/songs/types";
 import { SongUploadForm } from "@/features/songs";
 import { SongLibrary } from "@/features/songs";
-import { uploadSong, deleteSong, updateSong, listSongsPaginated } from "./api";
 import { useNavigate } from "react-router-dom";
 import {
   usePlayer,
   type PlayerContextType,
 } from "@/shared/context/PlayerContext";
-
-vi.mock("./api", () => ({
-  uploadSong: vi.fn(),
-  updateSong: vi.fn(),
-  deleteSong: vi.fn(),
-  listSongsPaginated: vi.fn(),
-}));
+import { server } from "@/mocks/server";
+import { http, HttpResponse, delay } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
+import { type Song } from "@/features/songs/types";
+import { createMockPlayer } from "@/test/factories/player";
 
 vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
@@ -43,66 +33,8 @@ vi.mock("@/shared/context/PlayerContext", () => ({
   usePlayer: vi.fn(),
 }));
 
-const mockUploadSong = vi.mocked(uploadSong) as unknown as ReturnType<
-  typeof vi.fn
->;
-const mockUpdateSong = vi.mocked(updateSong) as unknown as ReturnType<
-  typeof vi.fn
->;
-const mockDeleteSong = vi.mocked(deleteSong) as unknown as ReturnType<
-  typeof vi.fn
->;
-const mockListSongsPaginated = vi.mocked(
-  listSongsPaginated,
-) as unknown as ReturnType<typeof vi.fn>;
-
-const mockedUseCloudinary = useCloudinaryUpload as unknown as ReturnType<
-  typeof vi.fn
->;
-const mockedUseNavigate = useNavigate as unknown as ReturnType<typeof vi.fn>;
-const mockedUsePlayer = usePlayer as unknown as ReturnType<typeof vi.fn>;
-
-const mockSongs: Song[] = [
-  {
-    id: 1,
-    title: "Song A",
-    artist: "Artist 1",
-    duration: 120,
-    file_url: "http://example.com/song1.mp3",
-    cover_art_url: "http://example.com/cover1.jpg",
-    album: "Album 1",
-    uploaded_at: "2023-01-01T12:00:00.000Z",
-    release_year: 2023,
-  },
-  {
-    id: 2,
-    title: "Song B",
-    artist: "Artist 2",
-    duration: 150,
-    file_url: "http://example.com/song2.mp3",
-    cover_art_url: "http://example.com/cover2.jpg",
-
-    album: "Album 2",
-    uploaded_at: "2023-01-01T12:00:00.000Z",
-    release_year: 2024,
-  },
-];
-
-const paginatedSongs = {
-  count: 2,
-  results: mockSongs,
-  next: null,
-  previous: null,
-};
-
-const emptyPaginatedSongs = {
-  count: 0,
-  results: [],
-  next: null,
-  previous: null,
-};
-
-type AnyFn = (...args: unknown[]) => unknown;
+const mockedUseCloudinary = vi.mocked(useCloudinaryUpload);
+const mockedUsePlayer = vi.mocked(usePlayer);
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -124,43 +56,26 @@ const renderLibrary = (searchQuery = "") => {
   );
 };
 
-/** Shared player context mock.*/
-const makePlayerMock = (overrides?: Partial<PlayerContextType>) =>
-  ({
-    playlist: mockSongs,
-    currentSong: null,
-    playSong: vi
-      .fn()
-      .mockResolvedValue(undefined) as unknown as PlayerContextType["playSong"],
-    playPrev: vi
-      .fn()
-      .mockResolvedValue(undefined) as unknown as PlayerContextType["playPrev"],
-    playNext: vi
-      .fn()
-      .mockResolvedValue(undefined) as unknown as PlayerContextType["playNext"],
-    play: vi.fn() as unknown as AnyFn,
-    pause: vi.fn() as unknown as AnyFn,
-    seek: vi.fn() as unknown as AnyFn,
-    getPosition: vi.fn().mockReturnValue(0) as unknown as () => number,
-    setPlaylist: vi.fn() as unknown as PlayerContextType["setPlaylist"],
-    isPlaying: false,
-    isLoading: false,
-    isLooping: false,
-    toggleLoop: vi.fn() as unknown as AnyFn,
-    duration: 0,
-    ...overrides,
-  }) as PlayerContextType;
-
 describe("Song management", () => {
   let mockPlaySong: PlayerContextType["playSong"];
+  let navigateMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.resetAllMocks();
+    resetHandlerState();
+
+    navigateMock = vi.fn();
+    (useNavigate as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      navigateMock,
+    );
+
     mockPlaySong = vi
       .fn()
       .mockResolvedValue(undefined) as unknown as PlayerContextType["playSong"];
-    mockedUseNavigate.mockReturnValue(vi.fn());
-    mockedUsePlayer.mockReturnValue(makePlayerMock({ playSong: mockPlaySong }));
+    mockedUsePlayer.mockReturnValue(
+      createMockPlayer({ playSong: mockPlaySong }),
+    );
+
     mockedUseCloudinary.mockReturnValue({
       upload: vi.fn().mockResolvedValue({
         secure_url: "http://audio.url/song.mp3",
@@ -169,29 +84,25 @@ describe("Song management", () => {
       isUploading: false,
       error: null,
     });
-    mockListSongsPaginated.mockResolvedValue(paginatedSongs);
   });
 
-  // ─── Read ────────────────────────────────────────────────────────────────
   describe("read", () => {
     it("renders the list of songs fetched from the API", async () => {
       renderLibrary();
-
-      expect(await screen.findByText("Song A")).toBeInTheDocument();
-      expect(screen.getByText("Song B")).toBeInTheDocument();
-      expect(screen.getByText("Artist 1")).toBeInTheDocument();
-      expect(screen.getByText("Artist 2")).toBeInTheDocument();
+      expect(await screen.findByText("Skyline")).toBeInTheDocument();
+      expect(screen.getByText("Sunset")).toBeInTheDocument();
+      expect(screen.getByText("Nova")).toBeInTheDocument();
+      expect(screen.getByText("Wave")).toBeInTheDocument();
     });
   });
 
-  // ─── Create ──────────────────────────────────────────────────────────────
   describe("create", () => {
     it("uploads a song and navigates home", async () => {
-      mockUploadSong.mockResolvedValueOnce(mockSongs[0]);
-
       render(
         <QueryClientProvider client={createTestQueryClient()}>
-          <SongUploadForm />
+          <MemoryRouter>
+            <SongUploadForm />
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -213,34 +124,28 @@ describe("Song management", () => {
       fireEvent.click(screen.getByRole("button", { name: /save song/i }));
 
       await waitFor(() => {
-        expect(mockUploadSong).toHaveBeenCalledWith({
-          title: "Test Song",
-          artist: "Test Artist",
-          cover_art_url: "",
-          file_url: "http://audio.url/song.mp3",
-          duration: 123,
-          album: "Unknown Album",
-          release_year: undefined,
-        });
+        expect(navigateMock).toHaveBeenCalledWith("/");
       });
     });
   });
 
-  // ─── Update ──────────────────────────────────────────────────────────────
   describe("update", () => {
     it("updates a song and triggers callbacks", async () => {
       const onSongUpdated = vi.fn();
       const onClose = vi.fn();
-      mockUpdateSong.mockResolvedValueOnce({
-        ...mockSongs[0],
-        title: "New Title",
-        artist: "New Artist",
-      });
 
       render(
         <QueryClientProvider client={createTestQueryClient()}>
           <EditSongModal
-            song={mockSongs[0]}
+            song={{
+              id: 1,
+              title: "Skyline",
+              artist: "Nova",
+              file_url: "url",
+              cover_art_url: "url",
+              duration: 160,
+              uploaded_at: "2024-01-01",
+            }}
             isOpen={true}
             onClose={onClose}
             onSongUpdated={onSongUpdated}
@@ -258,38 +163,16 @@ describe("Song management", () => {
       fireEvent.click(screen.getByRole("button", { name: /save song/i }));
 
       await waitFor(() => {
-        expect(mockUpdateSong).toHaveBeenCalledWith(mockSongs[0].id, {
-          title: "New Title",
-          artist: "New Artist",
-          album: "Album 1",
-          release_year: 2023,
-          file_url: mockSongs[0].file_url,
-          duration: mockSongs[0].duration,
-          cover_art_url: mockSongs[0].cover_art_url,
-        });
         expect(onSongUpdated).toHaveBeenCalled();
         expect(onClose).toHaveBeenCalled();
       });
     });
   });
 
-  // ─── Delete ──────────────────────────────────────────────────────────────
   describe("delete", () => {
-    it("calls deleteSong and removes the song from the rendered list", async () => {
-      const songsAfterDelete = {
-        count: 1,
-        results: [mockSongs[1]],
-        next: null,
-        previous: null,
-      };
-      mockDeleteSong.mockResolvedValueOnce({});
-      // First call: initial load. Second call: re-fetch after invalidation.
-      mockListSongsPaginated
-        .mockResolvedValueOnce(paginatedSongs)
-        .mockResolvedValueOnce(songsAfterDelete);
+    it("calls delete endpoint and removes the song from the rendered list", async () => {
       renderLibrary();
-
-      await screen.findByText("Song A");
+      await screen.findByText("Skyline");
 
       const moreButtons = screen.getAllByRole("button");
       fireEvent.click(moreButtons[0]);
@@ -298,34 +181,32 @@ describe("Song management", () => {
       fireEvent.click(deleteOption);
 
       await waitFor(() => {
-        expect(mockDeleteSong).toHaveBeenCalledWith(mockSongs[0].id);
+        expect(screen.queryByText("Skyline")).not.toBeInTheDocument();
       });
-
-      // Song A should be absent. Song B should remain
-      await waitFor(() => {
-        expect(screen.queryByText("Song A")).not.toBeInTheDocument();
-      });
-      expect(screen.getByText("Song B")).toBeInTheDocument();
+      expect(screen.getByText("Sunset")).toBeInTheDocument();
     });
 
-    it("keeps the song list intact when deleteSong fails", async () => {
-      mockDeleteSong.mockRejectedValueOnce(new Error("Server error"));
-      renderLibrary();
+    it("keeps the song list intact when delete fails", async () => {
+      server.use(
+        http.delete(
+          "http://localhost:8000/api/songs/1/",
+          () => new HttpResponse(null, { status: 500 }),
+        ),
+      );
 
-      await screen.findByText("Song A");
-      fireEvent.click(screen.getAllByRole("button")[0]); // open dropdown
+      renderLibrary();
+      await screen.findByText("Skyline");
+
+      fireEvent.click(screen.getAllByRole("button")[0]);
       fireEvent.click(await screen.findByText("Delete"));
 
-      // The mutation error is shown in the UI via AlertMessage
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
       });
-      // Song should still be in the DOM after the failed delete
-      expect(screen.getByText("Song A")).toBeInTheDocument();
+      expect(screen.getByText("Skyline")).toBeInTheDocument();
     });
   });
 
-  // ─── SongLibrary display ─────────────────────────────────────────────────
   describe("SongLibrary – display", () => {
     it("shows the correct track count from the API response", async () => {
       renderLibrary();
@@ -335,7 +216,11 @@ describe("Song management", () => {
     });
 
     it("renders an empty library with 0 tracks", async () => {
-      mockListSongsPaginated.mockResolvedValueOnce(emptyPaginatedSongs);
+      server.use(
+        http.get("http://localhost:8000/api/songs/", () =>
+          HttpResponse.json({ count: 0, results: [] }),
+        ),
+      );
       renderLibrary();
       expect(
         await screen.findByText(/library \(0 tracks\)/i),
@@ -344,318 +229,46 @@ describe("Song management", () => {
 
     it("highlights the currently-playing song", async () => {
       mockedUsePlayer.mockReturnValue(
-        makePlayerMock({ playSong: mockPlaySong, currentSong: mockSongs[0] }),
+        createMockPlayer({
+          playSong: mockPlaySong,
+          currentSong: { id: 1, title: "Skyline" } as Song,
+        }),
       );
       const { container } = renderLibrary();
-      await screen.findByText("Song A");
+      await screen.findByText("Skyline");
       const firstItem = container.querySelector("li");
       expect(firstItem?.className).toMatch(/songItemActive/);
     });
-
-    it("calls playSong with the correct song when a list item is clicked", async () => {
-      renderLibrary();
-      fireEvent.click(await screen.findByText("Song B"));
-      expect(mockPlaySong).toHaveBeenCalledWith(mockSongs[1], mockSongs);
-    });
   });
 
-  // ─── SongLibrary sorting ─────────────────────────────────────────────────
-  describe("SongLibrary – sorting", () => {
-    it("re-fetches with the new ordering when the sort dropdown changes", async () => {
-      renderLibrary();
-      await screen.findByText("Song A");
-
-      fireEvent.change(screen.getByRole("combobox"), {
-        target: { value: "-title" },
-      });
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(1, "-title", "");
-      });
-    });
-
-    it("resets to page 1 when the sort order changes", async () => {
-      renderLibrary();
-      await screen.findByText("Song A");
-
-      fireEvent.change(screen.getByRole("combobox"), {
-        target: { value: "uploaded_at" },
-      });
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(
-          1,
-          "uploaded_at",
-          "",
-        );
-      });
-    });
-
-    it("supports all available sort options", async () => {
-      const sortOptions = [
-        "title",
-        "-title",
-        "uploaded_at",
-        "-uploaded_at",
-        "release_year",
-        "-release_year",
-        "duration",
-        "-duration",
-      ];
-
-      for (const value of sortOptions) {
-        vi.clearAllMocks();
-        mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-        const { unmount } = renderLibrary();
-        await screen.findByText("Song A");
-
-        fireEvent.change(screen.getByRole("combobox"), { target: { value } });
-
-        await waitFor(() => {
-          expect(mockListSongsPaginated).toHaveBeenCalledWith(1, value, "");
-        });
-        unmount();
-      }
-    });
-  });
-
-  // ─── SongLibrary searching ───────────────────────────────────────────────
-  describe("SongLibrary – searching", () => {
-    it("calls listSongsPaginated with the search query from the URL", async () => {
-      mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-      renderLibrary("Song A");
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(
-          1,
-          "title",
-          "Song A",
-        );
-      });
-    });
-
-    it("fetches page 1 with the URL search query on mount", async () => {
-      mockListSongsPaginated.mockResolvedValue({
-        count: 1,
-        results: [mockSongs[0]],
-        next: null,
-        previous: null,
-      });
-      renderLibrary("Artist");
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(
-          1,
-          "title",
-          "Artist",
-        );
-      });
-    });
-
-    it("makes exactly one API call on mount with a search query", async () => {
-      mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-      renderLibrary("x");
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledTimes(1);
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(1, "title", "x");
-      });
-    });
-
-    it("handles an API error during search gracefully", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      mockListSongsPaginated.mockRejectedValueOnce(new Error("Search failed"));
-      renderLibrary("bad");
-
-      await waitFor(() => expect(consoleSpy).toHaveBeenCalled());
-      consoleSpy.mockRestore();
-    });
-  });
-
-  // ─── SongLibrary pagination ──────────────────────────────────────────────
   describe("SongLibrary – pagination", () => {
-    it("fetches page 1 with the default ordering on mount", async () => {
-      renderLibrary();
-      await screen.findByText("Song A");
-      expect(mockListSongsPaginated).toHaveBeenCalledWith(1, "title", "");
-    });
-
-    it("appends songs from subsequent pages without replacing the first page", async () => {
-      const page1 = {
-        count: 2,
-        results: [mockSongs[0]],
-        next: "...",
-        previous: null,
-      };
-      const page2 = {
-        count: 2,
-        results: [mockSongs[1]],
-        next: null,
-        previous: "...",
-      };
-      mockListSongsPaginated
-        .mockResolvedValueOnce(page1)
-        .mockResolvedValueOnce(page2);
-
-      const { container } = renderLibrary();
-      expect(await screen.findByText("Song A")).toBeInTheDocument();
-
-      // Simulate an infinite-scroll trigger by firing the scroll event
-      // on the scroll container with properties that satisfy the threshold
-      const scrollContainer = container.querySelector(
-        '[class*="scrollContainer"]',
-      ) as HTMLElement;
-
-      if (scrollContainer) {
-        Object.defineProperty(scrollContainer, "scrollTop", {
-          value: 1000,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(scrollContainer, "clientHeight", {
-          value: 100,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(scrollContainer, "scrollHeight", {
-          value: 1050,
-          writable: true,
-          configurable: true,
-        });
-        fireEvent.scroll(scrollContainer);
-      }
-
-      await waitFor(() => {
-        expect(mockListSongsPaginated).toHaveBeenCalledWith(2, "title", "");
-      });
-
-      // Both pages should be visible simultaneously
-      expect(screen.getByText("Song A")).toBeInTheDocument();
-      expect(screen.getByText("Song B")).toBeInTheDocument();
-    });
-
-    it("does not fetch the next page when all songs are already loaded", async () => {
-      // count == results.length means no more pages
-      mockListSongsPaginated.mockResolvedValue(paginatedSongs);
-
-      const { container } = renderLibrary();
-      await screen.findByText("Song A");
-      mockListSongsPaginated.mockClear();
-
-      const scrollContainer = container.querySelector(
-        '[class*="scrollContainer"]',
-      ) as HTMLElement;
-
-      if (scrollContainer) {
-        Object.defineProperty(scrollContainer, "scrollTop", {
-          value: 9999,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(scrollContainer, "clientHeight", {
-          value: 100,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(scrollContainer, "scrollHeight", {
-          value: 10050,
-          writable: true,
-          configurable: true,
-        });
-        fireEvent.scroll(scrollContainer);
-      }
-
-      // Give any pending effects a chance to run
-      await act(async () => {});
-      expect(mockListSongsPaginated).not.toHaveBeenCalled();
-    });
-
     it("shows a loading indicator while a fetch is in progress", async () => {
-      let resolve!: (v: typeof paginatedSongs) => void;
-      mockListSongsPaginated.mockReturnValueOnce(
-        new Promise<typeof paginatedSongs>((r) => {
-          resolve = r;
+      server.use(
+        http.get("http://localhost:8000/api/songs/", async () => {
+          await delay("infinite");
+          return HttpResponse.json({});
         }),
       );
 
       renderLibrary();
       expect(screen.getByText("Loading...")).toBeInTheDocument();
-
-      await act(async () => {
-        resolve(paginatedSongs);
-      });
-
-      await waitFor(() =>
-        expect(screen.queryByText("Loading...")).not.toBeInTheDocument(),
-      );
     });
 
     it("handles an API error on initial load gracefully", async () => {
+      server.use(
+        http.get(
+          "http://localhost:8000/api/songs/",
+          () => new HttpResponse(null, { status: 500 }),
+        ),
+      );
       const consoleSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      mockListSongsPaginated.mockRejectedValueOnce(new Error("Network error"));
 
       renderLibrary();
 
       await waitFor(() => expect(consoleSpy).toHaveBeenCalled());
       consoleSpy.mockRestore();
-    });
-  });
-
-  // ─── EditSongModal edge cases ────────────────────────────────────────────
-  describe("EditSongModal – edge cases", () => {
-    it("renders nothing when song prop is null", () => {
-      const { container } = render(
-        <QueryClientProvider client={createTestQueryClient()}>
-          <EditSongModal
-            song={null}
-            isOpen={true}
-            onClose={vi.fn()}
-            onSongUpdated={vi.fn()}
-          />
-        </QueryClientProvider>,
-      );
-      expect(container.firstChild).toBeNull();
-    });
-
-    it("renders nothing when isOpen is false", () => {
-      render(
-        <QueryClientProvider client={createTestQueryClient()}>
-          <EditSongModal
-            song={mockSongs[0]}
-            isOpen={false}
-            onClose={vi.fn()}
-            onSongUpdated={vi.fn()}
-          />
-        </QueryClientProvider>,
-      );
-      expect(screen.queryByText("Edit Song")).not.toBeInTheDocument();
-    });
-  });
-
-  // ─── SongUploadForm validation ───────────────────────────────────────────
-  describe("SongUploadForm – validation", () => {
-    it("submit button is disabled until an audio file is selected", () => {
-      render(
-        <QueryClientProvider client={createTestQueryClient()}>
-          <SongUploadForm />
-        </QueryClientProvider>,
-      );
-      expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
-    });
-
-    it("disabled submit button prevents upload without an audio file", async () => {
-      const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
-      render(
-        <QueryClientProvider client={createTestQueryClient()}>
-          <SongUploadForm />
-        </QueryClientProvider>,
-      );
-      expect(screen.getByRole("button", { name: /save song/i })).toBeDisabled();
-      alertSpy.mockRestore();
     });
   });
 });

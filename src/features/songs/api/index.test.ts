@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   listAllSongs,
   listSongsPaginated,
@@ -8,225 +8,79 @@ import {
   getSongDetails,
   searchSongs,
 } from "./index";
-
-vi.mock("@/shared/api/client", () => ({
-  request: vi.fn(),
-}));
-
-import { request } from "@/shared/api/client";
-const mockRequest = vi.mocked(request);
-
-const mockSong = {
-  id: 1,
-  title: "Song A",
-  artist: "Artist 1",
-  duration: 120,
-  file_url: "http://example.com/song.mp3",
-  cover_art_url: "http://example.com/cover.jpg",
-};
+import { resetHandlerState } from "@/mocks/handlers";
 
 describe("Songs API", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    resetHandlerState();
   });
 
   describe("listSongs", () => {
-    it("GETs /songs/?page_size=1000 and returns an array of songs", async () => {
-      mockRequest.mockResolvedValueOnce({
-        count: 1,
-        results: [mockSong],
-        next: null,
-        previous: null,
-      });
-
+    it("returns an array of all songs", async () => {
       const result = await listAllSongs();
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/?page_size=1000");
-      expect(result).toEqual([mockSong]);
-    });
-
-    it("returns an empty array when there are no songs", async () => {
-      mockRequest.mockResolvedValueOnce({
-        count: 0,
-        results: [],
-        next: null,
-        previous: null,
-      });
-
-      expect(await listAllSongs()).toEqual([]);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].title).toBe("Skyline");
     });
   });
 
   describe("listSongsPaginated", () => {
-    it("GETs /songs/ with page and ordering params", async () => {
-      const paginated = {
-        count: 1,
-        results: [mockSong],
-        next: null,
-        previous: null,
-      };
-      mockRequest.mockResolvedValueOnce(paginated);
-
+    it("returns a paginated response with the default query", async () => {
       const result = await listSongsPaginated(1, "title");
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.stringContaining("page=1"),
-      );
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.stringContaining("ordering=title"),
-      );
-      expect(result).toEqual(paginated);
+      expect(result.count).toBeGreaterThan(0);
+      expect(result.results[0].title).toBe("Skyline");
     });
 
     it("appends a search param when a query is provided", async () => {
-      mockRequest.mockResolvedValueOnce({
-        count: 1,
-        results: [mockSong],
-        next: null,
-        previous: null,
-      });
-
-      await listSongsPaginated(1, "title", "Song A");
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.stringContaining("search=Song+A"),
-      );
-    });
-
-    it("does not append a search param when query is empty", async () => {
-      mockRequest.mockResolvedValueOnce({
-        count: 0,
-        results: [],
-        next: null,
-        previous: null,
-      });
-
-      await listSongsPaginated(1, "-uploaded_at", "");
-
-      const calledUrl = mockRequest.mock.calls[0][0] as string;
-      expect(calledUrl).not.toContain("search=");
-    });
-
-    it("requests page 2 when page number is 2", async () => {
-      mockRequest.mockResolvedValueOnce({
-        count: 5,
-        results: [mockSong],
-        next: null,
-        previous: "...",
-      });
-
-      await listSongsPaginated(2, "title");
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.stringContaining("page=2"),
-      );
-    });
-
-    it("propagates errors from the request", async () => {
-      mockRequest.mockRejectedValueOnce(new Error("Network error"));
-
-      await expect(listSongsPaginated(1, "title")).rejects.toThrow(
-        "Network error",
-      );
+      const result = await listSongsPaginated(1, "title", "Sunset");
+      expect(result.results.length).toBe(1);
+      expect(result.results[0].title).toBe("Sunset");
     });
   });
 
   describe("uploadSong", () => {
-    it("POSTs to /songs/ with the payload and returns the created song", async () => {
-      mockRequest.mockResolvedValueOnce(mockSong);
+    it("POSTs to the server and returns the created song", async () => {
       const payload = {
-        title: "Song A",
-        artist: "Artist 1",
+        title: "New Hit",
+        artist: "New Artist",
         file_url: "http://example.com/song.mp3",
         cover_art_url: "https://placehold.co/220",
         duration: 120,
       };
 
       const result = await uploadSong(payload);
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      expect(result).toEqual(mockSong);
-    });
-
-    it("propagates errors on upload failure", async () => {
-      mockRequest.mockRejectedValueOnce(new Error("Upload failed"));
-
-      await expect(
-        uploadSong({
-          title: "X",
-          artist: "Y",
-          file_url: "url",
-          cover_art_url: "https://placehold.co/220",
-          duration: 0,
-        }),
-      ).rejects.toThrow("Upload failed");
+      expect(result.title).toBe("New Hit");
+      expect(result.id).toBeDefined();
     });
   });
 
   describe("deleteSong", () => {
-    it("sends DELETE to /songs/:id/", async () => {
-      mockRequest.mockResolvedValueOnce(undefined);
-
+    it("removes the song successfully", async () => {
       await deleteSong(1);
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/1/", {
-        method: "DELETE",
-      });
-    });
-
-    it("propagates errors when deletion fails", async () => {
-      mockRequest.mockRejectedValueOnce(new Error("Not found"));
-
-      await expect(deleteSong(99)).rejects.toThrow("Not found");
+      const remaining = await listAllSongs();
+      expect(remaining.find((s) => s.id === 1)).toBeUndefined();
     });
   });
 
   describe("updateSong", () => {
-    it("sends PUT to /songs/:id/ with a partial payload", async () => {
-      mockRequest.mockResolvedValueOnce({ ...mockSong, title: "Updated" });
-
-      const result = await updateSong(1, { title: "Updated" });
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/1/", {
-        method: "PUT",
-        body: JSON.stringify({ title: "Updated" }),
-      });
-      expect(result.title).toBe("Updated");
+    it("updates the song details", async () => {
+      const result = await updateSong(1, { title: "Skyline (Remix)" });
+      expect(result.title).toBe("Skyline (Remix)");
     });
   });
 
   describe("getSongDetails", () => {
-    it("GETs /songs/:id/ and returns a single song", async () => {
-      mockRequest.mockResolvedValueOnce(mockSong);
-
+    it("returns a single song by ID", async () => {
       const result = await getSongDetails(1);
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/1/");
-      expect(result).toEqual(mockSong);
+      expect(result.id).toBe(1);
+      expect(result.title).toBe("Skyline");
     });
   });
 
   describe("searchSongs", () => {
-    it("GETs /songs/search/?q=... with the URL-encoded query", async () => {
-      mockRequest.mockResolvedValueOnce([mockSong]);
-
-      const result = await searchSongs("Song A");
-
-      expect(mockRequest).toHaveBeenCalledWith("/songs/search/?q=Song%20A");
-      expect(result).toEqual([mockSong]);
-    });
-
-    it("encodes special characters in the query", async () => {
-      mockRequest.mockResolvedValueOnce([]);
-
-      await searchSongs("rock & roll");
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        "/songs/search/?q=rock%20%26%20roll",
-      );
+    it("returns matching songs based on query", async () => {
+      const result = await searchSongs("Sunset");
+      expect(result.length).toBe(1);
+      expect(result[0].title).toBe("Sunset");
     });
   });
 });

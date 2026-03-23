@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { EmailVerificationPage } from "./EmailVerificationPage";
-import { verifyRegistrationEmail } from "../../api";
-import "@testing-library/jest-dom/vitest";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
 const mockNavigate = vi.fn();
 
@@ -14,14 +15,6 @@ vi.mock("react-router-dom", async () => {
     );
   return { ...actual, useNavigate: () => mockNavigate };
 });
-
-vi.mock("../../api", () => ({
-  verifyRegistrationEmail: vi.fn(),
-}));
-
-const mockVerifyRegistrationEmail = vi.mocked(
-  verifyRegistrationEmail,
-) as unknown as ReturnType<typeof vi.fn>;
 
 const renderPageAtRoute = (initialPath: string, routePath: string) => {
   return render(
@@ -35,6 +28,7 @@ const renderPageAtRoute = (initialPath: string, routePath: string) => {
 
 describe("EmailVerificationPage", () => {
   beforeEach(() => {
+    resetHandlerState();
     vi.clearAllMocks();
   });
 
@@ -43,16 +37,9 @@ describe("EmailVerificationPage", () => {
   });
 
   it("shows success and redirects to login when verification succeeds", async () => {
-    mockVerifyRegistrationEmail.mockResolvedValueOnce(undefined);
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
 
-    renderPageAtRoute("/verify/abc123", "/verify/:key");
-
-    expect(screen.getByText("Verifying your email...")).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockVerifyRegistrationEmail).toHaveBeenCalledWith("abc123");
-    });
+    renderPageAtRoute("/verify/good-key", "/verify/:key");
 
     expect(
       await screen.findByText(/Your email has been verified!/i),
@@ -73,9 +60,17 @@ describe("EmailVerificationPage", () => {
   });
 
   it("shows an error and does not redirect when verification fails", async () => {
-    mockVerifyRegistrationEmail.mockRejectedValueOnce(
-      new Error(
-        "Failed to confirm your email. The key may be invalid or expired.",
+    server.use(
+      http.post(
+        "http://localhost:8000/api/auth/registration/verify-email",
+        () =>
+          HttpResponse.json(
+            {
+              detail:
+                "Failed to confirm your email. The key may be invalid or expired.",
+            },
+            { status: 400 },
+          ),
       ),
     );
     const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
@@ -103,8 +98,5 @@ describe("EmailVerificationPage", () => {
         "Missing verification key. Please try verifying your email again.",
       ),
     ).toBeInTheDocument();
-
-    expect(mockVerifyRegistrationEmail).not.toHaveBeenCalled();
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

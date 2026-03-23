@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { PlaylistHero } from "./PlaylistHero";
 import type { Playlist } from "../../types";
 import type { UserMini } from "@/features/auth/types";
+import { createPlaylist } from "@/test/factories/playlist";
 
-// Mock sub-components that have their own complex dependencies/tests.
 vi.mock("../EditPlaylistForm/EditPlaylistForm", () => ({
   EditPlaylistForm: ({
     onClose,
@@ -26,46 +26,38 @@ vi.mock("../DeletePlaylistButton/DeletePlaylistButton", () => ({
   ),
 }));
 
-const basePlaylist: Playlist = {
-  id: 1,
-  title: "Test Playlist",
-  description: "A great playlist",
-  is_public: true,
-  is_collaborative: false,
-  cover_art_url: null,
-  owner: { id: 1, username: "owner" },
-  songs: [],
-};
-
 const contributors: UserMini[] = [
   { id: 2, username: "alice" },
   { id: 3, username: "bob", avatar_url: "https://example.com/bob.png" },
 ];
 
-const defaultProps = {
-  playlist: basePlaylist,
-  isOwner: false,
-  canAddSongs: false,
-  songsCount: 0,
-  contributors: [] as UserMini[],
-  onAddSongClick: vi.fn(),
-  onPlayClick: undefined as (() => void) | undefined,
-};
+type PlaylistHeroProps = React.ComponentProps<typeof PlaylistHero>;
 
-const renderHero = (
-  overrides: Omit<Partial<typeof defaultProps>, "playlist"> & {
-    playlist?: Partial<Playlist>;
-  } = {},
-) => {
+interface RenderHeroOptions extends Partial<
+  Omit<PlaylistHeroProps, "playlist">
+> {
+  playlist?: Partial<Playlist>;
+}
+
+const renderHero = (overrides: RenderHeroOptions = {}) => {
   const { playlist: playlistOverride, ...restOverrides } = overrides;
+
   const props = {
-    ...defaultProps,
-    ...restOverrides,
-    playlist: playlistOverride
-      ? { ...basePlaylist, ...playlistOverride }
-      : basePlaylist,
+    playlist: createPlaylist({
+      title: "Test Playlist",
+      cover_art_url: null,
+      songs: [],
+      ...playlistOverride,
+    }),
+    isOwner: false,
+    canAddSongs: false,
+    songsCount: 0,
+    contributors: [] as UserMini[],
     onAddSongClick: restOverrides.onAddSongClick ?? vi.fn(),
+    onPlayClick: undefined,
+    ...restOverrides,
   };
+
   return render(<PlaylistHero {...props} />);
 };
 
@@ -78,7 +70,7 @@ describe("PlaylistHero", () => {
     describe("Cover art", () => {
       it("shows a placeholder image when cover_art_url is null", () => {
         renderHero({ playlist: { cover_art_url: null } });
-        const img = screen.getByRole("img", { name: basePlaylist.title });
+        const img = screen.getByRole("img", { name: "Test Playlist" });
         expect(img).toHaveAttribute("src", "https://placehold.co/220");
       });
 
@@ -86,7 +78,7 @@ describe("PlaylistHero", () => {
         renderHero({
           playlist: { cover_art_url: "https://example.com/cover.png" },
         });
-        const img = screen.getByRole("img", { name: basePlaylist.title });
+        const img = screen.getByRole("img", { name: "Test Playlist" });
         expect(img).toHaveAttribute("src", "https://example.com/cover.png");
       });
     });
@@ -145,7 +137,7 @@ describe("PlaylistHero", () => {
 
     describe("Owner section", () => {
       it("renders the owner username", () => {
-        renderHero();
+        renderHero({ playlist: { owner: { id: 1, username: "owner" } } });
         expect(screen.getByText("owner")).toBeInTheDocument();
       });
 
@@ -164,9 +156,7 @@ describe("PlaylistHero", () => {
       });
 
       it("renders owner initial fallback when avatar_url is absent", () => {
-        renderHero({
-          playlist: { owner: { id: 1, username: "zara" } },
-        });
+        renderHero({ playlist: { owner: { id: 1, username: "zara" } } });
         expect(screen.getByText("Z")).toBeInTheDocument();
       });
     });
@@ -299,7 +289,7 @@ describe("PlaylistHero", () => {
 
     describe("Edit flow", () => {
       it("toggles to EditPlaylistForm when the Edit button is clicked", () => {
-        renderHero({ isOwner: true });
+        renderHero({ isOwner: true, playlist: { title: "Test Playlist" } });
         expect(
           screen.queryByTestId("edit-playlist-form"),
         ).not.toBeInTheDocument();
@@ -309,7 +299,7 @@ describe("PlaylistHero", () => {
       });
 
       it("hides the hero info while the EditPlaylistForm is open", () => {
-        renderHero({ isOwner: true });
+        renderHero({ isOwner: true, playlist: { title: "Test Playlist" } });
         fireEvent.click(screen.getByRole("button", { name: /edit playlist/i }));
         expect(
           screen.queryByRole("heading", { name: "Test Playlist" }),
@@ -317,12 +307,11 @@ describe("PlaylistHero", () => {
       });
 
       it("closes EditPlaylistForm and returns to hero view when onClose is called", () => {
-        renderHero({ isOwner: true });
+        renderHero({ isOwner: true, playlist: { title: "Test Playlist" } });
         fireEvent.click(screen.getByRole("button", { name: /edit playlist/i }));
         expect(screen.getByTestId("edit-playlist-form")).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole("button", { name: "Close Form" }));
-
         expect(
           screen.queryByTestId("edit-playlist-form"),
         ).not.toBeInTheDocument();

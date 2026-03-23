@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { VolumeBar } from "./VolumeBar";
 import { usePlayer } from "@/shared/context/PlayerContext";
-import type { PlayerContextType } from "@/shared/context/PlayerContext";
+import { createMockPlayer } from "@/test/factories/player";
 import { axe, toHaveNoViolations } from "jest-axe";
 expect.extend(toHaveNoViolations);
 
@@ -13,29 +13,11 @@ vi.mock("@/shared/context/PlayerContext", () => ({
 describe("VolumeBar", () => {
   const setVolume = vi.fn();
 
-  const defaultPlayerContext: PlayerContextType = {
-    volume: 0.4,
-    setVolume,
-    currentSong: null,
-    playlist: [],
-    isPlaying: false,
-    isLoading: false,
-    isLooping: false,
-    duration: 0,
-    play: vi.fn(),
-    pause: vi.fn(),
-    playPrev: vi.fn(async () => {}),
-    playNext: vi.fn(async () => {}),
-    seek: vi.fn(),
-    getPosition: vi.fn(() => 0),
-    toggleLoop: vi.fn(),
-    setPlaylist: vi.fn(),
-    playSong: vi.fn(async () => {}),
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(usePlayer).mockReturnValue(defaultPlayerContext);
+    vi.mocked(usePlayer).mockReturnValue(
+      createMockPlayer({ volume: 0.4, setVolume }),
+    );
   });
 
   it("renders a volume range input with current value", () => {
@@ -61,7 +43,7 @@ describe("VolumeBar", () => {
   it("writes css custom property used for progress styling", () => {
     render(<VolumeBar />);
 
-    // Check the fill element's width style
+    // Check the fill element's width style.
     const fill = screen.getByTestId("volume-fill");
     expect(fill).toHaveStyle({ width: "40%" });
   });
