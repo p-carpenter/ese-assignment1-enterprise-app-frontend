@@ -98,13 +98,19 @@ describe("SongDetailsForm", () => {
 
     it("syncs form values when initialValues prop changes after mount", () => {
       const { rerender } = render(
-        <SongDetailsForm onSubmit={noop} initialValues={{ title: "old title" }} />,
+        <SongDetailsForm
+          onSubmit={noop}
+          initialValues={{ title: "old title" }}
+        />,
       );
       expect(screen.getByPlaceholderText("Title")).toHaveValue("old title");
 
       // Simulate the parent component fetching ID3 tags and passing new props.
       rerender(
-        <SongDetailsForm onSubmit={noop} initialValues={{ title: "new title" }} />,
+        <SongDetailsForm
+          onSubmit={noop}
+          initialValues={{ title: "new title" }}
+        />,
       );
       expect(screen.getByPlaceholderText("Title")).toHaveValue("new title");
     });
@@ -146,18 +152,17 @@ describe("SongDetailsForm", () => {
           expect.anything(),
         );
       });
-
     });
 
-         it("handles empty string for release_year by stripping it to undefined", async () => {
+    it("handles empty string for release_year by stripping it to undefined", async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn();
       // Start with a value so it can be cleared.
       render(
-        <SongDetailsForm 
-          onSubmit={onSubmit} 
-          initialValues={{ title: "T", artist: "A", release_year: 2020 }} 
-        />
+        <SongDetailsForm
+          onSubmit={onSubmit}
+          initialValues={{ title: "T", artist: "A", release_year: 2020 }}
+        />,
       );
 
       const yearInput = screen.getByPlaceholderText("Release Year");
@@ -168,7 +173,7 @@ describe("SongDetailsForm", () => {
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith(
           expect.objectContaining({ release_year: undefined }),
-          expect.anything()
+          expect.anything(),
         );
       });
     });
@@ -273,8 +278,10 @@ describe("SongDetailsForm", () => {
 
       // Spy on the raw DOM click method since it's a hidden input.
       const clickSpy = vi.spyOn(HTMLInputElement.prototype, "click");
-      
-      await user.click(screen.getByRole("button", { name: /change cover art/i }));
+
+      await user.click(
+        screen.getByRole("button", { name: /change cover art/i }),
+      );
 
       expect(clickSpy).toHaveBeenCalled();
       clickSpy.mockRestore();
@@ -283,17 +290,31 @@ describe("SongDetailsForm", () => {
     it("displays the local filename and adds a checkmark when upload completes", async () => {
       const user = userEvent.setup();
       const { rerender } = render(
-        <SongDetailsForm onSubmit={noop} showMp3Upload={true} onMp3Upload={noop} mp3Uploaded={false} />
+        <SongDetailsForm
+          onSubmit={noop}
+          showMp3Upload={true}
+          onMp3Upload={noop}
+          mp3Uploaded={false}
+        />,
       );
 
-      const audioFile = new File(["audio"], "test-track.mp3", { type: "audio/mp3" });
-      const audioInput = document.querySelector('input[accept="audio/*"]') as HTMLInputElement;
-      
+      const audioFile = new File(["audio"], "test-track.mp3", {
+        type: "audio/mp3",
+      });
+      const audioInput = document.querySelector(
+        'input[accept="audio/*"]',
+      ) as HTMLInputElement;
+
       await user.upload(audioInput, audioFile);
 
       expect(screen.getByText("test-track.mp3")).toBeInTheDocument();
       rerender(
-        <SongDetailsForm onSubmit={noop} showMp3Upload={true} onMp3Upload={noop} mp3Uploaded={true} />
+        <SongDetailsForm
+          onSubmit={noop}
+          showMp3Upload={true}
+          onMp3Upload={noop}
+          mp3Uploaded={true}
+        />,
       );
 
       expect(screen.getByText("✓ test-track.mp3")).toBeInTheDocument();
@@ -329,9 +350,13 @@ describe("SongDetailsForm", () => {
 
     it("shows 'Uploading…' and disables button when coverArtUploading is true", () => {
       render(
-        <SongDetailsForm onSubmit={noop} onCoverArtUpload={noop} coverArtUploading={true} />
+        <SongDetailsForm
+          onSubmit={noop}
+          onCoverArtUpload={noop}
+          coverArtUploading={true}
+        />,
       );
-      
+
       const btn = screen.getByRole("button", { name: "Uploading…" });
       expect(btn).toBeInTheDocument();
       expect(btn).toBeDisabled();
