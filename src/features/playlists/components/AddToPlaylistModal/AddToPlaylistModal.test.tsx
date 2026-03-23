@@ -174,20 +174,22 @@ describe("AddToPlaylistModal", () => {
       expect(mockUseNavigate).toHaveBeenCalledWith("/playlists/42");
     });
 
-    it("shows fallback error message if error is not ApiError", async () => {
+    it("closes modal and calls onSongAdded after create success", () => {
+      const onSongAdded = vi.fn();
+      const onClose = vi.fn();
       render(
         <AddToPlaylistModal
           song={song}
           isOpen={true}
-          onClose={vi.fn()}
-          onSongAdded={vi.fn()}
+          onClose={onClose}
+          onSongAdded={onSongAdded}
         />,
       );
 
+      fireEvent.click(screen.getByText("+ Create New Playlist"));
       fireEvent.click(screen.getByText(/finish create/i));
-      expect(
-        await screen.findByText(/unexpected error|failed/i),
-      ).toBeInTheDocument();
+      expect(onSongAdded).toHaveBeenCalledWith(42);
+      expect(onClose).toHaveBeenCalledOnce();
     });
   });
 
