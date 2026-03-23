@@ -28,8 +28,6 @@ describe("ApiError", () => {
     expect(withoutMsg.message).toBe("API Error");
   });
 
-  // ── getReadableMessage ──────────────────────────────────────────────────
-
   describe("getReadableMessage", () => {
     it("returns detail when present", () => {
       const error = new ApiError(400, { detail: "Invalid credentials" });
