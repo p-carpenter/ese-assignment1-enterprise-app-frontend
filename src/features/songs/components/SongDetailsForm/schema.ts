@@ -6,14 +6,14 @@ export const songDetailsSchema = z.object({
   album: z.string().optional(),
   release_year: z
     .preprocess(
-      (val) => (val === "" || val === null ? undefined : Number(val)),
+      (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
       z
         .number()
         .int("Release year must be an integer")
         .min(1200, "Release year must be 1200 or later")
-        .max(new Date().getFullYear(), "Release year cannot be in the future"),
-    )
-    .optional(),
+        .max(new Date().getFullYear(), "Release year cannot be in the future")
+        .optional()
+    ),
   cover_art_url: z.string().optional(),
 });
 
