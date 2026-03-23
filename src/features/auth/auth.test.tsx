@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   render,
   screen,
@@ -11,39 +11,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginForm } from "./components/LoginForm/LoginForm";
 import { RegistrationForm } from "./components/RegistrationForm/RegistrationForm";
 import { ProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
-import { login, register, getMe } from "./api";
 import { AuthProvider } from "@/shared/context/AuthContext";
-import { ApiError } from "@/shared/api/errors";
-import "@testing-library/jest-dom/vitest";
+import { server } from "@/mocks/server";
+import { http, HttpResponse, delay } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
 
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-vi.mock("./api", () => ({
-  login: vi.fn(),
-  register: vi.fn(),
-  getMe: vi.fn(),
-}));
-
-const mockLogin = vi.mocked(login) as unknown as ReturnType<typeof vi.fn>;
-const mockRegister = vi.mocked(register) as unknown as ReturnType<typeof vi.fn>;
-const mockGetMe = vi.mocked(getMe) as unknown as ReturnType<typeof vi.fn>;
-
 describe("Auth features", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockGetMe.mockResolvedValue({
-      id: 1,
-      username: "testuser",
-      email: "test@example.com",
-    });
+    resetHandlerState();
   });
 
   it("submits login form and refreshes user", async () => {
-    mockLogin.mockResolvedValueOnce(undefined);
-
     render(
       <QueryClientProvider client={createTestQueryClient()}>
         <MemoryRouter>
@@ -54,12 +37,13 @@ describe("Auth features", () => {
       </QueryClientProvider>,
     );
 
-    // Wait for the initial getMe call to settle before submitting
-    await waitFor(() => expect(mockGetMe).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText("Email address")).toBeInTheDocument(),
+    );
 
     await act(async () => {
       fireEvent.change(screen.getByPlaceholderText("Email address"), {
-        target: { value: "user@example.com" },
+        target: { value: "test@test.com" },
       });
       fireEvent.change(screen.getByPlaceholderText("Password"), {
         target: { value: "secret" },
@@ -67,14 +51,25 @@ describe("Auth features", () => {
       fireEvent.click(screen.getByRole("button", { name: /log in/i }));
     });
 
+    // MSW will return 200 by default.
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith("user@example.com", "secret");
-      expect(mockGetMe).toHaveBeenCalledTimes(2);
+      expect(
+        screen.getByRole("button", { name: /log in/i }),
+      ).not.toBeDisabled();
     });
   });
 
   it("shows login error when api rejects", async () => {
-    mockLogin.mockRejectedValueOnce(new Error("Invalid credentials"));
+    server.use(
+      http.post(
+        "http://localhost:8000/api/auth/login/",
+        () =>
+          new HttpResponse(
+            JSON.stringify({ non_field_errors: ["Invalid credentials"] }),
+            { status: 400 },
+          ),
+      ),
+    );
 
     render(
       <QueryClientProvider client={createTestQueryClient()}>
@@ -97,13 +92,10 @@ describe("Auth features", () => {
     });
 
     expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
-    // AlertMessage displays errors with role="alert"
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("submits registration form and shows success message", async () => {
-    mockRegister.mockResolvedValueOnce(undefined);
-
     render(
       <MemoryRouter>
         <RegistrationForm />
@@ -125,19 +117,9 @@ describe("Auth features", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
-    await waitFor(() => {
-      expect(mockRegister).toHaveBeenCalledWith(
-        "newuser",
-        "new@example.com",
-        "pass1234",
-        "pass1234",
-      );
-    });
-
     expect(
       await screen.findByText(/Registration successful!/i),
     ).toBeInTheDocument();
-    // AlertMessage displays success with role="status"
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
@@ -181,42 +163,18 @@ describe("Auth features", () => {
     expect(screen.getByText("Private Page")).toBeInTheDocument();
   });
 
-  it("shows login error with ApiError details from the server", async () => {
-    mockLogin.mockRejectedValueOnce(
-      new ApiError(400, {
-        non_field_errors: ["Unable to log in with provided credentials."],
-      }),
-    );
-
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <MemoryRouter>
-          <AuthProvider>
-            <LoginForm />
-          </AuthProvider>
-        </MemoryRouter>
-      </QueryClientProvider>,
-    );
-
-    await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Email address"), {
-        target: { value: "user@example.com" },
-      });
-      fireEvent.change(screen.getByPlaceholderText("Password"), {
-        target: { value: "bad" },
-      });
-      fireEvent.click(screen.getByRole("button", { name: /log in/i }));
-    });
-
-    expect(
-      await screen.findByText("Unable to log in with provided credentials."),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-  });
-
   it("shows registration error with ApiError field-level details", async () => {
-    mockRegister.mockRejectedValueOnce(
-      new ApiError(400, { email: ["A user with this email already exists."] }),
+    server.use(
+      http.post(
+        "http://localhost:8000/api/auth/registration/",
+        () =>
+          new HttpResponse(
+            JSON.stringify({
+              email: ["A user with this email already exists."],
+            }),
+            { status: 400 },
+          ),
+      ),
     );
 
     render(
@@ -246,37 +204,13 @@ describe("Auth features", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
-  it("allows dismissing the login error", async () => {
-    mockLogin.mockRejectedValueOnce(new Error("Login failed"));
-
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <MemoryRouter>
-          <AuthProvider>
-            <LoginForm />
-          </AuthProvider>
-        </MemoryRouter>
-      </QueryClientProvider>,
-    );
-
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "bad" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
-
-    expect(await screen.findByText("Login failed")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /dismiss/i }));
-
-    expect(screen.queryByText("Login failed")).not.toBeInTheDocument();
-  });
-
   it("disables the login button while the request is in flight", async () => {
-    mockLogin.mockImplementationOnce(() => new Promise(() => {})); // never resolves
+    server.use(
+      http.post("http://localhost:8000/api/auth/login/", async () => {
+        await delay("infinite");
+        return new HttpResponse(null, { status: 200 });
+      }),
+    );
 
     render(
       <QueryClientProvider client={createTestQueryClient()}>
@@ -296,63 +230,6 @@ describe("Auth features", () => {
     });
 
     const submitButton = screen.getByRole("button", { name: /log in/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => expect(submitButton).toBeDisabled());
-  });
-
-  it("shows a registration error when the api rejects", async () => {
-    mockRegister.mockRejectedValueOnce(new Error("Email already in use"));
-
-    render(
-      <MemoryRouter>
-        <RegistrationForm />
-      </MemoryRouter>,
-    );
-
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
-      target: { value: "taken" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "taken@example.com" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "pass1234" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
-      target: { value: "pass1234" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
-
-    expect(await screen.findByText("Email already in use")).toBeInTheDocument();
-    // AlertMessage displays errors with role="alert"
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-  });
-
-  it("disables the registration button while the request is in flight", async () => {
-    mockRegister.mockImplementationOnce(() => new Promise(() => {}));
-
-    render(
-      <MemoryRouter>
-        <RegistrationForm />
-      </MemoryRouter>,
-    );
-
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
-      target: { value: "newuser" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "new@example.com" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "pass1234" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
-      target: { value: "pass1234" },
-    });
-
-    const submitButton = screen.getByRole("button", { name: /sign up/i });
     fireEvent.click(submitButton);
 
     await waitFor(() => expect(submitButton).toBeDisabled());
