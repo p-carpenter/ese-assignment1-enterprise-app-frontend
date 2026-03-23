@@ -60,7 +60,6 @@ describe("Reset Password Features", () => {
         screen.getByRole("button", { name: /Request Password Reset/i }),
       );
 
-      // Assuming your ApiError fallback displays a generic message for 500s
       expect(await screen.findByRole("alert")).toBeInTheDocument();
     });
 

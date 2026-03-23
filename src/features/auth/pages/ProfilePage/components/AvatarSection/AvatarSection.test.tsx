@@ -102,7 +102,7 @@ describe("AvatarSection", () => {
       const fileInput = document.querySelector(
         'input[type="file"]',
       ) as HTMLInputElement;
-      // Simulate change event with no files
+      // Simulate change event with no files.
       const { fireEvent } = await import("@testing-library/react");
       fireEvent.change(fileInput, { target: { files: null } });
 
