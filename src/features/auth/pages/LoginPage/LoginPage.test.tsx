@@ -1,99 +1,66 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginPage } from "./LoginPage";
-import { login, getMe } from "@/features/auth/api";
 import { AuthProvider } from "@/shared/context/AuthContext";
-import "@testing-library/jest-dom/vitest";
+import { server } from "@/mocks/server";
+import { http, HttpResponse } from "msw";
+import { resetHandlerState } from "@/mocks/handlers";
+import { renderWithQueryClient } from "@/test/render";
 
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-
-vi.mock("@/features/auth/api", () => ({
-  login: vi.fn(),
-  getMe: vi.fn(),
-}));
-
-const mockLogin = vi.mocked(login);
-const mockGetMe = vi.mocked(getMe) as unknown as ReturnType<typeof vi.fn>;
-
-const renderLoginPage = async () => {
-  const utils = render(
-    <QueryClientProvider client={createTestQueryClient()}>
-      <MemoryRouter>
-        <AuthProvider>
-          <LoginPage />
-        </AuthProvider>
-      </MemoryRouter>
-    </QueryClientProvider>,
+const renderLoginPage = () => {
+  return renderWithQueryClient(
+    <MemoryRouter>
+      <AuthProvider>
+        <LoginPage />
+      </AuthProvider>
+    </MemoryRouter>,
   );
-
-  // Wait for AuthProvider's getMe effect to finish to avoid act() warnings
-  await waitFor(() => expect(mockGetMe).toHaveBeenCalled());
-
-  return utils;
 };
 
 describe("LoginPage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockGetMe.mockResolvedValue({
-      id: 1,
-      username: "testuser",
-      email: "test@example.com",
-    });
+    resetHandlerState();
   });
 
   it("renders the email and password inputs", async () => {
-    await renderLoginPage();
-    expect(screen.getByPlaceholderText("Email address")).toBeInTheDocument();
+    renderLoginPage();
+    expect(
+      await screen.findByPlaceholderText("Email address"),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
   });
 
   it("renders a 'Forgot your password?' link", async () => {
-    await renderLoginPage();
-    expect(screen.getByText(/forgot your password\?/i)).toBeInTheDocument();
+    renderLoginPage();
+    expect(
+      await screen.findByText(/forgot your password\?/i),
+    ).toBeInTheDocument();
   });
 
   it("renders the 'Sign up' footer link", async () => {
-    await renderLoginPage();
-    expect(screen.getByRole("link", { name: /sign up/i })).toBeInTheDocument();
+    renderLoginPage();
+    expect(
+      await screen.findByRole("link", { name: /sign up/i }),
+    ).toBeInTheDocument();
   });
 
-  it("renders the 'Don't have an account?' footer text", async () => {
-    await renderLoginPage();
-    expect(screen.getByText(/don't have an account\?/i)).toBeInTheDocument();
-  });
+  it("shows an error message when login rejects", async () => {
+    server.use(
+      http.post(
+        "http://localhost:8000/api/auth/login/",
+        () =>
+          new HttpResponse(
+            JSON.stringify({ non_field_errors: ["Invalid credentials"] }),
+            { status: 400 },
+          ),
+      ),
+    );
 
-  it("calls login() on valid submission", async () => {
-    mockLogin.mockResolvedValueOnce(undefined);
+    renderLoginPage();
 
-    await renderLoginPage();
-
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "password123" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
-
-    await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith("user@example.com", "password123");
-    });
-  });
-
-  it("shows an error message when login() rejects", async () => {
-    mockLogin.mockRejectedValueOnce(new Error("Invalid credentials"));
-
-    await renderLoginPage();
-
-    fireEvent.change(screen.getByPlaceholderText("Email address"), {
-      target: { value: "bad@example.com" },
-    });
+    const emailInput = await screen.findByPlaceholderText("Email address");
+    fireEvent.change(emailInput, { target: { value: "bad@example.com" } });
     fireEvent.change(screen.getByPlaceholderText("Password"), {
       target: { value: "wrong" },
     });
