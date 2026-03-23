@@ -10,6 +10,7 @@ import { server } from "@/mocks/server";
 import { http } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import type { useCloudinaryUploadType } from "@/shared/hooks/useCloudinaryUpload/useCloudinaryUpload";
+import * as api from "../../api";
 
 const mockNavigate = vi.fn();
 
@@ -78,6 +79,22 @@ describe("SongUploadForm", () => {
   const getFormProps = () => vi.mocked(SongDetailsForm).mock.lastCall![0];
 
   describe("File Handling & Early Exits", () => {
+    it("updates coverArtUrl when cover upload succeeds", async () => {
+      setupCloudinaryMocks({
+        coverUpload: vi
+          .fn()
+          .mockResolvedValue({ secure_url: "https://cdn/cover.jpg" }),
+      });
+      renderWithQueryClient(<SongUploadForm />);
+
+      await act(async () => {
+        await getFormProps().onCoverArtUpload!(new File([""], "cover.jpg"));
+      });
+
+      // Assert that the successful upload passes the URL down to the child component.
+      expect(getFormProps().uploadedCoverUrl).toBe("https://cdn/cover.jpg");
+    });
+
     it("returns early when selecting null files for MP3 or Cover", async () => {
       setupCloudinaryMocks();
       renderWithQueryClient(<SongUploadForm />);
@@ -123,6 +140,60 @@ describe("SongUploadForm", () => {
   });
 
   describe("Submit behavior", () => {
+    it("shows the generic fallback message if submission throws a standard Error", async () => {
+      setupCloudinaryMocks({
+        mp3Upload: vi
+          .fn()
+          .mockResolvedValue({
+            secure_url: "https://cdn/audio.mp3",
+            duration: 90,
+          }),
+      });
+
+      const spy = vi
+        .spyOn(api, "uploadSong")
+        .mockRejectedValue(new Error("Standard raw error message"));
+
+      renderWithQueryClient(<SongUploadForm />);
+
+      await act(async () => {
+        await getFormProps().onMp3Upload!(new File([""], "test.mp3"));
+      });
+
+      await act(async () => {
+        await getFormProps().onSubmit({
+          title: "",
+          artist: "",
+          album: "",
+          release_year: undefined,
+          cover_art_url: "",
+        });
+      });
+
+      // It should hide the raw error and show the fallback.
+      expect(
+        await screen.findByText("Failed to save song to the database."),
+      ).toBeInTheDocument();
+      spy.mockRestore();
+    });
+    it("prevents submission and shows an error if no MP3 is uploaded", async () => {
+      renderWithQueryClient(<SongUploadForm />);
+
+      await act(async () => {
+        await getFormProps().onSubmit({
+          title: "Test",
+          artist: "Artist",
+          album: "",
+          release_year: undefined,
+          cover_art_url: "",
+        });
+      });
+
+      expect(
+        await screen.findByText("Please select an MP3 file."),
+      ).toBeInTheDocument();
+    });
+
     it("saves song, invalidates cache, and navigates on success", async () => {
       setupCloudinaryMocks({
         mp3Upload: vi.fn().mockResolvedValue({

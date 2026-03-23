@@ -96,9 +96,7 @@ export const SongUploadForm = () => {
       setSubmitError(
         err instanceof ApiError
           ? err.getReadableMessage("Failed to save song to the database.")
-          : err instanceof Error
-            ? err.message
-            : "Failed to save song to the database.",
+          : "Failed to save song to the database.",
       );
     } finally {
       setIsSaving(false);
