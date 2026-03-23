@@ -23,6 +23,14 @@ export const AddToPlaylistModal = ({
   onClose,
   onSongAdded,
 }: AddToPlaylistModalProps): JSX.Element => {
+  /**
+   * Modal allowing the user to add a song to an existing playlist or create a new one.
+   * @param song Song to add.
+   * @param isOpen Whether the modal is visible.
+   * @param onClose Close callback.
+   * @param onSongAdded Callback invoked with the chosen playlist id.
+   * @returns Modal element.
+   */
   const {
     data: playlists = [],
     isLoading,

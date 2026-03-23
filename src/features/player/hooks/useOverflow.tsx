@@ -5,6 +5,13 @@ import {
   type DependencyList,
 } from "react";
 
+/**
+ * Hook that detects whether an element's content overflows its parent horizontally.
+ * Useful for conditionally enabling marquee/scrolling behavior for long text.
+ * @param ref Ref to the element to observe.
+ * @param dependencies Optional dependency list to re-run the effect when values change.
+ * @returns Boolean indicating whether the element is overflowing.
+ */
 export const useIsOverflowing = (
   ref: RefObject<HTMLElement | null>,
   dependencies: DependencyList = [],

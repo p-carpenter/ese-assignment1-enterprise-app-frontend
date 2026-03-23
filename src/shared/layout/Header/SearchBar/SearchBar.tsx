@@ -5,6 +5,11 @@ import { MdClear } from "react-icons/md";
 import styles from "./SearchBar.module.css";
 
 export const SearchBar = () => {
+  /**
+   * Search input used in the header. Debounces navigation to the search results.
+   * Keeps track of the origin path so clearing returns the user to their previous page.
+   * @returns A search input element.
+   */
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -26,6 +31,10 @@ export const SearchBar = () => {
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    /**
+     * Handle change events on the search input.
+     * @param e - Change event from the input element.
+     */
     const val = e.target.value;
     const currentOrigin =
       originPath ?? (location.pathname !== "/" ? location.pathname : null);
@@ -37,6 +46,10 @@ export const SearchBar = () => {
   };
 
   const handleClear = () => {
+    /**
+     * Clear the current search input and navigate back to the origin path (or root).
+     * Resets internal origin tracking and cancels any debounced navigation.
+     */
     const destination = originPath ?? "/";
     setSearchInput("");
     setOriginPath(null);

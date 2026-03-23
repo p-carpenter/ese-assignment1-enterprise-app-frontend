@@ -12,12 +12,17 @@ interface PlayHistoryProps {
 export const PlayHistory = ({
   hideTitle = false,
 }: PlayHistoryProps): JSX.Element => {
+  /**
+   * Shows a paginated list of recently played tracks.
+   * @param hideTitle When true, the header title is omitted.
+   * @returns Play history UI element.
+   */
   const [page, setPage] = useState(1);
 
   const { data } = useQuery({
     queryKey: queryKeys.playHistory(page),
     queryFn: () => getPlayHistory(page, HISTORY_PAGE_SIZE),
-    // Keep previous page data visible while the next page loads
+    // Keep previous page data visible while the next page loads.
     placeholderData: (prev) => prev,
   });
 

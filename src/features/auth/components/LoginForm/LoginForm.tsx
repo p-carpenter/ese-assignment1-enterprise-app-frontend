@@ -9,6 +9,10 @@ import { ApiError } from "@/shared/api/errors";
 import { loginSchema, type LoginFormValues } from "./schema";
 
 export const LoginForm = () => {
+  /**
+   * Login form handling email/password authentication and navigation on success.
+   * Displays API-level errors using `AlertMessage`.
+   */
   const { login } = useAuth();
   const navigate = useNavigate();
   const [apiError, setApiError] = useState("");

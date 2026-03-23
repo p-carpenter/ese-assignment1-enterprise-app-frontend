@@ -3,6 +3,10 @@ import { AuthFormFooter } from "../../components/AuthFormFooter/AuthFormFooter";
 import { AuthLayout } from "../../components/AuthLayout/AuthLayout";
 import authStyles from "../AuthPages.module.css";
 
+/**
+ * Registration page composed of the `RegistrationForm` and footer CTA.
+ * @returns The registration page element.
+ */
 export const RegisterPage = () => {
   return (
     <AuthLayout>

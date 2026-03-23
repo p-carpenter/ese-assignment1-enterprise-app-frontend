@@ -6,6 +6,12 @@ interface ProtectedRouteProps {
   isAuthenticated: boolean;
 }
 
+/**
+ * Protects routes by redirecting unauthenticated users to `/login`.
+ * @param children Protected content to render when authenticated.
+ * @param isAuthenticated Whether the current user is authenticated.
+ * @returns The children when authenticated, otherwise a `<Navigate />`.
+ */
 export const ProtectedRoute = ({
   children,
   isAuthenticated,

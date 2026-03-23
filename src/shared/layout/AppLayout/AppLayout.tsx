@@ -9,6 +9,11 @@ import { Header } from "@/shared/layout";
 import { Sidebar } from "@/shared/layout/Sidebar/Sidebar";
 import styles from "./AppLayout.module.css";
 
+/**
+ * Persistent application layout used on protected routes.
+ * Renders header, sidebar, main outlet and the player controls.
+ * @returns The application layout element.
+ */
 export const AppLayout = (): JSX.Element => {
   const { currentSong } = usePlayer();
   const coverUrl = currentSong?.cover_art_url;

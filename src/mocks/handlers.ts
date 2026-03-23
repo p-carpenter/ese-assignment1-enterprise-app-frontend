@@ -63,6 +63,7 @@ let history: PlayHistoryEntry[] = [...INITIAL_HISTORY];
 
 /**
  * Resets in-memory handler state back to the initial fixtures.
+ * Used by tests to restore the mock server state.
  */
 export const resetHandlerState = () => {
   currentUser = { ...INITIAL_USER };
@@ -72,6 +73,9 @@ export const resetHandlerState = () => {
 };
 
 // Handlers
+/**
+ * MSW request handlers used to simulate the backend API in tests and development.
+ */
 export const handlers = [
   // Auth handlers
   http.post(`${BASE_URL}/auth/login/`, () => {

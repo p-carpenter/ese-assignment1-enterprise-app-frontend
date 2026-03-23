@@ -12,6 +12,12 @@ interface AvatarSectionProps {
   onAvatarChange: (file: File) => void;
 }
 
+/**
+ * Avatar and display-name section used on the profile page.
+ * Supports in-place avatar uploads when `isEditing` is enabled.
+ * @param props `AvatarSectionProps` containing avatar data and callbacks.
+ * @returns Avatar section element.
+ */
 export const AvatarSection = ({
   username,
   avatarUrl,

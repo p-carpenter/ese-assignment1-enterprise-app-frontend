@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { verifyRegistrationEmail } from "../../api";
 import { AlertMessage } from "@/shared/components";
 
+/**
+ * Page that consumes an email verification `key` from the route and attempts to verify
+ * the user's email via the `verifyRegistrationEmail` API. Shows status and redirects
+ * to the login page on success.
+ * @returns Email verification page element.
+ */
 export const EmailVerificationPage = () => {
   const { key } = useParams<{ key: string }>();
   const navigate = useNavigate();

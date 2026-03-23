@@ -34,6 +34,12 @@ export const SongList = ({
   loadMoreRef,
   isFetchingNextPage,
 }: SongListProps) => {
+  /**
+   * Renders a list of songs with controls for play, edit, delete and adding to playlists.
+   * Shows errors via `AlertMessage` and handles optimistic cache invalidation.
+   * @param songs Array of songs to render.
+   * @returns A song list element.
+   */
   const { currentSong, playSong } = usePlayer();
   const queryClient = useQueryClient();
 

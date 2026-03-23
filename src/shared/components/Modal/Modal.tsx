@@ -8,6 +8,9 @@ import {
 } from "react-aria-components";
 import styles from "./Modal.module.css";
 
+/**
+ * Props for `Modal` component.
+ */
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,6 +19,13 @@ interface ModalProps {
 }
 
 export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
+  /**
+   * Generic modal dialog component using react-aria primitives.
+   * @param isOpen Whether the modal is visible.
+   * @param onClose Callback invoked when the modal should close.
+   * @param title Optional title for the dialog.
+   * @returns Modal overlay and dialog elements.
+   */
   return (
     <ModalOverlay
       isOpen={isOpen}

@@ -5,6 +5,9 @@ import {
 } from "react-icons/io5";
 import styles from "./AlertMessage.module.css";
 
+/**
+ * Props for `AlertMessage` component.
+ */
 interface AlertMessageProps {
   message: string | null | undefined;
   variant?: "error" | "success";
@@ -16,6 +19,13 @@ export const AlertMessage = ({
   variant = "error",
   onDismiss,
 }: AlertMessageProps) => {
+  /**
+   * Simple alert/status message UI.
+   * @param message Message text to display.
+   * @param variant Visual variant: error or success.
+   * @param onDismiss Optional dismiss handler.
+   * @returns A styled alert element or null when no message.
+   */
   if (!message) return null;
 
   const isError = variant === "error";

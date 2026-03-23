@@ -17,6 +17,11 @@ export interface ParsedLine {
 const LRC_RE = /^\[(\d{2}):(\d{2}\.\d+)\]\s*(.*)/;
 
 /** Parses an LRC-format string into timestamped lines (seconds). */
+/**
+ * Parse an LRC formatted lyrics string into timestamped lines (seconds).
+ * @param lrc LRC formatted lyrics text.
+ * @returns Array of parsed lines with `time` and `text`.
+ */
 export const parseSyncedLyrics = (lrc: string): ParsedLine[] =>
   lrc
     .split("\n")
@@ -29,6 +34,11 @@ export const parseSyncedLyrics = (lrc: string): ParsedLine[] =>
     .filter((l): l is ParsedLine => l !== null && l.text.trim() !== "");
 
 /** Returns the index of the lyric line that should currently be highlighted. */
+/**
+ * Return the active lyric line index for a given playback position.
+ * @param lines Parsed lyric lines.
+ * @param position Current playback position in seconds.
+ */
 export const getActiveLyricIndex = (
   lines: ParsedLine[],
   position: number,
@@ -52,6 +62,13 @@ interface UseLyricsResult {
 /**
  * Fetches lyrics for a song from lrclib.net.
  * Returns both plain and synced (LRC) lyrics where available.
+ */
+/**
+ * Hook that fetches lyrics (plain and synced) for an artist/title pair.
+ * @param artist Artist name.
+ * @param title Track title.
+ * @param album Optional album name.
+ * @returns An object with `plainLyrics`, `syncedLines` and status flags.
  */
 export const useLyrics = (
   artist: string | undefined,

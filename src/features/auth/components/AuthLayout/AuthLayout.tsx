@@ -5,6 +5,11 @@ interface AuthLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * Layout wrapper used on authentication pages.
+ * Centers a card-style form with app branding.
+ * @param children Form/content to render inside the auth card.
+ */
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
     <div className={styles.root}>

@@ -16,6 +16,11 @@ import { PlaylistDetailPage } from "./features/playlists/pages/PlaylistDetailPag
 import { PlaylistsPage } from "./features/playlists/pages/PlaylistsPage";
 import { AppLayout } from "@/shared/layout";
 
+/**
+ * Application route tree.
+ * Uses authentication state to expose public and protected routes.
+ * @returns The app's top-level React Router element.
+ */
 export const AppRoutes = (): JSX.Element => {
   const { user } = useAuth();
   const isAuthenticated = !!user;

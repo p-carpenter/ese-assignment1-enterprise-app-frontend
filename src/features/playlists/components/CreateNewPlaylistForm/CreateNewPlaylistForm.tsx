@@ -17,6 +17,10 @@ export const CreateNewPlaylistForm = ({
   isSubmitting = false,
   error,
 }: CreateNewPlaylistFormProps) => {
+  /**
+   * Form for entering playlist metadata and uploading a cover image.
+   * Integrates with Cloudinary for cover uploads and calls `onSubmit` with values.
+   */
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const {

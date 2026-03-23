@@ -9,6 +9,13 @@ import {
 import { MoreHorizontalOutline } from "@/shared/icons";
 import styles from "./SongManagementDropdown.module.css";
 
+/**
+ * An item shown in the song management dropdown.
+ *
+ * - `label`: visible text for the menu item.
+ * - `onSelect`: callback invoked when the item is chosen.
+ * - `disabled`: optional flag to disable the item.
+ */
 export interface DropdownItem {
   label: string;
   onSelect: () => void;
@@ -19,6 +26,12 @@ interface SongManagementDropdownProps {
   dropdownItems?: DropdownItem[];
 }
 
+/**
+ * Renders a compact dropdown menu for song actions (e.g. edit, delete).
+ *
+ * The menu items are provided via `dropdownItems` and each item's
+ * `onSelect` handler is called when the corresponding menu entry is chosen.
+ */
 export const SongManagementDropdown: FC<SongManagementDropdownProps> = ({
   dropdownItems,
 }) => {

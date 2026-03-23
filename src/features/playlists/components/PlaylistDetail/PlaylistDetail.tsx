@@ -17,6 +17,11 @@ import { AddSongToPlaylistModal } from "../AddSongToPlaylistModal/AddSongToPlayl
 import { PlaylistHero } from "../PlaylistHero/PlaylistHero";
 import { ApiError } from "@/shared/api/errors";
 
+/**
+ * Playlist detail view showing playlist meta and its songs.
+ * Fetches playlist by route id and exposes add/remove and play controls.
+ * @returns The playlist detail page element.
+ */
 export const PlaylistDetail = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
   const queryClient = useQueryClient();

@@ -2,7 +2,9 @@ import { request } from "@/shared/api/client";
 import type { PaginatedResponse, Song, SongUploadPayload } from "../types";
 
 /**
- * GET all songs
+ * GET all songs.
+ *
+ * @returns A promise that resolves to an array of all `Song` objects.
  */
 export const listAllSongs = (): Promise<Song[]> =>
   request<PaginatedResponse<Song>>("/songs/?page_size=1000").then(
@@ -11,6 +13,11 @@ export const listAllSongs = (): Promise<Song[]> =>
 
 /**
  * GET songs with pagination, sorting, and optional search.
+ *
+ * @param page - Page number to request (1-based).
+ * @param ordering - Ordering string, e.g. `"-created"` or `"title"`.
+ * @param search - Optional search query to filter results.
+ * @returns A promise that resolves to a paginated response of `Song`.
  */
 export const listSongsPaginated = (
   page: number,
@@ -28,7 +35,9 @@ export const listSongsPaginated = (
 
 /**
  * POST a new song.
- * Returns the created Song so the UI can add it to the list immediately.
+ *
+ * @param payload - The song upload payload (file URL, metadata, etc.).
+ * @returns A promise that resolves to the created `Song` object.
  */
 export const uploadSong = (payload: SongUploadPayload): Promise<Song> =>
   request<Song>("/songs/", {
@@ -38,12 +47,19 @@ export const uploadSong = (payload: SongUploadPayload): Promise<Song> =>
 
 /**
  * DELETE a song by ID.
+ *
+ * @param songId - ID of the song to delete.
+ * @returns A promise that resolves when the deletion completes.
  */
 export const deleteSong = (songId: number): Promise<void> =>
   request<void>(`/songs/${songId}/`, { method: "DELETE" });
 
 /**
  * PUT (Update) a song.
+ *
+ * @param songId - ID of the song to update.
+ * @param payload - Partial payload containing fields to update.
+ * @returns A promise that resolves to the updated `Song`.
  */
 export const updateSong = (
   songId: number,
@@ -56,12 +72,18 @@ export const updateSong = (
 
 /**
  * GET details for a single song.
+ *
+ * @param songId - ID of the song to fetch.
+ * @returns A promise that resolves to the `Song` details.
  */
 export const getSongDetails = (songId: number): Promise<Song> =>
   request<Song>(`/songs/${songId}/`);
 
 /**
- * GET search results.
+ * GET search results for songs.
+ *
+ * @param query - Search query string.
+ * @returns A promise that resolves to an array of matching `Song` objects.
  */
 export const searchSongs = (query: string): Promise<Song[]> =>
   request<Song[]>(`/songs/search/?q=${encodeURIComponent(query)}`);

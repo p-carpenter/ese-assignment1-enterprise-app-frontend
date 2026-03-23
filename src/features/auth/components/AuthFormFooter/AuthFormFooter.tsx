@@ -13,6 +13,13 @@ export const AuthFormFooter: FC<AuthFormFooterProps> = ({
   linkText,
   linkTo,
 }) => {
+  /**
+   * Small footer used beneath auth forms to provide contextual links.
+   * @param footerText Lead-in text for the link.
+   * @param linkText Visible link text.
+   * @param linkTo Destination path for the link.
+   * @returns Footer element.
+   */
   return (
     <div className={styles.footer}>
       <span className={styles.footerText}>{footerText}</span>

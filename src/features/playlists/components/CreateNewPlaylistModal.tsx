@@ -19,6 +19,13 @@ export const CreateNewPlaylistModal = ({
   onClose,
   onSuccess,
 }: CreateNewPlaylistModalProps) => {
+  /**
+   * Modal to create a new playlist. Handles the create mutation and navigation.
+   * @param isOpen Whether the modal is visible.
+   * @param onClose Close callback.
+   * @param onSuccess Optional success callback with the created playlist.
+   * @returns Modal element or null.
+   */
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);

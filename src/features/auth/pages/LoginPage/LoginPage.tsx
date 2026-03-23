@@ -5,6 +5,11 @@ import { Link } from "react-router-dom";
 import styles from "./LoginPage.module.css";
 import authStyles from "../AuthPages.module.css";
 
+/**
+ * Login page layout composed of `AuthLayout` and `LoginForm`.
+ * Presents password reset link and footer with registration CTA.
+ * @returns The login page element.
+ */
 export const LoginPage = () => {
   return (
     <AuthLayout>

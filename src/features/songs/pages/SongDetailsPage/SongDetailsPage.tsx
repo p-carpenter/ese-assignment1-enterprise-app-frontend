@@ -9,6 +9,11 @@ import { SongHero } from "./components/SongHero/SongHero";
 import { LyricsSection } from "./components/LyricsSection/LyricsSection";
 import { MoreByArtist } from "./components/MoreByArtist/MoreByArtist";
 
+/**
+ * Full song details page showing hero, lyrics and related tracks.
+ * Fetches song details by id from the API and handles loading/error states.
+ * @returns Song details page element.
+ */
 export const SongDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const songId = Number(id);

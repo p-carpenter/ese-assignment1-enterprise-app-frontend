@@ -4,11 +4,20 @@ import { listAllSongs } from "@/features/songs/api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 import styles from "./MoreByArtist.module.css";
 
+/**
+ * Props for `MoreByArtist` component.
+ */
 interface MoreByArtistProps {
   artist: string;
   currentSongId: number;
 }
 
+/**
+ * Displays a grid of other songs by the same artist.
+ *
+ * @param props.artist - Artist name to search for.
+ * @param props.currentSongId - ID of the currently viewed song (excluded from list).
+ */
 export const MoreByArtist = ({ artist, currentSongId }: MoreByArtistProps) => {
   const navigate = useNavigate();
 

@@ -6,6 +6,11 @@ interface CloudinaryResponse {
   original_filename: string;
 }
 
+/**
+ * Hook providing a convenience `upload` function for Cloudinary uploads.
+ * Manages `isUploading` and `error` state and returns the Cloudinary response on success.
+ * @returns An object with `upload(file)`, `isUploading` and `error`.
+ */
 export const useCloudinaryUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);

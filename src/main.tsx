@@ -12,6 +12,11 @@ import {
 } from "@tanstack/react-query";
 import { ApiError } from "@/shared/api/errors";
 
+/**
+ * Application bootstrap: configure the global `QueryClient`, mount providers
+ * (auth, audio player, player context) and render the root `App` component.
+ * The `MutationCache` logs readable API errors for easier debugging.
+ */
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: (error) => {

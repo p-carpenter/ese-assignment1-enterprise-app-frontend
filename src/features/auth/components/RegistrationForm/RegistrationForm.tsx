@@ -8,6 +8,9 @@ import { ApiError } from "@/shared/api/errors";
 import { registrationSchema, type RegistrationFormValues } from "./schema";
 
 export const RegistrationForm = () => {
+  /**
+   * Registration form which calls the `register` API and reports success or errors.
+   */
   const [apiError, setApiError] = useState("");
   const [success, setSuccess] = useState(false);
 

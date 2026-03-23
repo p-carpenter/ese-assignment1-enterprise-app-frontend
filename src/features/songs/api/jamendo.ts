@@ -6,6 +6,13 @@ interface JamendoTracksResponse {
 
 const JAMENDO_API_URL = "https://api.jamendo.com/v3.0/tracks/";
 
+/**
+ * Search Jamendo's track API for matching tracks.
+ * @param query Search query string (title, artist, keywords).
+ * @param limit Maximum number of tracks to return (default: 10).
+ * @returns An array of `JamendoTrack` results.
+ * @throws When the client id is missing or the network request fails.
+ */
 export const searchJamendoTracks = async (
   query: string,
   limit = 10,

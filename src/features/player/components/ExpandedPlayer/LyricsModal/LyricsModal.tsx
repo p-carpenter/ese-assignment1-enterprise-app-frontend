@@ -14,6 +14,12 @@ interface LyricsModalProps {
   currentSong: Song | null;
 }
 
+/**
+ * Modal dialog that displays synced lyrics for the currently playing song.
+ * Renders the `LyricsSection` inside an accessible dialog and exposes a toggle button.
+ * @param currentSong The currently playing `Song` or `null`.
+ * @returns A lyrics modal trigger and dialog.
+ */
 export const LyricsModal = ({ currentSong }: LyricsModalProps) => {
   return (
     <DialogTrigger>

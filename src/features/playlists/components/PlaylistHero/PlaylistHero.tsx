@@ -21,6 +21,12 @@ interface PlaylistHeroProps {
   onPlayClick?: () => void;
 }
 
+/**
+ * Header display for a playlist showing artwork, title and actions.
+ * Supports edit, play and add-song actions depending on permissions.
+ * @param props `PlaylistHeroProps` describing the playlist and available actions.
+ * @returns A playlist hero element.
+ */
 export const PlaylistHero = ({
   playlist,
   isOwner,

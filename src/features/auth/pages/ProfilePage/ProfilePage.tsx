@@ -10,6 +10,12 @@ import { ProfileInfo } from "./components/ProfileInfo/ProfileInfo";
 import styles from "./ProfilePage.module.css";
 import { LinkButton } from "@/shared/components/Button/LinkButton";
 
+/**
+ * User profile page and editor.
+ * Shows avatar section, profile information and allows editing when enabled.
+ * @param props Optional `isEditing` flag to render the editable form.
+ * @returns Profile page element.
+ */
 export const ProfilePage = ({
   isEditing = false,
 }: {

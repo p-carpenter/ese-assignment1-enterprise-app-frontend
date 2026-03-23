@@ -14,6 +14,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { logPlay } from "@/features/player/api";
 import { type Song } from "@/features/songs/types";
 
+/**
+ * API exposed by the Player context for controlling playback.
+ */
 export interface PlayerContextType {
   currentSong: Song | null;
   playlist: Song[];
@@ -36,6 +39,11 @@ export interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
+/**
+ * Provides playback state and controls to the application.
+ * Wrap the app where player state should be available.
+ * @param children React children.
+ */
 export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const {
     play: audioPlay,
@@ -64,6 +72,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const getPosition = audioGetPosition;
 
   const seek = useCallback(
+    /**
+     * Seek playback to a specific position in seconds.
+     * @param position - Position in seconds to seek to.
+     */
     (position: number) => {
       audioSeek(position);
     },
@@ -71,14 +83,24 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const play = useCallback(() => {
+    /**
+     * Start or resume playback of the current audio.
+     */
     audioPlay();
   }, [audioPlay]);
 
   const pause = useCallback(() => {
+    /**
+     * Pause the currently playing audio.
+     */
     audioPause();
   }, [audioPause]);
 
   const setVolume = useCallback(
+    /**
+     * Set player volume.
+     * @param v - Volume level between 0 and 1.
+     */
     (v: number) => {
       volumeRef.current = v;
       setVolumeState(v);
@@ -88,6 +110,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const toggleLoop = useCallback(() => {
+    /**
+     * Toggle looping for the currently playing track.
+     */
     setIsLooping((prev) => {
       isLoopingRef.current = !prev;
       return !prev;
@@ -101,6 +126,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, [playlist, currentSong?.id]);
 
   const playSong = useCallback(
+    /**
+     * Play the given song, optionally replacing the current playlist.
+     * @param song - Song to play.
+     * @param newPlaylist - Optional playlist to set before playback.
+     * @returns A promise that resolves when playback starts.
+     */
     async (song: Song, newPlaylist?: Song[]): Promise<void> => {
       if (newPlaylist) {
         setPlaylist(newPlaylist);
@@ -108,6 +139,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
       if (currentSong?.id === song.id) {
         audioSeek(0);
+
+        /**
+         * Play the previous track in the current playlist (wraps `playSong`).
+         */
         audioPlay();
         return;
       }
@@ -139,12 +174,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     [currentSong?.id, load, audioSeek, audioPlay, stop, queryClient],
   );
 
+  /**
+   * Play the previous track in the current playlist (wraps `playSong`).
+   * @returns Promise that resolves when playback of the previous track begins.
+   */
   const playPrev = useCallback(async (): Promise<void> => {
     if (!playlist.length) return;
     const prevIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
     await playSong(playlist[prevIndex]);
   }, [currentIndex, playlist, playSong]);
 
+  /**
+   * Play the next track in the current playlist (wraps `playSong`).
+   */
   const playNext = useCallback(async (): Promise<void> => {
     if (!playlist.length) return;
     const nextIndex =
@@ -205,6 +247,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+/**
+ * Hook to access the player context.
+ * @throws If used outside of `PlayerProvider`.
+ */
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
   if (!context) {

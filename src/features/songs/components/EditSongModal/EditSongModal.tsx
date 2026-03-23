@@ -16,6 +16,12 @@ interface EditSongModalProps {
   onSongUpdated: () => void;
 }
 
+/**
+ * Modal that displays a `SongDetailsForm` to edit an existing song.
+ * Handles optional cover-art upload and sends updates to the server.
+ *
+ * @param props - Component props (see `EditSongModalProps`).
+ */
 export const EditSongModal = ({
   song,
   isOpen,
@@ -66,6 +72,10 @@ export const EditSongModal = ({
   if (!song) return null;
 
   const handleCoverArtUpload = async (file: File) => {
+    /**
+     * Upload a cover art file using the Cloudinary hook and update local URL state.
+     * @param file - The image file to upload.
+     */
     try {
       const cloudData = await upload(file);
       if (cloudData) {
@@ -77,6 +87,10 @@ export const EditSongModal = ({
   };
 
   const handleSubmit = ({
+    /**
+     * Handle submission of the edited song details.
+     * @param values - Values collected from the song details form.
+     */
     title,
     artist,
     album,

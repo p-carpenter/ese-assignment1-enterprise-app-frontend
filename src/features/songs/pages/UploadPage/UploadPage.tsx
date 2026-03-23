@@ -6,6 +6,10 @@ import { useNavigate } from "react-router-dom";
 import styles from "./UploadPage.module.css";
 
 export const UploadPage = () => {
+  /**
+   * Page allowing users to upload an MP3 or import from Jamendo.
+   * @returns Upload page element with tabs for both flows.
+   */
   const navigate = useNavigate();
 
   return (

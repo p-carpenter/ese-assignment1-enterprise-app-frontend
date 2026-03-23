@@ -13,6 +13,12 @@ export const LinkButton = ({
   children,
   ...props
 }: LinkButtonProps) => {
+  /**
+   * Link styled as a button for internal navigation.
+   * @param variant Visual variant.
+   * @param size Button size.
+   * @returns A `Link` element styled like a button.
+   */
   const classes = [
     styles.button,
     styles.linkOverride,

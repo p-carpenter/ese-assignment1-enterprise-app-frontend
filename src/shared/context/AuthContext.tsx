@@ -22,6 +22,11 @@ export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
 );
 
+/**
+ * Authentication context provider.
+ * Provides `user`, `loading` state and auth actions to the app via context.
+ * @param children React children to render within the provider.
+ */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
 
@@ -33,20 +38,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     staleTime: Infinity,
   });
 
-  /** Immediately write a user object into the cache (e.g. after profile update). */
+  /**
+   * Immediately write a user object into the cache (e.g. after profile update).
+   * @param newUser The new user object or null to clear.
+   */
   const setUser = (newUser: UserProfile | null) => {
     queryClient.setQueryData(queryKeys.me, newUser);
   };
 
-  /** Refetch the current user from the server. */
+  /**
+   * Refetch the current user from the server.
+   * @returns Promise resolving when refetch completes.
+   */
   const refreshUser = () =>
     queryClient.refetchQueries({ queryKey: queryKeys.me });
 
+  /**
+   * Log in using email/password and refresh the cached user.
+   * @param email User email.
+   * @param password User password.
+   */
   const login = async (email: string, password: string) => {
     await loginApi(email, password);
     await queryClient.refetchQueries({ queryKey: queryKeys.me });
   };
 
+  /**
+   * Log out the current user and clear user-specific cache.
+   */
   const logout = async () => {
     await logoutApi();
     // Set user to null synchronously so ProtectedRoute redirects immediately.
@@ -67,6 +86,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+/**
+ * Hook to access authentication context.
+ * @throws If used outside of `AuthProvider`.
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
