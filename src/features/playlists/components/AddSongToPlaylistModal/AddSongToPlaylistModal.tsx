@@ -13,6 +13,9 @@ import { ApiError } from "@/shared/api/errors";
 const ALL_SONGS_KEY = ["songs"] as const;
 import styles from "./AddSongToPlaylistModal.module.css";
 
+/**
+ * Props for `AddSongToPlaylistModal` component.
+ */
 interface AddSongToPlaylistModalProps {
   playlistId: number;
   existingSongIds: Set<number>;
@@ -26,6 +29,14 @@ export const AddSongToPlaylistModal = ({
   isOpen,
   onClose,
 }: AddSongToPlaylistModalProps) => {
+  /**
+   * Modal for selecting songs to add to a playlist, with search and feedback.
+   * @param playlistId Target playlist id.
+   * @param existingSongIds Set of song ids already in the playlist to exclude.
+   * @param isOpen Whether the modal is open.
+   * @param onClose Close callback.
+   * @returns Modal element.
+   */
   const queryClient = useQueryClient();
   const { currentSong } = usePlayer();
   const [search, setSearch] = useState("");

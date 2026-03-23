@@ -4,8 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { SongManagementDropdown } from "./SongManagementDropdown";
 import "@testing-library/jest-dom/vitest";
-
-// Extend Vitest's expect with jest-axe assertions.
 expect.extend(toHaveNoViolations);
 
 describe("SongManagementDropdown", () => {

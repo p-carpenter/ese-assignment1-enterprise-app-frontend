@@ -17,6 +17,10 @@ export const SongMeta: FC<SongMetaProps> = ({
   isArtistScrolling,
   isExpanded = false,
 }) => {
+  /**
+   * Displays track artwork, title and artist for the current player song.
+   * Accepts refs used for overflow/scroll detection.
+   */
   const { currentSong } = usePlayer();
 
   return (

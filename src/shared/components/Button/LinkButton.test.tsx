@@ -4,8 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { LinkButton } from "./LinkButton";
 import "@testing-library/jest-dom/vitest";
-
-// Extend Vitest's expect with jest-axe matchers.
 expect.extend(toHaveNoViolations);
 
 // Custom render function to avoid repeating MemoryRouter wrapper.

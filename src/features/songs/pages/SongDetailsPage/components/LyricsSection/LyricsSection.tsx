@@ -8,6 +8,12 @@ interface LyricsSectionProps {
   song: { id: number; artist: string; title: string; album?: string };
 }
 
+/**
+ * Renders lyrics for a song. If synced lyrics are available and the song is
+ * currently playing, it drives a synced display; otherwise it shows plain lyrics.
+ *
+ * @param props.song - Song identity and metadata used to fetch lyrics.
+ */
 export const LyricsSection = ({ song }: LyricsSectionProps) => {
   const { currentSong, getPosition } = usePlayer();
   const { plainLyrics, syncedLines, isLoading, notFound } = useLyrics(

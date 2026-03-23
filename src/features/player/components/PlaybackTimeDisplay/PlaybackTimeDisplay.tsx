@@ -1,6 +1,11 @@
 import { useEffect, useRef, useMemo } from "react";
 import styles from "./PlaybackTimeDisplay.module.css";
 
+/**
+ * Format a numeric seconds value as M:SS for playback displays.
+ * @param seconds Number of seconds.
+ * @returns A formatted time string like "2:34".
+ */
 const formatTime = (seconds: number): string => {
   if (isNaN(seconds) || seconds <= 0) return "0:00";
 
@@ -22,6 +27,13 @@ export const PlaybackTimeDisplay = ({
   maxDuration,
   isPlaying,
 }: PlaybackTimeDisplayProps) => {
+  /**
+   * Displays current playback time and total duration, updating while playing.
+   * @param getPosition Function returning current playback position in seconds.
+   * @param maxDuration Maximum duration to display.
+   * @param isPlaying Whether playback is active (used to drive updates).
+   * @returns A time display element.
+   */
   const timeDisplayRef = useRef<HTMLSpanElement>(null);
   const frameRef = useRef<number>(0);
 

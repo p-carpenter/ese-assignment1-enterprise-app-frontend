@@ -5,6 +5,10 @@ import { IoVolumeMedium } from "react-icons/io5";
 import styles from "./VolumeBar.module.css";
 
 export const VolumeBar: FC = () => {
+  /**
+   * Volume control slider connected to the player context.
+   * @returns Volume slider element.
+   */
   const { volume, setVolume } = usePlayer();
 
   return (

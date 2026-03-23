@@ -12,6 +12,10 @@ import { ApiError } from "@/shared/api/errors";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
 export const SongUploadForm = () => {
+  /**
+   * Composite form that handles MP3 and cover uploads, ID3 extraction and final song creation.
+   * Delegates metadata entry to `SongDetailsForm` and coordinates Cloudinary uploads.
+   */
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -36,6 +40,10 @@ export const SongUploadForm = () => {
   const [submitError, setSubmitError] = useState("");
 
   const handleCoverArtUpload = async (file: File | null) => {
+    /**
+     * Upload a cover art image and set the resulting URL on success.
+     * @param file - The selected image file or null.
+     */
     if (!file) return;
     try {
       const cloudData = await uploadCover(file);
@@ -48,24 +56,32 @@ export const SongUploadForm = () => {
   };
 
   const handleMp3Upload = async (file: File | null) => {
+    /**
+     * Process and upload an MP3 file: read ID3 tags, upload to Cloudinary and set state.
+     * @param file - The MP3 file selected by the user, or null.
+     */
     if (!file) return;
+
     try {
-      const [cloudData, tags] = await Promise.all([
-        uploadMp3(file),
-        readId3Tags(file),
-      ]);
+      const tags = await readId3Tags(file);
+      setId3Tags(tags);
+      setSongFileName(file.name);
+
+      const cloudData = await uploadMp3(file);
       if (cloudData) {
         setSongUrl(cloudData.secure_url);
         setSongDuration(Math.round(cloudData.duration || 0));
-        setSongFileName(file.name);
       }
-      setId3Tags(tags);
     } catch (err) {
-      console.error("MP3 upload failed:", err);
+      console.error("MP3 processing or upload failed:", err);
     }
   };
 
   const handleSubmit = async (data: SongDetailsValues) => {
+    /**
+     * Finalise and submit song metadata and uploaded assets to create a new song record.
+     * @param data - Values from the song details form.
+     */
     if (!songUrl) {
       setSubmitError("Please select an MP3 file.");
       return;
@@ -75,9 +91,15 @@ export const SongUploadForm = () => {
     setIsSaving(true);
 
     try {
-      const releaseYear =
-        data.release_year ??
-        (id3Tags.year ? Number(id3Tags.year) || undefined : undefined);
+      let releaseYear = data.release_year;
+
+      // if the user didn't manually enter a year, try to extract it from the mp3 tags.
+      if (!releaseYear && id3Tags.year) {
+        const parsedYear = Number(id3Tags.year);
+        if (!isNaN(parsedYear) && parsedYear > 0) {
+          releaseYear = parsedYear;
+        }
+      }
 
       await uploadSong({
         title: data.title || id3Tags.title || songFileName,
@@ -138,7 +160,7 @@ export const SongUploadForm = () => {
         mp3Label={isMp3Uploading ? "Uploading MP3..." : "Select MP3"}
         coverArtUploading={isCoverUploading}
         onCoverArtUpload={handleCoverArtUpload}
-        uploadedCoverUrl={coverArtUrl} // <-- This feeds the URL back into the child form's preview
+        uploadedCoverUrl={coverArtUrl}
       />
     </div>
   );

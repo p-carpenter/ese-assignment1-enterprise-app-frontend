@@ -31,6 +31,13 @@ export const PlaybackControls: FC<PlaybackControlsProps> = ({
   disableNext,
   isExpanded = false,
 }) => {
+  /**
+   * Primary playback controls component (prev/play-pause/next).
+   * @param isPlaying Whether audio is currently playing.
+   * @param onPlay Callback to start playing.
+   * @param onPause Callback to pause playback.
+   * @returns Playback control buttons.
+   */
   // Scale icons up for mobile expanded view.
   const secondaryIconSize = isExpanded ? 32 : 16;
   const primaryIconSize = isExpanded ? 32 : 16;

@@ -3,6 +3,11 @@ import { RequestResetPasswordForm } from "../../components/RequestResetPasswordF
 import { AuthLayout } from "../../components/AuthLayout/AuthLayout";
 import authStyles from "../AuthPages.module.css";
 
+/**
+ * Page containing the request-reset-password flow.
+ * Composes `RequestResetPasswordForm` inside the auth layout with footer CTA.
+ * @returns Request reset password page element.
+ */
 export const RequestResetPasswordPage = () => {
   return (
     <AuthLayout>

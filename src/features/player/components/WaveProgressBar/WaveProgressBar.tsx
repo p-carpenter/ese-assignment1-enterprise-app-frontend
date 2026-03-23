@@ -17,6 +17,14 @@ export const WaveProgressBar: FC<WaveProgressBarProps> = ({
   getPosition,
   isExpanded = false,
 }) => {
+  /**
+   * Visual waveform-like progress bar implemented using a sequence of bars.
+   * Supports dragging to seek and syncs with the audio position.
+   * @param currentSong Optional current song metadata.
+   * @param duration Current playback duration in seconds.
+   * @param seek Callback to seek to a specific position.
+   * @returns Wave progress slider element.
+   */
   const frameRef = useRef<number>(0);
   const [position, setPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);

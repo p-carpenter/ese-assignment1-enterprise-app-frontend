@@ -10,6 +10,11 @@ interface DeletePlaylistButtonProps {
   playlistId: number;
 }
 
+/**
+ * Button component that prompts for confirmation and deletes a playlist when confirmed.
+ * @param props `DeletePlaylistButtonProps` with the `playlistId` to delete.
+ * @returns A delete button or confirmation controls.
+ */
 export const DeletePlaylistButton = ({
   playlistId,
 }: DeletePlaylistButtonProps) => {

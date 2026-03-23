@@ -18,12 +18,21 @@ interface SongRowProps {
   avatarUser?: UserMini;
 }
 
+/**
+ * Format seconds to M:SS.
+ * @param seconds Number of seconds.
+ */
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.round(seconds % 60);
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
 
+/**
+ * Single row item representing a song in a list.
+ * Shows cover art, title, artist, upload date and duration and exposes a dropdown.
+ * @param props Row props including song, active state and callbacks.
+ */
 export const SongRow = memo(
   ({ song, isActive, onPlay, dropdownItems, avatarUser }: SongRowProps) => {
     return (

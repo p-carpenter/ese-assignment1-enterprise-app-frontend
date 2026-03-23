@@ -14,6 +14,11 @@ import { useAuth } from "@/shared/context/AuthContext";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
 export const PlaylistList = () => {
+  /**
+   * Shows the logged-in user's playlists and a button to create a new one.
+   * Handles loading, empty and error states.
+   * @returns A sidebar playlist list element.
+   */
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 

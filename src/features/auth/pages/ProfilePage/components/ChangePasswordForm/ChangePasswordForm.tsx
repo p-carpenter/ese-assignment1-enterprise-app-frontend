@@ -12,6 +12,12 @@ interface ChangePasswordFormProps {
   onCancel: () => void;
 }
 
+/**
+ * Small form allowing a logged-in user to change their password.
+ * Validates and submits via the `changePassword` API and calls `onSuccess` on completion.
+ * @param props `ChangePasswordFormProps` including callbacks for success and cancel.
+ * @returns A password-change form element.
+ */
 export const ChangePasswordForm = ({
   onSuccess,
   onCancel,

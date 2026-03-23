@@ -16,6 +16,12 @@ interface Props {
 }
 
 export const MiniPlayer = ({ onExpand }: Props) => {
+  /**
+   * Compact player shown at the bottom of the screen.
+   * Provides quick playback controls and a small progress bar.
+   * @param onExpand Callback to expand the player to full view.
+   * @returns Mini player element.
+   */
   const {
     currentSong,
     isPlaying,

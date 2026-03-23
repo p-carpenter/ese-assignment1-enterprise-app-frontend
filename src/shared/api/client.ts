@@ -3,6 +3,14 @@ import { ApiError } from "@/shared/api/errors";
 const API_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
+/**
+ * Generic API request helper that wraps fetch and throws `ApiError` on failure.
+ * It automatically prefixes the API base URL and sets JSON headers.
+ * @template T Expected response type.
+ * @param endpoint API endpoint path (leading slash recommended).
+ * @param options Fetch options to merge with defaults.
+ * @returns Parsed JSON response of type `T` or `undefined` for empty responses.
+ */
 export const request = async <T>(
   endpoint: string,
   options: RequestInit = {},

@@ -11,6 +11,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export const RequestResetPasswordForm = () => {
+  /**
+   * Form used to request a password reset email for a given address.
+   * Shows success or API error messages.
+   */
   const [apiError, setApiError] = useState("");
   const [success, setSuccess] = useState(false);
 

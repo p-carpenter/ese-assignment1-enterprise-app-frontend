@@ -10,6 +10,11 @@ import styles from "./SongHero.module.css";
 import type { Song } from "@/features/songs";
 import { usePlayer } from "@/features/player/components";
 
+/**
+ * Format seconds to M:SS for display in the hero header.
+ * @param s Number of seconds.
+ * @returns A string like "4:20".
+ */
 const fmt = (s: number) => {
   const mins = Math.floor(s / 60);
   const secs = Math.floor(s % 60);
@@ -20,6 +25,12 @@ interface SongHeroProps {
   song: Song;
 }
 
+/**
+ * Prominent header section for a song details page.
+ * Displays cover art, title, artist, metadata and play/edit controls.
+ * @param props `SongHeroProps` containing the `song` to display.
+ * @returns A hero element for the song.
+ */
 export const SongHero = (props: SongHeroProps) => {
   const { user } = useAuth();
   const { playSong, pause, play, isPlaying, currentSong } = usePlayer();

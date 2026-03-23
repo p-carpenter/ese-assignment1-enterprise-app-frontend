@@ -21,6 +21,12 @@ interface EditPlaylistFormProps {
   onClose: () => void;
 }
 
+/**
+ * Form used to edit playlist metadata within an edit flow or modal.
+ * Only dirty/changed fields are submitted to the API to avoid unnecessary updates.
+ * @param props `EditPlaylistFormProps` with the target `playlist` and `onClose` handler.
+ * @returns A form element for editing playlist metadata.
+ */
 export const EditPlaylistForm = ({
   playlist,
   onClose,

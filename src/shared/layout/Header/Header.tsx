@@ -11,10 +11,19 @@ interface HeaderProps {
   onMenuClick?: () => void;
 }
 
+/**
+ * App header with navigation, search and user actions.
+ * @param onMenuClick Optional callback toggling the sidebar on small screens.
+ * @returns Header element.
+ */
 export const Header = ({ onMenuClick }: HeaderProps): JSX.Element => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  /**
+   * Logs the current user out and navigates to the login screen.
+   * Catches and logs any errors from the logout flow.
+   */
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();

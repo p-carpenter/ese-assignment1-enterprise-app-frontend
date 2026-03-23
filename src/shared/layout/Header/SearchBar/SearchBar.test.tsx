@@ -179,7 +179,7 @@ describe("SearchBar", () => {
       await user.type(input, "test");
       await user.clear(input);
 
-      // Origin should be /profile again
+      // Origin should be /profile again.
       await user.type(input, "again");
       await user.clear(input);
       expect(screen.getByTestId("location-display")).toHaveTextContent(

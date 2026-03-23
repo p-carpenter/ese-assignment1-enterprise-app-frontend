@@ -6,6 +6,15 @@ import styles from "./SongLibrary.module.css";
 import { listSongsPaginated } from "../../api";
 import { queryKeys } from "@/shared/lib/queryKeys";
 
+/**
+ * Displays a paginated, infinitely-scrollable list of songs from the library.
+ *
+ * - Reads the `q` query parameter for search text and allows ordering.
+ * - Uses an infinite query to load pages and supports both scroll and
+ *   intersection-observer driven pagination.
+ *
+ * @returns A JSX element containing the library header and `SongList`.
+ */
 export const SongLibrary = (): JSX.Element => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") ?? "";

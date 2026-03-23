@@ -23,6 +23,12 @@ interface SongEditFormProps {
   onClose: () => void;
 }
 
+/**
+ * Inline form used to edit basic song metadata on the song details page.
+ * Only changed fields are submitted to the API; untouched fields are ignored.
+ * @param props `SongEditFormProps` containing the target `song` and `onClose` callback.
+ * @returns A form element for editing song metadata.
+ */
 export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
   const queryClient = useQueryClient();
 

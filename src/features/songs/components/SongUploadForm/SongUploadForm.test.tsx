@@ -127,7 +127,7 @@ describe("SongUploadForm", () => {
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(
-          "MP3 upload failed:",
+          "MP3 processing or upload failed:",
           expect.any(Error),
         );
         expect(consoleSpy).toHaveBeenCalledWith(
@@ -142,12 +142,10 @@ describe("SongUploadForm", () => {
   describe("Submit behavior", () => {
     it("shows the generic fallback message if submission throws a standard Error", async () => {
       setupCloudinaryMocks({
-        mp3Upload: vi
-          .fn()
-          .mockResolvedValue({
-            secure_url: "https://cdn/audio.mp3",
-            duration: 90,
-          }),
+        mp3Upload: vi.fn().mockResolvedValue({
+          secure_url: "https://cdn/audio.mp3",
+          duration: 90,
+        }),
       });
 
       const spy = vi

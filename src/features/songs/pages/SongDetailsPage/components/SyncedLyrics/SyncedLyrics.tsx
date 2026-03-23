@@ -5,11 +5,20 @@ import {
 } from "../../../../hooks/useLyrics";
 import styles from "./SyncedLyrics.module.css";
 
+/**
+ * Props for `SyncedLyrics` component.
+ */
 interface SyncedLyricsProps {
   lines: ParsedLine[];
   position: number;
 }
 
+/**
+ * Render timestamped (synced) lyrics and keep the active line centered.
+ * @param lines Parsed lyric lines with timestamps.
+ * @param position Current playback position in seconds.
+ * @returns A scrollable lyrics view with the active line highlighted.
+ */
 export const SyncedLyrics: FC<SyncedLyricsProps> = ({ lines, position }) => {
   const activeIdx = getActiveLyricIndex(lines, position);
   const activeRef = useRef<HTMLParagraphElement>(null);

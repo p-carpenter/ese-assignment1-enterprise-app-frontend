@@ -4,6 +4,11 @@ import { useAuth } from "@/shared/context/AuthContext";
 import { Button, AlertMessage } from "@/shared/components";
 import styles from "./AuthFooter.module.css";
 
+/**
+ * Sidebar footer showing the logged-in user's avatar, username and a logout button.
+ *
+ * Renders nothing when there is no authenticated `user`.
+ */
 export const AuthFooter = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();

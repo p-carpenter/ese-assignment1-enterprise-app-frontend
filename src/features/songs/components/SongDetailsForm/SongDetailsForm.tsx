@@ -34,6 +34,10 @@ export const SongDetailsForm = ({
   onCoverArtUpload,
   uploadedCoverUrl,
 }: SongDetailsFormProps) => {
+  /**
+   * Form for editing or entering song metadata used by upload and edit flows.
+   * Supports optional MP3/cover upload controls when provided by the parent.
+   */
   const [mp3FileName, setMp3FileName] = useState<string>("");
   const mp3InputId = useId();
   const coverInputRef = useRef<HTMLInputElement>(null);

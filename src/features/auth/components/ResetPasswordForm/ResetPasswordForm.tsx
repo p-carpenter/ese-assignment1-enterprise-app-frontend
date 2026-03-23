@@ -9,6 +9,10 @@ import { ApiError } from "@/shared/api/errors";
 import { resetPasswordSchema, type ResetPasswordFormValues } from "./schema";
 
 export const ResetPasswordForm = () => {
+  /**
+   * Form used to set a new password when arriving via a reset link (uid/token).
+   * Validates the new password pair and calls the confirm API.
+   */
   const { uid, token } = useParams<{ uid: string; token: string }>();
 
   const [apiError, setApiError] = useState("");

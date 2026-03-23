@@ -18,6 +18,11 @@ interface Props {
 }
 
 export const ExpandedPlayer = ({ onCollapse }: Props) => {
+  /**
+   * Expanded player view with full controls, lyrics and history.
+   * @param onCollapse Callback invoked to collapse back to the mini player.
+   * @returns Expanded player element.
+   */
   const {
     currentSong,
     isPlaying,

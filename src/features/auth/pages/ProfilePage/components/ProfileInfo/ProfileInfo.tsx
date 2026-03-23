@@ -12,6 +12,12 @@ interface ProfileInfoProps {
   onPasswordChangeSuccess: () => void;
 }
 
+/**
+ * Displays user profile fields (id, username, email) and an optional password change form.
+ * When `isEditing` is true the username becomes editable and the password change form is available.
+ * @param props `ProfileInfoProps` providing current values and callbacks.
+ * @returns Profile info element.
+ */
 export const ProfileInfo = ({
   id,
   username,

@@ -4,6 +4,11 @@ import { AppRoutes } from "./routes";
 import { useAuth } from "@/shared/context/AuthContext";
 import "./App.css";
 
+/**
+ * Root application component.
+ * Waits for auth initialization then mounts routing.
+ * @returns The top-level App component.
+ */
 export const App = (): JSX.Element => {
   const { loading } = useAuth();
 

@@ -3,6 +3,11 @@ import { ResetPasswordForm } from "../../components/ResetPasswordForm/ResetPassw
 import { AuthLayout } from "@/features/auth";
 import authStyles from "../AuthPages.module.css";
 
+/**
+ * Page for resetting a user's password via a form.
+ * Composes `ResetPasswordForm` within the auth layout and provides footer CTA.
+ * @returns Reset password page element.
+ */
 export const ResetPasswordPage = () => {
   return (
     <AuthLayout>

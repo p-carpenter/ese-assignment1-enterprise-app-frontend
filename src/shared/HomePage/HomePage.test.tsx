@@ -6,7 +6,6 @@ import { HomePage } from "./HomePage";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import "@testing-library/jest-dom/vitest";
 
-// Stub heavy child components so this test focuses on page composition
 vi.mock("@/features/songs", () => ({
   SongLibrary: () => <div data-testid="song-library">Song Library</div>,
 }));

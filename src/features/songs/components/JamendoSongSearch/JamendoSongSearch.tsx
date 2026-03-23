@@ -6,6 +6,11 @@ import { searchJamendoTracks } from "../../api/jamendo";
 import type { JamendoTrack } from "../../types";
 import styles from "./JamendoSongSearch.module.css";
 
+/**
+ * Extracts the year from an ISO-like date string.
+ * @param date Optional date string in YYYY-MM-DD or similar format.
+ * @returns The numeric year if parseable, otherwise `undefined`.
+ */
 const getReleaseYear = (date?: string): number | undefined => {
   if (!date) return undefined;
   const yearStr = date.split("-")[0];
@@ -13,6 +18,11 @@ const getReleaseYear = (date?: string): number | undefined => {
   return Number.isFinite(n) ? n : undefined;
 };
 
+/**
+ * Formats a duration in seconds as M:SS.
+ * @param seconds Duration in seconds.
+ * @returns A human-readable string like "3:05".
+ */
 const formatDuration = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -23,6 +33,12 @@ interface JamendoSongSearchProps {
   onImportSuccess: () => void;
 }
 
+/**
+ * UI for searching Jamendo tracks and importing a selected track into the app.
+ * Handles searching, displays results and imports chosen tracks via `uploadSong`.
+ * @param onImportSuccess Callback invoked after a successful import.
+ * @returns A section element with search form and results.
+ */
 export const JamendoSongSearch = ({
   onImportSuccess,
 }: JamendoSongSearchProps) => {

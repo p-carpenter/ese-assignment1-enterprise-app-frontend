@@ -1,6 +1,11 @@
 import { request } from "@/shared/api/client";
 import type { UserProfile } from "../types";
 
+/**
+ * Log in with an email and password.
+ * @param email User email.
+ * @param password User password.
+ */
 export const login = async (email: string, password: string): Promise<void> => {
   await request("/auth/login/", {
     method: "POST",
@@ -8,14 +13,28 @@ export const login = async (email: string, password: string): Promise<void> => {
   });
 };
 
+/**
+ * Fetch the current user's profile.
+ * @returns The user's profile.
+ */
 export const getMe = async (): Promise<UserProfile> => {
   return await request("/auth/user/");
 };
 
+/**
+ * Log out the current user.
+ */
 export const logout = async (): Promise<void> => {
   await request("/auth/logout/", { method: "POST" });
 };
 
+/**
+ * Register a new user.
+ * @param username Desired username.
+ * @param email User email.
+ * @param password1 Password.
+ * @param password2 Password confirmation.
+ */
 export const register = async (
   username: string,
   email: string,
@@ -33,6 +52,10 @@ export const register = async (
   });
 };
 
+/**
+ * Verify a registration email using the provided key.
+ * @param key Verification key.
+ */
 export const verifyRegistrationEmail = async (
   key: string | undefined,
 ): Promise<void> => {
@@ -44,6 +67,10 @@ export const verifyRegistrationEmail = async (
   });
 };
 
+/**
+ * Request a password reset e-mail for the provided address.
+ * @param email The user's e-mail address.
+ */
 export const requestPasswordReset = async (email: string): Promise<void> => {
   await request("/auth/password/reset/", {
     method: "POST",
@@ -51,6 +78,13 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
   });
 };
 
+/**
+ * Confirm a password reset using uid/token and new passwords.
+ * @param uid User identifier part of reset link.
+ * @param token Reset token.
+ * @param new_password1 New password.
+ * @param new_password2 Confirmation of new password.
+ */
 export const confirmPasswordReset = async (
   uid: string | undefined,
   token: string | undefined,
@@ -68,6 +102,12 @@ export const confirmPasswordReset = async (
   });
 };
 
+/**
+ * Change the current user's password.
+ * @param old_password Current password.
+ * @param new_password1 New password.
+ * @param new_password2 New password confirmation.
+ */
 export const changePassword = async (
   old_password: string,
   new_password1: string,
@@ -83,6 +123,12 @@ export const changePassword = async (
   });
 };
 
+/**
+ * Update the current user's profile.
+ * @param username New username.
+ * @param avatar_url Optional avatar URL.
+ * @returns The updated user profile.
+ */
 export const updateProfile = async (
   username: string,
   avatar_url?: string,

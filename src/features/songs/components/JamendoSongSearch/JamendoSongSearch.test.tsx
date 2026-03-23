@@ -157,7 +157,6 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      // If the actual API implementation returns a 400 Bad Request standardly handled by ApiError
       server.use(
         http.post("http://localhost:8000/api/songs/", () => {
           return HttpResponse.json(
