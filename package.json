@@ -50,6 +50,7 @@
     "globals": "^16.5.0",
     "jest-axe": "^10.0.0",
     "jsdom": "^28.1.0",
+    "jsdom-testing-mocks": "^1.16.0",
     "msw": "^2.12.10",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
