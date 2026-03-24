@@ -50,15 +50,24 @@ export const useCloudinaryUpload = () => {
       formData.append("api_key", api_key);
       formData.append("timestamp", timestamp.toString());
       formData.append("signature", signature);
-      formData.append("folder", "prod");
+      formData.append(
+        "folder",
+        import.meta.env.VITE_CLOUDINARY_FOLDER ?? "prod"
+      );
 
       const uploadResponse: Response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
         { method: "POST", body: formData },
       );
 
-      if (!uploadResponse.ok)
-        throw new Error("Cloudinary rejected the signed upload");
+      if (!uploadResponse.ok) {
+        const errBody = await uploadResponse.json().catch(() => null);
+
+        throw new Error(
+          errBody?.error?.message ??
+          "Cloudinary rejected the signed upload"
+        );
+      }
 
       const data: CloudinaryResponse = await uploadResponse.json();
       return data;
