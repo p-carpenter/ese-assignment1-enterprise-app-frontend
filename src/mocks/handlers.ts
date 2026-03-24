@@ -332,4 +332,9 @@ export const handlers = [
       api_key: "key",
     });
   }),
+
+  // CSRF token endpoint for compatibility with Django's CSRF protection.
+  http.get("*/api/csrf/", () => {
+    return HttpResponse.json({ detail: "Mock CSRF token set" });
+  }),
 ];
