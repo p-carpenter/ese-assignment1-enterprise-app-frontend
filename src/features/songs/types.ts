@@ -16,8 +16,8 @@ export interface Song {
 export interface SongUploadPayload {
   title: string;
   artist: string;
-  album?: string;
-  release_year?: number;
+  album?: string | null;
+  release_year?: number | null;
   file_url: string;
   cover_art_url: string;
   duration: number;
