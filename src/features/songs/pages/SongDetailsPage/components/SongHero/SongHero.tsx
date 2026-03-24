@@ -54,14 +54,18 @@ export const SongHero = (props: SongHeroProps) => {
 
   return (
     <div className={styles.hero}>
-      <img src={coverUrl} alt={props.song.title} className={styles.coverArt} />
+      {isEditing ? (
+        <SongEditForm song={props.song} onClose={() => setIsEditing(false)} />
+      ) : (
+        <>
+          <img
+            src={coverUrl}
+            alt={props.song.title}
+            className={styles.coverArt}
+          />
 
-      <div className={styles.heroInfo}>
-        <p className={styles.heroLabel}>Song</p>
-        {isEditing ? (
-          <SongEditForm song={props.song} onClose={() => setIsEditing(false)} />
-        ) : (
-          <>
+          <div className={styles.heroInfo}>
+            <p className={styles.heroLabel}>Song</p>
             <h1 className={styles.heroTitle}>{props.song.title}</h1>
             <p className={styles.heroArtist}>{props.song.artist}</p>
             {(props.song.album || props.song.release_year) && (
@@ -95,9 +99,9 @@ export const SongHero = (props: SongHeroProps) => {
                 </button>
               )}
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

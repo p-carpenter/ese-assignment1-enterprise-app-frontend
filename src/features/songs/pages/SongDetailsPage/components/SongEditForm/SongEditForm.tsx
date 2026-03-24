@@ -1,9 +1,15 @@
+import { useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateSong } from "@/features/songs/api";
+import { useCloudinaryUpload } from "@/shared/hooks";
 import { queryKeys } from "@/shared/lib/queryKeys";
-import { IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
+import {
+  IoCheckmarkOutline,
+  IoCloseOutline,
+  IoImageOutline,
+} from "react-icons/io5";
 import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 import { ApiError } from "@/shared/api/errors";
 import styles from "./SongEditForm.module.css";
@@ -31,10 +37,13 @@ interface SongEditFormProps {
  */
 export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
   const queryClient = useQueryClient();
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
+    control,
+    setValue,
     formState: { errors, dirtyFields },
   } = useForm<SongEditFormValues>({
     resolver: zodResolver(songEditSchema) as Resolver<SongEditFormValues>,
@@ -43,8 +52,26 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
       artist: song?.artist || "",
       album: song?.album || "",
       release_year: song?.release_year || undefined,
+      cover_art_url: song?.cover_art_url || "https://placehold.co/220",
     },
   });
+
+  const coverUrl = useWatch({ control, name: "cover_art_url" });
+
+  const { upload: uploadCover, isUploading: isCoverUploading } =
+    useCloudinaryUpload();
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const res = await uploadCover(file);
+    if (res) {
+      setValue("cover_art_url", res.secure_url, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  };
 
   const {
     mutate: saveEdit,
@@ -52,16 +79,8 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     isError: isSaveError,
     error: saveError,
   } = useMutation({
-    mutationFn: (data: Partial<SongEditFormValues>) =>
-      updateSong(song.id, {
-        title: data.title,
-        artist: data.artist,
-        album: data.album,
-        release_year: data.release_year,
-        file_url: song.file_url,
-        duration: song.duration,
-        cover_art_url: song.cover_art_url,
-      }),
+    mutationFn: (payload: Partial<SongEditFormValues>) =>
+      updateSong(song.id, payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.song(song.id),
@@ -71,17 +90,13 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
     },
   });
 
-  // Intercept the submission to filter out untouched fields
   const onFormSubmit = (data: SongEditFormValues) => {
     const payload = Object.keys(dirtyFields).reduce((acc, key) => {
       const k = key as keyof SongEditFormValues;
-
       (acc as Record<string, unknown>)[k] = data[k];
-
       return acc;
     }, {} as Partial<SongEditFormValues>);
 
-    // If no fields were changed, close the form without making an API call.
     if (Object.keys(payload).length === 0) {
       onClose();
       return;
@@ -96,84 +111,117 @@ export const SongEditForm = ({ song, onClose }: SongEditFormProps) => {
       : saveError?.message || "An unexpected error occurred.";
 
   return (
-    <form className={styles.editFields} onSubmit={handleSubmit(onFormSubmit)}>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
       {isSaveError && <AlertMessage message={editErrorMessage} />}
 
-      <div className={styles.inputGroup}>
-        <input
-          className={styles.editInput}
-          placeholder="Title"
-          aria-label="Title"
-          {...register("title")}
-        />
-        {errors.title && (
-          <span className={styles.errorText} role="alert">
-            {errors.title.message}
-          </span>
-        )}
-      </div>
+      <div className={styles.editFormRow}>
+        <div className={styles.coverWrap}>
+          <img
+            src={coverUrl || "https://placehold.co/220"}
+            alt="Song cover art"
+            className={styles.coverArt}
+          />
+          <button
+            type="button"
+            className={styles.coverEditBtn}
+            onClick={() => coverInputRef.current?.click()}
+            disabled={isCoverUploading}
+            aria-label={
+              isCoverUploading ? "Uploading cover image" : "Change song cover"
+            }
+          >
+            <IoImageOutline size={18} aria-hidden="true" />
+            {isCoverUploading ? "Uploading…" : "Change cover"}
+          </button>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            className={styles.hiddenInput}
+            onChange={handleCoverChange}
+            aria-label="Upload cover image file"
+            tabIndex={-1}
+          />
+        </div>
 
-      <div className={styles.inputGroup}>
-        <input
-          className={styles.editInput}
-          placeholder="Artist"
-          aria-label="Artist"
-          {...register("artist")}
-        />
-        {errors.artist && (
-          <span className={styles.errorText} role="alert">
-            {errors.artist.message}
-          </span>
-        )}
-      </div>
+        <div className={styles.editFields}>
+          <div className={styles.inputGroup}>
+            <input
+              className={styles.editInput}
+              placeholder="Title"
+              aria-label="Title"
+              {...register("title")}
+            />
+            {errors.title && (
+              <span className={styles.errorText} role="alert">
+                {errors.title.message}
+              </span>
+            )}
+          </div>
 
-      <div className={styles.inputGroup}>
-        <input
-          className={styles.editInput}
-          placeholder="Album"
-          aria-label="Album"
-          {...register("album")}
-        />
-        {errors.album && (
-          <span className={styles.errorText} role="alert">
-            {errors.album.message}
-          </span>
-        )}
-      </div>
+          <div className={styles.inputGroup}>
+            <input
+              className={styles.editInput}
+              placeholder="Artist"
+              aria-label="Artist"
+              {...register("artist")}
+            />
+            {errors.artist && (
+              <span className={styles.errorText} role="alert">
+                {errors.artist.message}
+              </span>
+            )}
+          </div>
 
-      <div className={styles.inputGroup}>
-        <input
-          className={styles.editInput}
-          placeholder="Release year"
-          aria-label="Release year"
-          {...register("release_year")}
-        />
-        {errors.release_year && (
-          <span className={styles.errorText} role="alert">
-            {errors.release_year.message}
-          </span>
-        )}
-      </div>
+          <div className={styles.inputGroup}>
+            <input
+              className={styles.editInput}
+              placeholder="Album"
+              aria-label="Album"
+              {...register("album")}
+            />
+            {errors.album && (
+              <span className={styles.errorText} role="alert">
+                {errors.album.message}
+              </span>
+            )}
+          </div>
 
-      <div className={styles.editActions}>
-        <button
-          type="submit"
-          className={styles.iconBtn}
-          disabled={isSaving}
-          aria-label="Save"
-        >
-          <IoCheckmarkOutline size={20} />
-          {isSaving ? "Saving…" : "Save"}
-        </button>
-        <button
-          type="button"
-          className={styles.iconBtn}
-          onClick={onClose}
-          aria-label="Cancel"
-        >
-          <IoCloseOutline size={20} />
-          Cancel
-        </button>
+          <div className={styles.inputGroup}>
+            <input
+              className={styles.editInput}
+              placeholder="Release year"
+              aria-label="Release year"
+              {...register("release_year")}
+            />
+            {errors.release_year && (
+              <span className={styles.errorText} role="alert">
+                {errors.release_year.message}
+              </span>
+            )}
+          </div>
+
+          <div className={styles.editActions}>
+            <button
+              type="submit"
+              className={styles.iconBtn}
+              disabled={isSaving || isCoverUploading}
+              aria-label="Save"
+            >
+              <IoCheckmarkOutline size={20} />
+              {isSaving ? "Saving…" : "Save"}
+            </button>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={onClose}
+              aria-label="Cancel"
+            >
+              <IoCloseOutline size={20} />
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </form>
   );
