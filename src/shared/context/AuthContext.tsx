@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getMe,
@@ -8,6 +8,7 @@ import {
 } from "@/features/auth/api";
 import { type UserProfile } from "@/features/auth/types";
 import { queryKeys } from "@/shared/lib/queryKeys";
+import { request } from "@/shared/api/client";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -28,6 +29,12 @@ export const AuthContext = createContext<AuthContextType | undefined>(
  * @param children React children to render within the provider.
  */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  useEffect(() => {
+    request("/csrf/", { method: "GET" }).catch((err) =>
+      console.error("Failed to fetch CSRF token", err),
+    );
+  }, []);
+
   const queryClient = useQueryClient();
 
   const { data: user = null, isLoading: loading } = useQuery({
