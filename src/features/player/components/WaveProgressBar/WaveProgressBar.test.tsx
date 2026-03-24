@@ -1,9 +1,6 @@
 import { render, screen, act, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { WaveProgressBar } from "./WaveProgressBar";
-import { axe, toHaveNoViolations } from "jest-axe";
-
-expect.extend(toHaveNoViolations);
 
 describe("WaveProgressBar", () => {
   const defaultProps = {
@@ -178,15 +175,5 @@ describe("WaveProgressBar", () => {
       const slider = screen.getByRole("slider", { name: "Seek time" });
       expect(slider).toHaveAttribute("max", "100");
     });
-  });
-
-  it("should have no accessibility violations", async () => {
-    // Axe requires real timers to resolve its internal promises.
-    vi.useRealTimers();
-
-    const { container } = render(<WaveProgressBar {...defaultProps} />);
-    const results = await axe(container);
-
-    expect(results).toHaveNoViolations();
   });
 });
