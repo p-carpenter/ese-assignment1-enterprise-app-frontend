@@ -1,3 +1,4 @@
+import { request } from "@/shared/api/client";
 import { useState } from "react";
 
 interface CloudinaryResponse {
@@ -6,8 +7,14 @@ interface CloudinaryResponse {
   original_filename: string;
 }
 
+interface SignatureResponse {
+  signature: string;
+  timestamp: number;
+  api_key: string;
+}
+
 /**
- * Hook providing a convenience `upload` function for Cloudinary uploads.
+ * Hook providing a convenience signed `upload` function for Cloudinary uploads.
  * Manages `isUploading` and `error` state and returns the Cloudinary response on success.
  * @returns An object with `upload(file)`, `isUploading` and `error`.
  */
@@ -17,37 +24,46 @@ export const useCloudinaryUpload = () => {
 
   const upload = async (file: File | null) => {
     if (!file) {
-      // If no file is selected (e.g., user cancels file dialog), do nothing.
-      // This prevents state changes when the user cancels.
       return null;
     }
 
     setIsUploading(true);
     setError(null);
 
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
+    const cloudName: string = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
-    // Auto-detect type: 'video' for audio files, 'image' for images
-    const resourceType = file.type.startsWith("audio") ? "video" : "image";
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", uploadPreset);
-    formData.append("resource_type", resourceType);
-
+    const resourceType: string = file.type.startsWith("audio")
+      ? "video"
+      : "image";
     try {
-      const response = await fetch(
+      const sigData = await request<SignatureResponse>(
+        "/cloudinary/generate-signature/",
+        {
+          method: "GET",
+        },
+      );
+
+      const { signature, timestamp, api_key } = sigData;
+
+      const formData: FormData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", api_key);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+      formData.append("folder", "prod");
+
+      const uploadResponse: Response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
         { method: "POST", body: formData },
       );
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!uploadResponse.ok)
+        throw new Error("Cloudinary rejected the signed upload");
 
-      const data: CloudinaryResponse = await response.json();
+      const data: CloudinaryResponse = await uploadResponse.json();
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setError(err instanceof Error ? err.message : "Unknown upload error");
       throw err;
     } finally {
       setIsUploading(false);
