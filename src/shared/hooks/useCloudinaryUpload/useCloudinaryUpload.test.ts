@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { useCloudinaryUpload } from "./useCloudinaryUpload";
-import { server } from "@/mocks/server"; 
+import { server } from "@/mocks/server";
 
 describe("useCloudinaryUpload", () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe("useCloudinaryUpload", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
-    server.resetHandlers(); 
+    server.resetHandlers();
   });
 
   it("starts with isUploading=false and error=null", () => {
@@ -30,7 +30,8 @@ describe("useCloudinaryUpload", () => {
     });
 
     expect(data).toEqual({
-      secure_url: "https://res.cloudinary.com/testcloud/image/upload/v1234567890/mock_upload.jpg",
+      secure_url:
+        "https://res.cloudinary.com/testcloud/image/upload/v1234567890/mock_upload.jpg",
       duration: 180,
       original_filename: "mock_file",
     });
@@ -41,10 +42,13 @@ describe("useCloudinaryUpload", () => {
   it("uses resource_type=video for audio files", async () => {
     let interceptedUrl = "";
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", ({ request }) => {
-        interceptedUrl = request.url;
-        return HttpResponse.json({ secure_url: "mock_url" });
-      })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        ({ request }) => {
+          interceptedUrl = request.url;
+          return HttpResponse.json({ secure_url: "mock_url" });
+        },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -60,10 +64,13 @@ describe("useCloudinaryUpload", () => {
   it("uses resource_type=image for image files", async () => {
     let interceptedUrl = "";
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", ({ request }) => {
-        interceptedUrl = request.url;
-        return HttpResponse.json({ secure_url: "mock_url" });
-      })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        ({ request }) => {
+          interceptedUrl = request.url;
+          return HttpResponse.json({ secure_url: "mock_url" });
+        },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -78,9 +85,12 @@ describe("useCloudinaryUpload", () => {
 
   it("sets error state and re-throws when the upload request fails (non-ok)", async () => {
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", () => {
-        return new HttpResponse("Bad Request", { status: 400 });
-      })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        () => {
+          return new HttpResponse("Bad Request", { status: 400 });
+        },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -98,9 +108,12 @@ describe("useCloudinaryUpload", () => {
 
   it("sets error state and re-throws when fetch itself rejects (network error)", async () => {
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", () => {
-        return HttpResponse.error();
-      })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        () => {
+          return HttpResponse.error();
+        },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -110,14 +123,20 @@ describe("useCloudinaryUpload", () => {
       await expect(result.current.upload(file)).rejects.toThrow();
     });
 
-    expect(result.current.error).toMatch(/Failed to fetch|fetch failed|Network error/i);
+    expect(result.current.error).toMatch(
+      /Failed to fetch|fetch failed|Network error/i,
+    );
   });
 
   it("clears error state when a subsequent upload succeeds", async () => {
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", () => {
-        return new HttpResponse("Error", { status: 500 });
-      }, { once: true })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        () => {
+          return new HttpResponse("Error", { status: 500 });
+        },
+        { once: true },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -137,10 +156,13 @@ describe("useCloudinaryUpload", () => {
   it("posts to the correct Cloudinary URL including the cloud name", async () => {
     let interceptedUrl = "";
     server.use(
-      http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", ({ request }) => {
-        interceptedUrl = request.url;
-        return HttpResponse.json({ secure_url: "mock_url" });
-      })
+      http.post(
+        "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+        ({ request }) => {
+          interceptedUrl = request.url;
+          return HttpResponse.json({ secure_url: "mock_url" });
+        },
+      ),
     );
 
     const { result } = renderHook(() => useCloudinaryUpload());
@@ -152,6 +174,4 @@ describe("useCloudinaryUpload", () => {
 
     expect(interceptedUrl).toContain("testcloud");
   });
-
-  
 });

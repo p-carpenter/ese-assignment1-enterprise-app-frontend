@@ -312,13 +312,17 @@ export const handlers = [
   }),
 
   // Cloudinary upload handler.
-  http.post("https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload", () => {
-    return HttpResponse.json({
-      secure_url: "https://res.cloudinary.com/testcloud/image/upload/v1234567890/mock_upload.jpg",
-      duration: 180,
-      original_filename: "mock_file",
-    });
-  }),
+  http.post(
+    "https://api.cloudinary.com/v1_1/:cloudName/:resourceType/upload",
+    () => {
+      return HttpResponse.json({
+        secure_url:
+          "https://res.cloudinary.com/testcloud/image/upload/v1234567890/mock_upload.jpg",
+        duration: 180,
+        original_filename: "mock_file",
+      });
+    },
+  ),
 
   // Cloudinary signature handler.
   http.get(`${BASE_URL}/cloudinary/generate-signature/`, () => {

@@ -52,7 +52,7 @@ export const useCloudinaryUpload = () => {
       formData.append("signature", signature);
       formData.append(
         "folder",
-        import.meta.env.VITE_CLOUDINARY_FOLDER ?? "prod"
+        import.meta.env.VITE_CLOUDINARY_FOLDER ?? "prod",
       );
 
       const uploadResponse: Response = await fetch(
@@ -64,8 +64,7 @@ export const useCloudinaryUpload = () => {
         const errBody = await uploadResponse.json().catch(() => null);
 
         throw new Error(
-          errBody?.error?.message ??
-          "Cloudinary rejected the signed upload"
+          errBody?.error?.message ?? "Cloudinary rejected the signed upload",
         );
       }
 
