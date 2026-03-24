@@ -3,6 +3,12 @@ import { ApiError } from "@/shared/api/errors";
 const API_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
+/** Helper function to get CSRF token from cookies for Django requests.*/
+const getCsrfToken = () => {
+  const match = document.cookie.match(new RegExp("(^| )csrftoken=([^;]+)"));
+  return match ? match[2] : null;
+};
+
 /**
  * Generic API request helper that wraps fetch and throws `ApiError` on failure.
  * It automatically prefixes the API base URL and sets JSON headers.
@@ -17,11 +23,15 @@ export const request = async <T>(
 ): Promise<T> => {
   const url = `${API_URL}${endpoint}`;
 
+  // Extract the CSRF token.
+  const csrfToken = getCsrfToken();
+
   const config = {
     ...options,
     credentials: "include" as RequestCredentials,
     headers: {
       "Content-Type": "application/json",
+      ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
       ...options.headers,
     },
   };
