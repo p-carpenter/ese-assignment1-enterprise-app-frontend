@@ -3,7 +3,7 @@ import type { Playlist } from "@/features/playlists/types";
 import type { UserProfile } from "@/features/auth/types";
 import type { Song } from "@/features/songs/types";
 import type { PlayHistoryEntry } from "@/features/player/types";
-
+import type { UserMini } from "@/features/auth/types";
 // Fixtures
 const BASE_URL = "http://localhost:8000/api";
 
@@ -11,6 +11,11 @@ const INITIAL_USER: UserProfile = {
   id: 1,
   username: "testuser",
   email: "test@test.com",
+};
+
+const INITIAL_USER_MINI: UserMini = {
+  id: 1,
+  username: "testuser",
 };
 
 const INITIAL_SONGS: Song[] = [
@@ -22,6 +27,7 @@ const INITIAL_SONGS: Song[] = [
     file_url: "https://example.com/skyline.mp3",
     cover_art_url: "https://placehold.co/220",
     uploaded_at: "2024-01-01T00:00:00Z",
+    uploaded_by: INITIAL_USER_MINI,
   },
   {
     id: 2,
@@ -31,6 +37,7 @@ const INITIAL_SONGS: Song[] = [
     file_url: "https://example.com/sunset.mp3",
     cover_art_url: "https://placehold.co/220",
     uploaded_at: "2024-01-02T00:00:00Z",
+    uploaded_by: INITIAL_USER_MINI,
   },
 ];
 
@@ -42,7 +49,7 @@ const INITIAL_PLAYLISTS: Playlist[] = [
     is_public: true,
     is_collaborative: false,
     cover_art_url: "https://placehold.co/220",
-    owner: { id: 1, username: "testuser" },
+    owner: INITIAL_USER_MINI,
     songs: [],
   },
 ];
@@ -168,6 +175,7 @@ export const handlers = [
       file_url: payload.file_url || "",
       cover_art_url: payload.cover_art_url || "",
       uploaded_at: new Date().toISOString(),
+      uploaded_by: currentUser || INITIAL_USER_MINI,
     };
     songs.push(newSong);
     return HttpResponse.json(newSong, { status: 201 });
@@ -208,7 +216,7 @@ export const handlers = [
       is_public: payload.is_public || false,
       is_collaborative: payload.is_collaborative || false,
       cover_art_url: "https://placehold.co/220",
-      owner: currentUser!,
+      owner: currentUser || INITIAL_USER_MINI,
       songs: [],
     };
     playlists.push(newPlaylist);

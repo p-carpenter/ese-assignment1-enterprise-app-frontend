@@ -13,6 +13,7 @@ import { IoTimeOutline } from "react-icons/io5";
 import { ApiError } from "@/shared/api/errors";
 import { AlertMessage } from "@/shared/components/AlertMessage/AlertMessage";
 import { queryKeys } from "@/shared/lib/queryKeys";
+import { useAuth } from "@/shared/context/AuthContext";
 
 interface SongListProps {
   songs: Song[];
@@ -47,6 +48,7 @@ export const SongList = ({
   const [songToAddToPlaylist, setSongToAddToPlaylist] = useState<Song | null>(
     null,
   );
+  const { user } = useAuth();
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteSong(id),
@@ -78,19 +80,27 @@ export const SongList = ({
   );
 
   const generateDropdownItems = useCallback(
-    (song: Song): DropdownItem[] => [
-      { label: "Edit", onSelect: () => setEditSong(song) },
-      {
-        label: "Delete",
-        onSelect: () => deleteMutation.mutate(song.id),
-        disabled: deleteMutation.isPending,
-      },
-      {
+    (song: Song): DropdownItem[] => {
+      const isOwner = user?.id === song.uploaded_by?.id;
+      const items: DropdownItem[] = [];
+
+      if (isOwner) {
+        items.push({ label: "Edit", onSelect: () => setEditSong(song) });
+        items.push({
+          label: "Delete",
+          onSelect: () => deleteMutation.mutate(song.id),
+          disabled: deleteMutation.isPending,
+        });
+      }
+
+      items.push({
         label: "Add to Playlist",
         onSelect: () => setSongToAddToPlaylist(song),
-      },
-    ],
-    [deleteMutation],
+      });
+
+      return items;
+    },
+    [deleteMutation, user?.id],
   );
 
   const activeError = deleteMutation.error || addToPlaylistMutation.error;

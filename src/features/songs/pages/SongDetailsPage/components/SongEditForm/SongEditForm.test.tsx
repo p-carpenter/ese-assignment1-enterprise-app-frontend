@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SongEditForm } from "./SongEditForm";
@@ -8,6 +8,12 @@ import { server } from "@/mocks/server";
 import { http, HttpResponse, delay } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import { createSong } from "@/test/factories/song";
+import { useCloudinaryUpload } from "@/shared/hooks";
+
+vi.mock("@/shared/hooks", () => ({
+  useCloudinaryUpload: vi.fn(),
+}));
+const mockedUseCloudinary = vi.mocked(useCloudinaryUpload);
 
 describe("SongEditForm", () => {
   const mockOnClose = vi.fn();
@@ -20,6 +26,12 @@ describe("SongEditForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetHandlerState();
+
+    mockedUseCloudinary.mockReturnValue({
+      upload: vi.fn(),
+      isUploading: false,
+      error: null,
+    });
   });
 
   describe("form submission", () => {
@@ -46,64 +58,122 @@ describe("SongEditForm", () => {
         expect(mockOnClose).toHaveBeenCalled();
       });
     });
-  });
-
-  describe("mutation lifecycle", () => {
-    it("disables save button and shows saving label while mutation is pending", async () => {
-      server.use(
-        http.put("http://localhost:8000/api/songs/1/", async () => {
-          await delay("infinite");
-          return HttpResponse.json({});
-        }),
-      );
-
+    it("closes without saving if no fields were modified", async () => {
       const user = userEvent.setup();
       renderWithQueryClient(
         <SongEditForm song={dummySong} onClose={mockOnClose} />,
       );
 
-      const titleInput = screen.getByPlaceholderText("Title");
-      await user.clear(titleInput);
-      await user.type(titleInput, "Changed Title");
       await user.click(screen.getByRole("button", { name: "Save" }));
 
       await waitFor(() => {
-        const saveBtn = screen.getByRole("button", { name: "Save" });
-        expect(saveBtn).toBeDisabled();
-        expect(saveBtn).toHaveTextContent(/saving/i);
+        expect(mockOnClose).toHaveBeenCalled();
       });
     });
-  });
+    it("uploads a new cover and updates the form state", async () => {
+      const mockUpload = vi
+        .fn()
+        .mockResolvedValue({ secure_url: "http://new-cover.jpg" });
+      mockedUseCloudinary.mockReturnValue({
+        upload: mockUpload,
+        isUploading: false,
+        error: null,
+      });
 
-  describe("errors and cancellation", () => {
-    it("shows readable API error message when save fails", async () => {
-      server.use(
-        http.put("http://localhost:8000/api/songs/1/", () =>
-          HttpResponse.json({ title: ["Title is invalid"] }, { status: 400 }),
-        ),
-      );
-
-      const user = userEvent.setup();
       renderWithQueryClient(
         <SongEditForm song={dummySong} onClose={mockOnClose} />,
       );
 
-      const titleInput = screen.getByPlaceholderText("Title");
-      await user.clear(titleInput);
-      await user.type(titleInput, "Bad Title");
-      await user.click(screen.getByRole("button", { name: "Save" }));
+      const fileInput = screen.getByLabelText("Upload cover image file");
+      const file = new File(["dummy"], "cover.jpg", { type: "image/jpeg" });
 
-      expect(await screen.findByText(/Title is invalid/i)).toBeInTheDocument();
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      await waitFor(() => {
+        expect(mockUpload).toHaveBeenCalledWith(file);
+      });
+
+      const img = screen.getByRole("img", { name: "Song cover art" });
+      await waitFor(() => {
+        expect(img).toHaveAttribute("src", "http://new-cover.jpg");
+      });
     });
 
-    it("calls onClose when cancel is clicked", async () => {
-      const user = userEvent.setup();
+    describe("mutation lifecycle", () => {
+      it("disables save button and shows saving label while mutation is pending", async () => {
+        server.use(
+          http.put("http://localhost:8000/api/songs/1/", async () => {
+            await delay("infinite");
+            return HttpResponse.json({});
+          }),
+        );
+
+        const user = userEvent.setup();
+        renderWithQueryClient(
+          <SongEditForm song={dummySong} onClose={mockOnClose} />,
+        );
+
+        const titleInput = screen.getByPlaceholderText("Title");
+        await user.clear(titleInput);
+        await user.type(titleInput, "Changed Title");
+        await user.click(screen.getByRole("button", { name: "Save" }));
+
+        await waitFor(() => {
+          const saveBtn = screen.getByRole("button", { name: "Save" });
+          expect(saveBtn).toBeDisabled();
+          expect(saveBtn).toHaveTextContent(/saving/i);
+        });
+      });
+    });
+
+    describe("errors and cancellation", () => {
+      it("shows readable API error message when save fails", async () => {
+        server.use(
+          http.put("http://localhost:8000/api/songs/1/", () =>
+            HttpResponse.json({ title: ["Title is invalid"] }, { status: 400 }),
+          ),
+        );
+
+        const user = userEvent.setup();
+        renderWithQueryClient(
+          <SongEditForm song={dummySong} onClose={mockOnClose} />,
+        );
+
+        const titleInput = screen.getByPlaceholderText("Title");
+        await user.clear(titleInput);
+        await user.type(titleInput, "Bad Title");
+        await user.click(screen.getByRole("button", { name: "Save" }));
+
+        expect(
+          await screen.findByText(/Title is invalid/i),
+        ).toBeInTheDocument();
+      });
+
+      it("calls onClose when cancel is clicked", async () => {
+        const user = userEvent.setup();
+        renderWithQueryClient(
+          <SongEditForm song={dummySong} onClose={mockOnClose} />,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+    });
+
+    it("does nothing if file input is cleared without a file", () => {
+      mockedUseCloudinary.mockReturnValue({
+        upload: vi.fn(),
+        isUploading: false,
+        error: null,
+      });
+
       renderWithQueryClient(
         <SongEditForm song={dummySong} onClose={mockOnClose} />,
       );
+      const fileInput = screen.getByLabelText("Upload cover image file");
 
-      await user.click(screen.getByRole("button", { name: "Cancel" }));
-      expect(mockOnClose).toHaveBeenCalled();
+      fireEvent.change(fileInput, { target: { files: [] } });
+      expect(mockedUseCloudinary().upload).not.toHaveBeenCalled();
     });
   });
 });
