@@ -4,6 +4,9 @@ import { ApiError } from "@/shared/api/errors";
 import { uploadSong } from "../../api";
 import { searchJamendoTracks } from "../../api/jamendo";
 import type { JamendoTrack } from "../../types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/shared/lib/queryKeys";
+import { JamendoSearchResult } from "./JamendoSearchResult";
 import styles from "./JamendoSongSearch.module.css";
 
 /**
@@ -19,39 +22,24 @@ const getReleaseYear = (date?: string): number | undefined => {
 };
 
 /**
- * Formats a duration in seconds as M:SS.
- * @param seconds Duration in seconds.
- * @returns A human-readable string like "3:05".
- */
-const formatDuration = (seconds: number) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-};
-
-interface JamendoSongSearchProps {
-  onImportSuccess: () => void;
-}
-
-/**
  * UI for searching Jamendo tracks and importing a selected track into the app.
  * Handles searching, displays results and imports chosen tracks via `uploadSong`.
  * @param onImportSuccess Callback invoked after a successful import.
  * @returns A section element with search form and results.
  */
-export const JamendoSongSearch = ({
-  onImportSuccess,
-}: JamendoSongSearchProps) => {
+export const JamendoSongSearch = () => {
   const [query, setQuery] = useState("");
   const [tracks, setTracks] = useState<JamendoTrack[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isImportingTrackId, setIsImportingTrackId] = useState<string | null>(
     null,
   );
+  const [importedTrackIds, setImportedTrackIds] = useState<string[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
   const hasResults = tracks.length > 0;
+  const queryClient = useQueryClient();
 
   const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,6 +68,26 @@ export const JamendoSongSearch = ({
     }
   };
 
+  const uploadMutation = useMutation({
+    mutationFn: uploadSong,
+    onSuccess: () => {
+      // Invalidate the songs query to refresh the list with the newly imported track.
+      queryClient.invalidateQueries({ queryKey: queryKeys.allSongs });
+    },
+    onError: (error) => {
+      setImportError(
+        error instanceof ApiError
+          ? error.getReadableMessage("Failed to import Jamendo track.")
+          : error instanceof Error
+            ? error.message
+            : "Failed to import Jamendo track.",
+      );
+    },
+    onSettled: () => {
+      setIsImportingTrackId(null);
+    },
+  });
+
   const handleImport = async (track: JamendoTrack) => {
     const fileUrl = track.audiodownload || track.audio;
 
@@ -91,10 +99,10 @@ export const JamendoSongSearch = ({
     setIsImportingTrackId(track.id);
     setImportError(null);
 
-    try {
-      const release_year = getReleaseYear(track.releasedate);
+    const release_year = getReleaseYear(track.releasedate);
 
-      await uploadSong({
+    uploadMutation.mutate(
+      {
         title: track.name,
         artist: track.artist_name || "Unknown Artist",
         album: track.album_name || "Unknown Album",
@@ -102,20 +110,13 @@ export const JamendoSongSearch = ({
         file_url: fileUrl,
         cover_art_url: track.image || "",
         duration: Math.round(track.duration || 0),
-      });
-
-      onImportSuccess();
-    } catch (error) {
-      setImportError(
-        error instanceof ApiError
-          ? error.getReadableMessage("Failed to import Jamendo track.")
-          : error instanceof Error
-            ? error.message
-            : "Failed to import Jamendo track.",
-      );
-    } finally {
-      setIsImportingTrackId(null);
-    }
+      },
+      {
+        onSuccess: () => {
+          setImportedTrackIds((prev) => [...prev, track.id]);
+        },
+      },
+    );
   };
 
   return (
@@ -152,23 +153,13 @@ export const JamendoSongSearch = ({
       {hasResults && (
         <ul className={styles.results}>
           {tracks.map((track) => (
-            <li key={track.id} className={styles.resultItem}>
-              <div className={styles.meta}>
-                <p className={styles.trackTitle}>{track.name}</p>
-                <p className={styles.trackDetails}>
-                  {track.artist_name || "Unknown Artist"} •{" "}
-                  {formatDuration(Math.round(track.duration || 0))}
-                </p>
-              </div>
-
-              <Button
-                size="small"
-                onClick={() => void handleImport(track)}
-                isDisabled={isImportingTrackId === track.id}
-              >
-                {isImportingTrackId === track.id ? "Importing..." : "Import"}
-              </Button>
-            </li>
+            <JamendoSearchResult
+              key={track.id}
+              track={track}
+              onImport={handleImport}
+              isImporting={isImportingTrackId === track.id}
+              isImported={importedTrackIds.includes(track.id)}
+            />
           ))}
         </ul>
       )}
