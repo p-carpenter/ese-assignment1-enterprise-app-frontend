@@ -9,6 +9,7 @@ import { server } from "@/mocks/server";
 import { http, HttpResponse, delay } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import { axe, toHaveNoViolations } from "jest-axe";
+
 expect.extend(toHaveNoViolations);
 
 vi.mock("../../api/jamendo", () => ({
@@ -18,8 +19,6 @@ vi.mock("../../api/jamendo", () => ({
 const mockedSearchJamendoTracks = vi.mocked(searchJamendoTracks);
 
 describe("JamendoSongSearch", () => {
-  const mockOnImportSuccess = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
     resetHandlerState();
@@ -28,9 +27,7 @@ describe("JamendoSongSearch", () => {
   describe("Search", () => {
     it("shows validation error when searching with empty query", async () => {
       const user = userEvent.setup();
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.click(screen.getByRole("button", { name: /search/i }));
 
@@ -52,9 +49,7 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "test");
       await user.click(screen.getByRole("button", { name: /search/i }));
@@ -68,9 +63,7 @@ describe("JamendoSongSearch", () => {
         "Just a generic string failure",
       );
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "error");
       await user.click(screen.getByRole("button", { name: /search/i }));
@@ -82,7 +75,7 @@ describe("JamendoSongSearch", () => {
   });
 
   describe("Import", () => {
-    it("imports a track and calls onImportSuccess with mapped payload", async () => {
+    it("imports a track and updates the button to 'Added'", async () => {
       const user = userEvent.setup();
       mockedSearchJamendoTracks.mockResolvedValueOnce([
         {
@@ -98,9 +91,16 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
+      server.use(
+        http.post("http://localhost:8000/api/songs/", () => {
+          return HttpResponse.json(
+            { id: 99, title: "Mapped Song" },
+            { status: 201 },
+          );
+        }),
       );
+
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -112,7 +112,9 @@ describe("JamendoSongSearch", () => {
       await user.click(screen.getByRole("button", { name: /^import$/i }));
 
       await waitFor(() => {
-        expect(mockOnImportSuccess).toHaveBeenCalledTimes(1);
+        expect(
+          screen.getByRole("button", { name: /^added$/i }),
+        ).toBeInTheDocument();
       });
     });
 
@@ -129,9 +131,8 @@ describe("JamendoSongSearch", () => {
         },
       ]);
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
+
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "nourl");
       await user.click(screen.getByRole("button", { name: /search/i }));
 
@@ -166,9 +167,7 @@ describe("JamendoSongSearch", () => {
         }),
       );
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -182,7 +181,6 @@ describe("JamendoSongSearch", () => {
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
       });
-      expect(mockOnImportSuccess).not.toHaveBeenCalled();
     });
 
     it("handles non-Error values thrown from upload routine", async () => {
@@ -201,9 +199,8 @@ describe("JamendoSongSearch", () => {
         .spyOn(songsApi, "uploadSong")
         .mockRejectedValueOnce("String Exception");
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
+
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
         "nonerr",
@@ -238,9 +235,7 @@ describe("JamendoSongSearch", () => {
         }),
       );
 
-      renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={mockOnImportSuccess} />,
-      );
+      renderWithQueryClient(<JamendoSongSearch />);
 
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
@@ -262,9 +257,7 @@ describe("JamendoSongSearch", () => {
 
   describe("Accessibility", () => {
     it("should have no accessibility violations", async () => {
-      const { container } = renderWithQueryClient(
-        <JamendoSongSearch onImportSuccess={vi.fn()} />,
-      );
+      const { container } = renderWithQueryClient(<JamendoSongSearch />);
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });

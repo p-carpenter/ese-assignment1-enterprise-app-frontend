@@ -109,17 +109,5 @@ describe("UploadPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/");
       expect(mockNavigate).toHaveBeenCalledTimes(1);
     });
-
-    it("navigates to '/' after successful Jamendo import", async () => {
-      const user = userEvent.setup();
-      renderComponent();
-
-      await user.click(screen.getByRole("tab", { name: /search jamendo/i }));
-
-      await user.click(screen.getByTestId("mock-success-trigger"));
-
-      expect(mockNavigate).toHaveBeenCalledWith("/");
-      expect(mockNavigate).toHaveBeenCalledTimes(1);
-    });
   });
 });

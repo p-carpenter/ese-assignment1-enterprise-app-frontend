@@ -16,8 +16,12 @@ export const UploadPage = () => {
     <div className={styles.page}>
       <Tabs aria-label="Upload methods">
         <TabList className={styles.tabs}>
-          <Tab id="upload">Upload MP3</Tab>
-          <Tab id="jamendo">Search Jamendo</Tab>
+          <Tab id="upload" className={styles.tab}>
+            Upload MP3
+          </Tab>
+          <Tab id="jamendo" className={styles.tab}>
+            Search Jamendo
+          </Tab>
         </TabList>
 
         <TabPanel id="upload">
@@ -25,7 +29,7 @@ export const UploadPage = () => {
         </TabPanel>
 
         <TabPanel id="jamendo">
-          <JamendoSongSearch onImportSuccess={() => navigate("/")} />
+          <JamendoSongSearch />
         </TabPanel>
       </Tabs>
 
