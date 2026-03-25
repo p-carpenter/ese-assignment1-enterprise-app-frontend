@@ -9,6 +9,7 @@ import { resetHandlerState } from "@/mocks/handlers";
 import { createSong } from "@/test/factories/song";
 import { interactionObserverMock } from "../../../../../vitest.setup.ts";
 import { PlayerProvider } from "@/shared/context/PlayerContext.tsx";
+import { AuthProvider } from "@/shared/context/AuthContext.tsx";
 
 describe("SongLibrary", () => {
   beforeEach(() => {
@@ -19,9 +20,11 @@ describe("SongLibrary", () => {
   const renderComponent = () =>
     renderWithQueryClient(
       <MemoryRouter>
-        <PlayerProvider>
-          <SongLibrary />
-        </PlayerProvider>
+        <AuthProvider>
+          <PlayerProvider>
+            <SongLibrary />
+          </PlayerProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
 

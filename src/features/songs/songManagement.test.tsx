@@ -16,6 +16,7 @@ import { http, HttpResponse, delay } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import { type Song } from "@/features/songs/types";
 import { createMockPlayer } from "@/test/factories/player";
+import { AuthProvider, useAuth } from "@/shared/context";
 
 vi.mock("@/shared/hooks", () => ({
   useCloudinaryUpload: vi.fn(),
@@ -33,8 +34,16 @@ vi.mock("@/shared/context/PlayerContext", () => ({
   usePlayer: vi.fn(),
 }));
 
+vi.mock("@/shared/context/AuthContext", () => ({
+  useAuth: vi.fn(),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 const mockedUseCloudinary = vi.mocked(useCloudinaryUpload);
 const mockedUsePlayer = vi.mocked(usePlayer);
+const mockedUseAuth = vi.mocked(useAuth);
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -45,13 +54,15 @@ const renderLibrary = (searchQuery = "") => {
   const queryClient = createTestQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter
-        initialEntries={[
-          searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
-        ]}
-      >
-        <SongLibrary />
-      </MemoryRouter>
+      <AuthProvider>
+        <MemoryRouter
+          initialEntries={[
+            searchQuery ? `/?q=${encodeURIComponent(searchQuery)}` : "/",
+          ]}
+        >
+          <SongLibrary />
+        </MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>,
   );
 };
@@ -63,6 +74,10 @@ describe("Song management", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     resetHandlerState();
+
+    mockedUseAuth.mockReturnValue({
+      user: { id: 1, username: "testuser", email: "test@test.com" },
+    } as ReturnType<typeof useAuth>);
 
     navigateMock = vi.fn();
     (useNavigate as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
