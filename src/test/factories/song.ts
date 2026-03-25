@@ -13,6 +13,7 @@ export const createSong = (overrides: Partial<Song> = {}): Song => ({
 
   cover_art_url: "https://placehold.co/220",
   uploaded_at: new Date().toISOString(),
+  uploaded_by: { id: 1, username: "testuser" },
 
   ...overrides,
 });
