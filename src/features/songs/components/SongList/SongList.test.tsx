@@ -11,6 +11,8 @@ import { http, HttpResponse } from "msw";
 import { resetHandlerState } from "@/mocks/handlers";
 import { createSong } from "@/test/factories/song";
 import { createMockPlayer } from "@/test/factories/player";
+import { AuthProvider } from "@/shared/context";
+import { queryKeys } from "@/shared/lib/queryKeys";
 
 vi.mock("@/shared/context/PlayerContext", () => ({
   usePlayer: vi.fn(),
@@ -73,6 +75,15 @@ vi.mock(
   }),
 );
 
+vi.mock("@/shared/context/AuthContext", () => ({
+  useAuth: vi.fn().mockReturnValue({
+    user: { id: 1, username: "testuser", email: "test@test.com" },
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 const mockSongs: Song[] = [
   createSong({ id: 1, title: "Song 1" }),
   createSong({ id: 2, title: "Song 2" }),
@@ -85,7 +96,9 @@ const setup = (props: Partial<ComponentProps<typeof SongList>> = {}) => {
   );
 
   const utils = renderWithQueryClient(
-    <SongList songs={mockSongs} {...props} />,
+    <AuthProvider>
+      <SongList songs={mockSongs} {...props} />
+    </AuthProvider>,
   );
   return { ...utils, mockPlaySong };
 };
@@ -160,6 +173,48 @@ describe("SongList", () => {
       await waitFor(() =>
         expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
       );
+    });
+
+    it("invalidates queries on successful delete", async () => {
+      server.use(
+        http.delete(
+          "http://localhost:8000/api/songs/1/",
+          () => new HttpResponse(null, { status: 204 }),
+        ),
+      );
+
+      const { queryClient } = setup();
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+      fireEvent.click(screen.getAllByText("Delete")[0]);
+
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: queryKeys.allSongs,
+        });
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: queryKeys.playlists,
+        });
+      });
+    });
+  });
+  describe("Display & Pagination", () => {
+    it("renders load more sentinel and loading indicator when provided", () => {
+      const dummyRef = { current: null };
+      setup({ loadMoreRef: dummyRef, isFetchingNextPage: true });
+
+      expect(screen.getByTestId("scroll-sentinel")).toBeInTheDocument();
+      expect(screen.getByText("Loading more...")).toBeInTheDocument();
+    });
+
+    it("triggers onScroll callback when container is scrolled", () => {
+      const onScrollMock = vi.fn();
+      setup({ onScroll: onScrollMock });
+
+      const scrollContainer = screen.getByRole("list").parentElement!;
+      fireEvent.scroll(scrollContainer);
+
+      expect(onScrollMock).toHaveBeenCalled();
     });
   });
 });
