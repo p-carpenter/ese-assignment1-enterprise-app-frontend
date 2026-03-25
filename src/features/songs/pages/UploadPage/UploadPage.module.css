@@ -6,5 +6,36 @@
 .tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--app-dark-highlight); /* Gives the tab list a track to sit on */
+  padding-bottom: 8px;
+}
+
+.tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--app-gray);
+  border: none;
+  border-radius: 20px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.tab:hover {
+  background-color: var(--app-dark-highlight);
+  color: var(--app-white);
+}
+
+.tab[data-selected] {
+  background-color: var(--app-white);
+  color: #000;
+}
+
+.tab[data-focus-visible] {
+  outline: 2px solid var(--app-white);
+  outline-offset: 2px;
 }
