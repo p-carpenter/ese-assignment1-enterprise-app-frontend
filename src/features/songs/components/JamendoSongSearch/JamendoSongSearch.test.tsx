@@ -93,7 +93,10 @@ describe("JamendoSongSearch", () => {
 
       server.use(
         http.post("http://localhost:8000/api/songs/", () => {
-          return HttpResponse.json({ id: 99, title: "Mapped Song" }, { status: 201 });
+          return HttpResponse.json(
+            { id: 99, title: "Mapped Song" },
+            { status: 201 },
+          );
         }),
       );
 
@@ -109,7 +112,9 @@ describe("JamendoSongSearch", () => {
       await user.click(screen.getByRole("button", { name: /^import$/i }));
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /^added$/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /^added$/i }),
+        ).toBeInTheDocument();
       });
     });
 
@@ -127,7 +132,7 @@ describe("JamendoSongSearch", () => {
       ]);
 
       renderWithQueryClient(<JamendoSongSearch />);
-      
+
       await user.type(screen.getByLabelText(/search jamendo tracks/i), "nourl");
       await user.click(screen.getByRole("button", { name: /search/i }));
 
@@ -195,7 +200,7 @@ describe("JamendoSongSearch", () => {
         .mockRejectedValueOnce("String Exception");
 
       renderWithQueryClient(<JamendoSongSearch />);
-      
+
       await user.type(
         screen.getByLabelText(/search jamendo tracks/i),
         "nonerr",
