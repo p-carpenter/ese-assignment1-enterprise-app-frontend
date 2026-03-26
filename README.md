@@ -1,4 +1,4 @@
-# Enterprise Audio Application Frontend
+# AdaStream: Enterprise Audio Application Frontend
 
 A modern, responsive, and accessible single-page application (SPA) built with React 19 and TypeScript. This frontend provides a comprehensive audio streaming and playlist management experience with robust form validation, global state caching, and advanced audio visualisation.
 
